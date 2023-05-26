@@ -1,0 +1,12 @@
+{
+  "name": "schedule",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start:web": "pnpm -C ./packages/web start:dev",
+    "start:server": "pnpm -C ./packages/server start:dev"
+  },
+  "packageManager": "pnpm@7.24.3"
+}
