@@ -2,6 +2,7 @@ import {User} from './user.entity';
 import {Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Injectable, UnauthorizedException} from '@nestjs/common';
+import type {FindManyOptions} from "typeorm";
 
 @Injectable()
 export class UserService {
@@ -23,8 +24,16 @@ export class UserService {
         return this.userRepository.findOne({where})
     }
 
-    getUser(id) {
+    find(options?: FindManyOptions<User>) {
+        return this.userRepository.find(options)
+    }
+
+    async getUser(id) {
         if (!id) throw new UnauthorizedException();
-        return this.findOne({id})
+        const data = await this.findOne({id});
+        return {
+            data,
+            success: true
+        }
     }
 }

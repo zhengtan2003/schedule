@@ -1,16 +1,14 @@
-import Footer from '@/components/Footer';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { LoginForm, ProFormCheckbox, ProFormText } from '@ant-design/pro-components';
-import { useEmotionCss } from '@ant-design/use-emotion-css';
-import { history, useModel, Helmet,useRequest} from '@umijs/max';
-import { Alert } from 'antd';
-import Settings from '../../../../config/defaultSettings';
-import { flushSync } from 'react-dom';
-import {login} from "@/services/login";
+import {flushSync} from 'react-dom';
+import {authLogin} from "@/services/auth";
+import {useEmotionCss} from '@ant-design/use-emotion-css';
+import {LockTwoTone, MailTwoTone} from '@ant-design/icons';
+import {defaultSettings} from '../../../config/defaultSettings';
+import {history, useModel, Helmet, useRequest} from '@umijs/max';
+import {LoginForm, ProFormText} from '@ant-design/pro-components';
 
 const Login: React.FC = () => {
-    const {data,run} = useRequest(login,{manual:true});
-    const { initialState, setInitialState } = useModel('@@initialState');
+    const {data, run} = useRequest(authLogin, {manual: true});
+    const {initialState, setInitialState} = useModel('@@initialState');
     const containerClassName = useEmotionCss(() => {
         return {
             display: 'flex',
@@ -34,8 +32,8 @@ const Login: React.FC = () => {
         }
     };
     const handleSubmit = async (values: API.LoginDto) => {
-        const {authority} = await run(values);
-        localStorage.setItem("authorization",`Bearer ${authority}`)
+        const {accessToken} = await run(values);
+        localStorage.setItem("authorization", `Bearer ${accessToken}`)
         await fetchUserInfo();
         const urlParams = new URL(window.location.href).searchParams;
         history.push(urlParams.get('redirect') || '/');
@@ -44,85 +42,36 @@ const Login: React.FC = () => {
         <div className={containerClassName}>
             <Helmet>
                 <title>
-                    {'登录'}- {Settings.title}
+                    {'登录'}- {defaultSettings.title}
                 </title>
             </Helmet>
-            <div
-                style={{
-                    flex: '1',
-                    padding: '32px 0',
-                }}
-            >
-                <LoginForm
-                    contentStyle={{
-                        minWidth: 280,
-                        maxWidth: '75vw',
-                    }}
-                    logo={<img alt="logo" src="/logo.svg" />}
-                    title="Ant Design"
-                    subTitle={'Ant Design 是西湖区最具影响力的 Web 设计规范'}
-                    initialValues={{
-                        autoLogin: true,
-                    }}
-                    onFinish={async (values) => {
-                        await handleSubmit(values as API.LoginDto);
-                    }}
-                >
-                    {data?.errorMessage && <Alert
-											style={{
-                          marginBottom: 24,
-                      }}
-											message={data.errorMessage}
-											type="error"
-											showIcon
-										/>}
+            <div className={"flex-1 py-32"}>
+                <LoginForm title="Schedule"
+                           logo={<img alt="logo" src="/logo.svg"/>}
+                           contentStyle={{minWidth: 280, maxWidth: '75vw'}}
+                           subTitle={'Ant Design 是西湖区最具影响力的 Web 设计规范'}
+                           submitter={{ searchConfig: { submitText: '登录 / 注册'}}}
+                           onFinish={async (values) => {
+                               await handleSubmit(values as API.LoginDto);
+                           }}>
                     <ProFormText
-                        name="username"
+                        name="email"
                         fieldProps={{
                             size: 'large',
-                            prefix: <UserOutlined />,
+                            prefix: <MailTwoTone/>
                         }}
-                        placeholder={'用户名: admin or user'}
-                        rules={[
-                            {
-                                required: true,
-                                message: '用户名是必填项！',
-                            },
-                        ]}
-                    />
+                        placeholder={'邮箱'}
+                        rules={[{required: true}]}/>
                     <ProFormText.Password
                         name="password"
                         fieldProps={{
                             size: 'large',
-                            prefix: <LockOutlined />,
+                            prefix: <LockTwoTone/>,
                         }}
-                        placeholder={'密码: ant.design'}
-                        rules={[
-                            {
-                                required: true,
-                                message: '密码是必填项！',
-                            },
-                        ]}
-                    />
-                    {/*<div*/}
-                    {/*    style={{*/}
-                    {/*        marginBottom: 24,*/}
-                    {/*    }}*/}
-                    {/*>*/}
-                    {/*    <ProFormCheckbox noStyle name="autoLogin">*/}
-                    {/*        自动登录*/}
-                    {/*    </ProFormCheckbox>*/}
-                    {/*    <a*/}
-                    {/*        style={{*/}
-                    {/*            float: 'right',*/}
-                    {/*        }}*/}
-                    {/*    >*/}
-                    {/*        忘记密码 ?*/}
-                    {/*    </a>*/}
-                    {/*</div>*/}
+                        placeholder={'密码'}
+                        rules={[{required: true}]}/>
                 </LoginForm>
             </div>
-            <Footer />
         </div>
     );
 };

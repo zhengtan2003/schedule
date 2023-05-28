@@ -26,7 +26,7 @@ export class AuthService {
         }
         // 验证用户密码
         if (!await user.comparePassword(password)) {
-            throw new UnauthorizedException('Invalid username or password');
+            throw new UnauthorizedException('密码错误');
         }
         const accessToken = this.jwtService.sign({id: user.id});
         return {

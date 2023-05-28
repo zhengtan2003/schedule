@@ -1,0 +1,1 @@
+export {default as getAuthorization} from './get-authorization';
