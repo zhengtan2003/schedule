@@ -23,6 +23,6 @@ export class Env {
     remark: string;
     @ManyToOne(() => Task, (Task) => Task)
     task: { id: any };
-    @ManyToOne(() => User, (User) => User.Env)
+    @ManyToOne(() => User, (User) => User.env)
     user: { id: any };
 }

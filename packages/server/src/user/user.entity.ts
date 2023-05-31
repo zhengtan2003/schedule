@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { Task } from '../task/task.entity';
 import { Env } from '../env/env.entity';
+import { Script } from '../script/script.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -23,7 +24,9 @@ export class User {
   @OneToMany(() => Task, (task) => task.user)
   task: Task[];
   @OneToMany(() => Env, (env) => env.user)
-  Env: Env[];
+  env: Env[];
+  @OneToMany(() => Script, (script) => script.user)
+  script: Script[];
   @PrimaryGeneratedColumn()
   readonly id: number;
   @CreateDateColumn()

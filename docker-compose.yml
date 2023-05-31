@@ -1,6 +1,7 @@
 version: '3'
 services:
   web:
+    image: zhengtan2003/schedule-web
     container_name: web
     build:
       context: ./packages/web
@@ -11,6 +12,7 @@ services:
       - server
 
   server:
+    image: zhengtan2003/schedule-server
     container_name: server
     environment:
       - PORT=3000

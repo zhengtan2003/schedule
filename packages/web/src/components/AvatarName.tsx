@@ -4,6 +4,6 @@ import React from "react";
 const AvatarName = () => {
     const {initialState} = useModel('@@initialState');
     const {currentUser} = initialState || {};
-    return <span className="anticon">{currentUser?.name}</span>;
+    return <span className="anticon">{currentUser?.email}</span>;
 };
 export default AvatarName;
