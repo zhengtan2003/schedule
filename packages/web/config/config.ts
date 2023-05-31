@@ -39,9 +39,7 @@ export default defineConfig({
             projectName: './',
         },
     ],
-    mfsu: {
-        strategy: 'normal',
-    },
+    mfsu: false,
     requestRecord: {},
     npmClient: 'pnpm',
 });

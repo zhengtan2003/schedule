@@ -1,1 +1,1 @@
-export {default as getAuthorization} from './get-authorization';
+export {default as getAuthorization} from './getAuthorization';

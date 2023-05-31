@@ -1,4 +1,4 @@
-import React, {useRef, useMemo, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
     PageContainer, ProColumns,
     ProTable,
@@ -17,6 +17,7 @@ export interface DataType {
     version: string;
     updateTime: string;
     createTime: string;
+    updateURL: string;
     status: "waiting" | "processing";
 }
 
@@ -59,11 +60,13 @@ const Task: React.FC = () => {
             title: "cron",
             width: "120px",
             dataIndex: "cronTime",
+            hideInSearch: true,
         },
         {
             title: "版本",
             width: "70px",
             dataIndex: "version",
+            hideInSearch: true,
         },
         {
             title: "更新地址",
@@ -71,18 +74,21 @@ const Task: React.FC = () => {
             ellipsis: true,
             copyable: true,
             dataIndex: "updateURL",
+            hideInSearch: true,
         },
         {
             title: "任务开始时间",
             width: "170px",
             dataIndex: "startTime",
             valueType: 'date',
+            hideInSearch: true,
         },
         {
             title: "任务结束时间",
             width: "170px",
             dataIndex: "endTime",
             valueType: 'date',
+            hideInSearch: true,
         },
         {
             title: "更新时间",
@@ -102,6 +108,7 @@ const Task: React.FC = () => {
             title: "操作",
             key: 'action',
             fixed: "right",
+            hideInSearch: true,
             render: (_: any, record: DataType) => {
                 return (
                     <>

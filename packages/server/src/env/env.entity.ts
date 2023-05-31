@@ -19,7 +19,7 @@ export class Env {
     updateTime: Date;
     @Column()
     processEnv: string;
-    @Column()
+    @Column({nullable: true})
     remark: string;
     @ManyToOne(() => Task, (Task) => Task)
     task: { id: any };

@@ -15,6 +15,7 @@ import {
     UseInterceptors,
     UploadedFile,
 } from '@nestjs/common';
+import {QueryDTO} from "./dto/query.dto";
 
 @ApiTags('task')
 @Controller('task')
@@ -29,10 +30,15 @@ export class TaskController {
     @ApiBearerAuth()
     @Post('upload')
     @UseInterceptors(FileInterceptor('file'))
-    upsertUpload(@UploadedFile() file, @Request() request) {
-        const code = file.buffer.toString();
-        const fileName = file.originalname;
-        return this.taskService.upsert({code, fileName}, request);
+    upsertUpload(
+        @UploadedFile() file,
+        @Request() request
+    ) {
+        const buffer = Buffer.from(file.originalname, 'binary');
+        return this.taskService.upsert({
+            code: file.buffer.toString(),
+            filename: buffer.toString()
+        }, request);
     }
 
     @ApiOperation({summary: '新建(远程获取)', operationId: 'task_upsertRemote'})
@@ -40,7 +46,13 @@ export class TaskController {
     @Post('remote')
     async upsertRemote(@Body() {id, updateURL}, @Request() request) {
         const {data} = await firstValueFrom(this.httpService.get(updateURL));
-        return this.taskService.upsert({id, code: data, updateURL}, request);
+        const filename = updateURL.split('/').pop();
+        return this.taskService.upsert({
+            id,
+            code: data,
+            updateURL,
+            filename
+        }, request);
     }
 
     @ApiOperation({summary: '读取', operationId: 'task_get'})
@@ -53,8 +65,8 @@ export class TaskController {
     @ApiOperation({summary: '删除', operationId: 'task_delete'})
     @ApiBearerAuth()
     @Delete()
-    delete(@Query('id') id, @Request() request) {
-        return this.taskService.delete(id, request);
+    delete(@Query() queryDTO: QueryDTO, @Request() request) {
+        return this.taskService.delete(queryDTO.id, request);
     }
 
     @ApiOperation({summary: '列表', operationId: 'task_search'})
@@ -67,14 +79,14 @@ export class TaskController {
     @ApiOperation({summary: '开始任务', operationId: 'task_start'})
     @ApiBearerAuth()
     @Post('start')
-    start(@Query('id') id, @Request() request) {
-        return this.taskService.start(id, request);
+    start(@Query() queryDTO: QueryDTO, @Request() request) {
+        return this.taskService.start(queryDTO.id, request);
     }
 
     @ApiOperation({summary: '停止任务', operationId: 'task_stop'})
     @ApiBearerAuth()
     @Post('stop')
-    stop(@Query('id') id, @Request() request) {
-        return this.taskService.stop(id, request);
+    stop(@Query() queryDTO: QueryDTO, @Request() request) {
+        return this.taskService.stop(queryDTO.id, request);
     }
 }

@@ -17,8 +17,8 @@ export class Task {
     createTime: Date;
     @UpdateDateColumn()
     updateTime: Date;
-    @Column('longtext')
-    code: string;
+    @Column()
+    filePath: string;
     @Column('text')
     name: string;
     @Column('text', {nullable: true})

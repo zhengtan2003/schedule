@@ -11,6 +11,8 @@ import {CronJob} from 'cron';
 import type {FindManyOptions} from "typeorm";
 import {EnvService} from '../env/env.service';
 import {SchedulerRegistry} from '@nestjs/schedule';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class TaskService {
@@ -26,11 +28,31 @@ export class TaskService {
         return this.taskRepository.find(options);
     }
 
-    async upsert({id, fileName, code, updateURL}: any, {user}) {
-        // const hasScript = await this.repository.findOne({ where: { name } });
-        // if (hasScript) {
-        //   throw new ConflictException('此脚本已存在');
-        // }
+    commentParser(comment: string) {
+        const regex = /\/\/\s*@(\w+)\s+(.*)/g;
+        const matches = comment.matchAll(regex);
+        const metadata: any = {};
+        for (const match of matches) {
+            const [, key, value] = match;
+            metadata[key] = value;
+        }
+        return metadata
+    }
+
+    saveFile({code, filename, user}) {
+        const uploadDir = path.join(__dirname, 'script', `${user.id}`, `${Date.now()}`);
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, {recursive: true});
+        }
+        const targetPath = path.join(uploadDir, filename)
+        const writeStream = fs.createWriteStream(targetPath);
+        writeStream.write(code);
+        writeStream.end();
+        return targetPath;
+    }
+
+    async upsert({id, filename, code, updateURL}: any, {user}) {
+        const filePath = this.saveFile({code, filename, user})
         const regex = /\/\/\s*@(\w+)\s+(.*)/g;
         const matches = code.matchAll(regex);
         const metadata: any = {};
@@ -40,21 +62,20 @@ export class TaskService {
         }
         const task = new Task();
         task.id = id;
-        task.name = metadata.name ?? fileName;
-        task.code = code;
         task.user = user.id;
-        task.updateURL = updateURL;
-        task.cronTime = metadata.cronTime;
+        task.filePath = filePath;
         task.version = metadata.version;
+        task.cronTime = metadata.cronTime;
+        task.name = metadata.name ?? filename;
         task.description = metadata.description;
-        task.startTime = toISOString(metadata.startTime);
         task.endTime = toISOString(metadata.endTime);
+        task.startTime = toISOString(metadata.startTime);
+        task.updateURL = metadata.updateURL ?? updateURL;
         await this.taskRepository.save(task);
         return {
             showType: 1,
-            msg: !!id ? '任务更新成功' : '任务创建成功'
+            message: !!id ? '任务更新成功' : '任务创建成功'
         }
-        // await this.addCronJob(id);
     }
 
     async get(id) {
@@ -68,10 +89,21 @@ export class TaskService {
     async delete(id, {user}) {
         const envs = await this.envService.find({task: {id}, user: {id: user.id}});
         await this.envService.remove(envs);
-        const task = await this.taskRepository.findOne({where: {id}});
+        const task = await this.taskRepository.findOne({where: {id, user: {id: user.id}}});
         if (!task) {
             throw new NotFoundException('未找到此任务');
         }
+        if (task.status === "processing") {
+            const cronName = this.getCronName(user.id, id);
+            await this.schedulerRegistry.deleteCronJob(cronName);
+        }
+        fs.unlink(task.filePath, (err) => {
+            if (err) {
+                console.error('Error deleting file:', err);
+            } else {
+                console.log('File deleted successfully');
+            }
+        });
         await this.taskRepository.remove(task);
         return {
             showType: 1
@@ -83,6 +115,8 @@ export class TaskService {
         const [data, total] = await this.taskRepository.findAndCount({
             where: {
                 user: {id: user.id},
+                // name: params.name,
+                // status: params.status
             },
             take: pageSize,
             skip: (current - 1) * pageSize,
@@ -93,13 +127,17 @@ export class TaskService {
         };
     }
 
+    getCronName(userId, taskId) {
+        return `cron_task_${userId}_${taskId}`
+    }
+
     async start(id, {user}) {
-        const taskName = `cron_task_${user.id}_${id}`;
-        const envs = await this.envService.find({task: {id}, user: {id: user.id}});
+        const cronName = this.getCronName(user.id, id);
         const task = await this.taskRepository.findOne({where: {id, user: {id: user.id}}});
         const cronJob = new CronJob(task.cronTime, async () => {
+            const envs = await this.envService.find({task: {id}, user: {id: user.id}});
             envs.forEach((env) => {
-                const cp = spawn('node', ['-e', task.code], {
+                const cp = spawn('node', [task.filePath], {
                     env: {
                         ...process.env,
                         ...JSON.parse(env.processEnv),
@@ -116,7 +154,7 @@ export class TaskService {
                 });
             });
         });
-        this.schedulerRegistry.addCronJob(taskName, cronJob);
+        this.schedulerRegistry.addCronJob(cronName, cronJob);
         cronJob.start();
         if (task.status !== "processing") {
             task.status = "processing";

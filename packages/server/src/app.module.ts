@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
-import { EnvModule } from './env/env.module';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -8,16 +8,16 @@ import { TaskModule } from './task/task.module';
 import { AppController } from './app.controller';
 import { ScheduleModule } from '@nestjs/schedule';
 
-
+console.log(process.env.DATABASE_HOST);
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'zszq228035085',
-      database: 'schedule',
+      host: process.env.DATABASE_HOST,
+      port: +process.env.DATABASE_PORT,
+      username: process.env.DATABASE_USERNAME,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_DATABASE,
       timezone: '+08:00',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
@@ -25,7 +25,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     UserModule,
     AuthModule,
     TaskModule,
-    ScheduleModule.forRoot()
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

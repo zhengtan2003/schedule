@@ -1,0 +1,40 @@
+version: '3'
+services:
+  web:
+    container_name: web
+    build:
+      context: ./packages/web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+  server:
+    container_name: server
+    environment:
+      - PORT=3000
+      - DATABASE_HOST=database
+      - DATABASE_PORT=3306
+      - DATABASE_USERNAME=root
+      - DATABASE_PASSWORD=schedule123456
+      - DATABASE_DATABASE=schedule
+    build:
+      context: ./packages/server
+      dockerfile: Dockerfile
+    ports:
+      - "7002:3000"
+    depends_on:
+      - database
+
+  database:
+    image: mysql:8.0
+    container_name: database
+    restart: always
+    environment:
+      - MYSQL_DATABASE=schedule
+      - MYSQL_ROOT_PASSWORD=schedule123456
+    ports:
+      - "7001:3306"
+    volumes:
+      - ./data:/var/lib/mysql

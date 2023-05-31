@@ -1,11 +1,10 @@
-import React from 'react';
-import {history} from '@umijs/max';
-import {currentUser} from './services/currentUser';
-import type {RunTimeLayoutConfig} from '@umijs/max';
-import {SettingDrawer} from '@ant-design/pro-components';
-import {defaultSettings} from '../config/defaultSettings';
-import type {Settings as LayoutSettings} from '@ant-design/pro-components';
-import {AvatarDropdown, AvatarName} from '@/components'
+import { AvatarDropdown,AvatarName } from '@/components';
+import type { Settings as LayoutSettings } from '@ant-design/pro-components';
+import { SettingDrawer } from '@ant-design/pro-components';
+import type { RunTimeLayoutConfig } from '@umijs/max';
+import { history } from '@umijs/max';
+import { defaultSettings } from '../config/defaultSettings';
+import { userCurrent } from './services/user';
 
 export * from './request';
 
@@ -23,10 +22,10 @@ export async function getInitialState(): Promise<{
 }> {
     const fetchUserInfo = async () => {
         try {
-            const msg = await currentUser({
-                skipErrorHandler: true,
+            const { data } = await userCurrent({
+              skipErrorHandler: true,
             });
-            return msg.data;
+            return data;
         } catch (error) {
             history.push(loginPath);
         }
@@ -52,7 +51,7 @@ export async function getInitialState(): Promise<{
 export const layout: RunTimeLayoutConfig = ({initialState, setInitialState}) => {
     return {
         avatarProps: {
-            src: initialState?.currentUser?.avatar,
+            src: '/avatar.jpg',
             title: <AvatarName/>,
             render: (_, avatarChildren) => {
                 return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
