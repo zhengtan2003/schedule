@@ -1,20 +1,15 @@
-import {Task} from './task.entity';
-import {HttpModule} from '@nestjs/axios';
-import {TaskService} from './task.service';
-import {EnvModule} from '../env/env.module';
-import {TypeOrmModule} from '@nestjs/typeorm';
-import {TaskController} from './task.controller';
-import {Module} from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { TaskService } from './task.service';
+import { TaskController } from './task.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Task } from './entities/task.entity';
 
 @Module({
-    imports: [
-        EnvModule,
-        HttpModule,
-        TypeOrmModule.forFeature([Task]),
-    ],
-    controllers: [TaskController],
-    providers: [TaskService],
-    exports: [TaskService],
+  imports: [
+    TypeOrmModule.forFeature([Task]),
+  ],
+  controllers: [TaskController],
+  providers: [TaskService],
+  exports: [TaskService]
 })
-export class TaskModule {
-}
+export class TaskModule {}

@@ -1,27 +1,40 @@
 ﻿export default [
-    {path: '/login', layout: false, component: './Login'},
+    { path: '/login', layout: false, component: './Login' },
     {
         name: '脚本管理',
         icon: 'table',
         path: '/script',
-        routes:[
+        routes: [
             {
                 path: '/script',
                 component: './Script',
             },
             {
-                path: '/script/upsert',
+                name: '新建脚本',
+                hideInMenu: true,
+                path: '/script/create',
                 component: './Script/Upsert',
-            }
-        ]
+            },
+            {
+                name: '编辑脚本',
+                hideInMenu: true,
+                path: '/script/update/:id',
+                component: './Script/Upsert',
+            },
+        ],
     },
     {
         name: '任务管理',
         icon: 'table',
         path: '/task',
-        component: './Task',
+        routes: [
+            {
+                path: '/task',
+                component: './Task',
+            },
+        ],
     },
-    {path: '/welcome', icon: 'smile', component: './Welcome'},
-    {path: '/', redirect: '/welcome'},
+    { path: '/welcome', icon: 'smile', component: './Welcome' },
+    { path: '/', redirect: '/welcome' },
     // { path: '*', layout: false, component: './404' },
 ];

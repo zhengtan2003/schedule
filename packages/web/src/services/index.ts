@@ -5,12 +5,10 @@
 import * as user from './user';
 import * as auth from './auth';
 import * as task from './task';
-import * as env from './env';
 import * as script from './script';
 export default {
   user,
   auth,
   task,
-  env,
   script,
 };

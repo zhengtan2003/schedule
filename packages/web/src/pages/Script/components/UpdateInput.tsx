@@ -1,4 +1,4 @@
-import { scriptAnalysis } from "@/services/script";
+// import { scriptAnalysis } from "@/services/script";
 import { SyncOutlined } from "@ant-design/icons";
 import { useRequest } from "@umijs/max";
 import { Button, Input, Space } from "antd";
@@ -10,7 +10,7 @@ interface UpdateInputProps {
 
 const UpdateInput: React.FC<UpdateInputProps> = (props) => {
   const valueRef = useRef<any>();
-  const { run, loading } = useRequest(scriptAnalysis, {
+  const { run, loading } = useRequest(()=>Promise.resolve(), {
     manual: true,
     // onError: props.onError,
     onSuccess: props.onSuccess

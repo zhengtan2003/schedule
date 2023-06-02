@@ -6,8 +6,8 @@ import {
     Column,
     ManyToOne,
 } from 'typeorm';
-import {Task} from '../task/task.entity';
-import {User} from '../user/user.entity';
+// import {Task} from '../task/task.entity';
+import {User} from '../user/entities/user.entity';
 
 @Entity()
 export class Env {
@@ -21,7 +21,7 @@ export class Env {
     processEnv: string;
     @Column({nullable: true})
     remark: string;
-    @ManyToOne(() => Task, (Task) => Task)
+    // @ManyToOne(() => Task, (Task) => Task)
     task: { id: any };
     @ManyToOne(() => User, (User) => User.env)
     user: { id: any };

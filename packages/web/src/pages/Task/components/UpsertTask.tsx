@@ -1,50 +1,60 @@
-import React, {useRef} from 'react';
-import {useRequest} from '@umijs/max';
-import {Button, Input, Space} from "antd";
-import {taskUpsertRemote} from '@/services/task';
-import {GithubOutlined} from '@ant-design/icons';
+import {
+    ModalForm,
+    ProForm,
+    ProFormDateRangePicker,
+    ProFormSelect,
+    ProFormText,
+} from '@ant-design/pro-components';
+import { Button } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import CronParser from 'cron-parser';
+import { ScriptControllerOptions } from '@/services/script';
 
-interface UpsertTaskProps {
-    record?: any;
-    onSuccess?: () => void;
-    onError?: () => void;
-}
-
-const UpsertTask: React.FC<UpsertTaskProps> = (props) => {
-    const valueRef = useRef<any>();
-    const {run, loading} = useRequest(taskUpsertRemote, {
-        manual: true,
-        onError: props.onError,
-        onSuccess: props.onSuccess,
-    });
-    if (props.record) {
-        return (
-            <Button type={"link"}
-                    size={"small"}
-                    loading={loading}
-                    onClick={() => {
-                        run({
-                            data: {
-                                id: props.record.id,
-                                updateURL: props.record.updateURL
-                            }
-                        })
-                    }}>更新</Button>
-        )
-    }
+const UpsertTask = () => {
     return (
-        <Space.Compact>
-            <Input placeholder={"请输入远程地址"}
-                   onChange={(e) => valueRef.current = e.target.value}/>
-            <Button type="primary"
-                    loading={loading}
-                    onClick={() => {
-                        run({data: {updateURL: valueRef.current}})
-                    }}>
-                <GithubOutlined/>
-                远程获取
-            </Button>
-        </Space.Compact>
+        <ModalForm
+            title={'新建任务'}
+            trigger={
+                <Button type='primary'>
+                    <PlusOutlined />
+                    新建
+                </Button>
+            }
+            onFinish={async (body) => {
+                console.log(body);
+            }}
+            modalProps={{ destroyOnClose: true }}>
+            <ProFormSelect showSearch
+                           request={ScriptControllerOptions} />
+            <ProFormText
+                width='md'
+                name='name'
+                label='任务名称'
+                rules={[{ required: true }]}
+            />
+            <ProFormText
+                width='md'
+                name={'cronTime'}
+                label={'执行频率'}
+                rules={[{ required: true }, {
+                    validator: (_, value) => {
+                        try {
+                            // 尝试解析 Cron 表达式
+                            CronParser.parseExpression(value);
+                            return Promise.resolve();
+                        } catch (error) {
+                            return Promise.reject('Cron 表达式无效');
+                        }
+                    },
+                }]} />
+            <ProFormDateRangePicker
+                width='md'
+                label={'生效时间'}
+                tooltip={'不填就是无限'}
+                name={'effectiveDateRange'}
+            />
+        </ModalForm>
     );
 };
-export default UpsertTask
+
+export default UpsertTask;

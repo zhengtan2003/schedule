@@ -4,7 +4,7 @@ import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history } from '@umijs/max';
 import { defaultSettings } from '../config/defaultSettings';
-import { userCurrent } from './services/user';
+import { UserControllerCurrent } from './services/user';
 
 export * from './request';
 
@@ -22,7 +22,7 @@ export async function getInitialState(): Promise<{
 }> {
     const fetchUserInfo = async () => {
         try {
-            const { data } = await userCurrent({
+            const { data } = await UserControllerCurrent({
               skipErrorHandler: true,
             });
             return data;

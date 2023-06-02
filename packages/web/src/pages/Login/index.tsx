@@ -1,4 +1,4 @@
-import { authLogin } from '@/services/auth';
+import { AuthControllerLogin } from '@/services/auth';
 import { LockTwoTone,MailTwoTone } from '@ant-design/icons';
 import { LoginForm, ProFormText} from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
@@ -33,7 +33,7 @@ const Login: React.FC = () => {
     return userInfo;
   };
   const onFinish = async (values: any) => {
-    const { data } = await authLogin({
+    const { data } = await AuthControllerLogin({
       email: values.email,
       password: CryptoJS.SHA256(values.password).toString(),
     });

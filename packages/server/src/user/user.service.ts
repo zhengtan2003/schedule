@@ -1,39 +1,46 @@
-import { User } from './user.entity';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import type { FindManyOptions } from 'typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-  ) {}
+    constructor(
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
+    ) {
+    }
 
-  async create(userDto) {
-    const { email, password } = userDto;
-    const user = new User();
-    user.email = email;
-    user.password = password;
-    return await this.userRepository.save(user);
-  }
+    create(createUserDto: CreateUserDto) {
+        const { email, password } = createUserDto;
+        const user = new User();
+        user.email = email;
+        user.password = password;
+        return this.userRepository.save(user);
+    }
 
-  findOne(options) {
-    return this.userRepository.findOne(options);
-  }
+    findAll() {
+        return `This action returns all user`;
+    }
 
-  find(options?: FindManyOptions<User>) {
-    return this.userRepository.find(options);
-  }
+    async findOne(id: number) {
+        const { password, ...data } = await this.userRepository.findOne({
+            where: { id },
+        });
+        return { data };
+    }
 
-  async getUser(id) {
-    if (!id) throw new UnauthorizedException();
-    const { password, ...data } = await this.userRepository.findOne({
-      where: { id },
-    });
-    return {
-      data,
-    };
-  }
+    repository() {
+        return this.userRepository;
+    }
+
+    update(id: number, updateUserDto: UpdateUserDto) {
+        return `This action updates a #${id} user`;
+    }
+
+    remove(id: number) {
+        return `This action removes a #${id} user`;
+    }
 }
