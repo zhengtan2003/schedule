@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Query, Delete, Request } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { User } from '../decorators/user.decorator';
-import { ListBodyDto } from '../dto/list-body.dto';
+import { User } from '@/decorators/user.decorator';
+import { ListBodyDto } from '@/dto/list-body.dto';
 
 @ApiBearerAuth()
 @ApiTags('task')
@@ -19,26 +19,32 @@ export class TaskController {
         return this.taskService.create(createTaskDto, user);
     }
 
-    @ApiOperation({ summary: '列表'})
+    @ApiOperation({ summary: '列表' })
     @Post('list')
-    list(@Body() listBody: ListBodyDto, @Request() request) {
-        return this.taskService.list(listBody, request);
+    list(@Body() listBody: ListBodyDto, @User() user) {
+        return this.taskService.list(listBody, user);
     }
 
-    @Get(':id')
-    findOne(@Param('id') id: string) {
+    @Get()
+    findOne(@Query('id') id: string) {
         return this.taskService.findOne(+id);
     }
 
     @ApiOperation({ summary: '更新' })
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
+    @Patch()
+    update(@Query('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
         return this.taskService.update(+id, updateTaskDto);
     }
 
     @ApiOperation({ summary: '删除' })
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.taskService.remove(+id);
+    @Delete()
+    remove(@Query('id') id: string, @User() user) {
+        return this.taskService.remove(+id, user);
+    }
+
+    @ApiOperation({ summary: '开始' })
+    @Get('start')
+    start(@Query('id') id: string, @User() user) {
+        return this.taskService.start(+id, user);
     }
 }

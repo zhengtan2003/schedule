@@ -5,6 +5,9 @@ import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history } from '@umijs/max';
 import { defaultSettings } from '../config/defaultSettings';
 import { UserControllerCurrent } from './services/user';
+import { loader } from '@monaco-editor/react';
+
+loader.init().then((monaco) => console.log('monaco-editor：初始化加载完成'));
 
 export * from './request';
 

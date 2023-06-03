@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseInterceptors, Query } from '@nestjs/common';
 import { ScriptService } from './script.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ListBodyDto } from '../dto/list-body.dto';
-import { User } from '../decorators/user.decorator';
+import { ListBodyDto } from '@/dto/list-body.dto';
+import { User } from '@/decorators/user.decorator';
 import { UpdateScriptDto } from './dto/update-script.dto';
 import { CreateScriptDto } from './dto/create-script.dto';
 
@@ -20,8 +20,8 @@ export class ScriptController {
     }
 
     @ApiOperation({ summary: '更新' })
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateScriptDto: UpdateScriptDto, @User() user) {
+    @Patch()
+    update(@Query('id') id: string, @Body() updateScriptDto: UpdateScriptDto, @User() user) {
         return this.scriptService.update(+id, updateScriptDto, user);
     }
 
@@ -32,20 +32,20 @@ export class ScriptController {
     }
 
     @ApiOperation({ summary: '获取' })
-    @Get(':id')
-    findOne(@Param('id') id: string, @User() user) {
+    @Get()
+    findOne(@Query('id') id: string, @User() user) {
         return this.scriptService.findOne(+id, user);
+    }
+
+    @Get('select')
+    select(@User() user) {
+        return this.scriptService.select(user);
     }
 
     @ApiOperation({ summary: '删除' })
     @Delete(':id')
-    remove(@Param('id') id: string, @User() user) {
+    remove(@Query('id') id: string, @User() user) {
         return this.scriptService.remove(+id, user);
     }
 
-    @Get('options')
-    options(@Query('keyWords') keyWords: string) {
-        console.log(keyWords);
-        return Promise.resolve({});
-    }
 }

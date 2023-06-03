@@ -1,7 +1,10 @@
-import {Env} from './env.entity';
-import {Repository} from 'typeorm';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Injectable, NotFoundException, BadRequestException} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { CreateEnvDto } from './dto/create-env.dto';
+import { UpdateEnvDto } from './dto/update-env.dto';
+import { Env } from './entities/env.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { HttpResponse } from '@/http-response';
 
 @Injectable()
 export class EnvService {
@@ -11,53 +14,65 @@ export class EnvService {
     ) {
     }
 
-    find(where) {
-        return this.envRepository.find({where});
+    repository() {
+        return this.envRepository;
     }
 
-    remove(envs) {
-        return this.envRepository.remove(envs);
+    async create(createEnvDto: CreateEnvDto, user) {
+        const { processEnv, taskId } = createEnvDto;
+        const env = new Env();
+        env.processEnv = processEnv;
+        env.task = { id: taskId };
+        env.user = user;
+        await this.envRepository.save(env);
+        return new HttpResponse({ showType: 1 });
     }
 
-    async upsert(envDto, taskId, {user}) {
-        const {id, processEnv, remark} = envDto;
-        let env;
-        if (!id) {
-            env = new Env();
-            env.task = {id: taskId}
-            env.user = {id: user.id}
-        } else {
-            env = await this.envRepository.findOne({where: {id, task: {id: taskId}, user: {id: user.id}}});
-            if (!env) throw new NotFoundException();
-        }
+    async list({ params }, user) {
+        const { current = 1, pageSize = 10, taskId } = params;
+        const [data, total] = await this.envRepository.findAndCount({
+            where: {
+                task: { id: taskId },
+                user: user,
+            },
+            take: pageSize,
+            skip: (current - 1) * pageSize,
+        });
+        return new HttpResponse({
+            data,
+            total,
+        });
+    }
+
+    async findOne(id: number, user) {
+        const env = await this.envRepository.findOne({ where: { id, user } });
+        if (!env) return new HttpResponse({ showType: 1, success: false, message: '未找到ENV' });
+        return new HttpResponse({
+            data: env,
+        });
+    }
+
+    async form(id: number, user) {
+        const env = await this.envRepository.findOne({ where: { id, user } });
+        if (!env) return new HttpResponse({ showType: 1, success: false, message: '未找到ENV' });
+        const { processEnv, remark } = env;
+        return { processEnv, remark };
+    }
+
+    async update(updateEnvDto: UpdateEnvDto, user) {
+        const { id, processEnv, remark } = updateEnvDto;
+        const env = await this.envRepository.findOne({ where: { id: +id, user } });
+        if (!env) return new HttpResponse({ showType: 1, success: false, message: '未找到ENV' });
         env.remark = remark;
         env.processEnv = processEnv;
         await this.envRepository.save(env);
-        return {
-            showType: 1
-        }
+        return new HttpResponse({ showType: 1 });
     }
 
-    async get(id, {user}) {
-        const env = await this.envRepository.findOne({where: {id, user: {id: user.id}}});
-        if (!env) throw new NotFoundException();
-        return {
-            data: env
-        }
-    }
-
-    async delete(id, {user}) {
-        const env = await this.envRepository.findOne({where: {id, user: {id: user.id}}});
-        if (!env) throw new NotFoundException();
-        await this.envRepository.remove(env)
-        return {
-            showType: 1
-        }
-    }
-
-    async search({id}, {user}) {
-        const data = await this.find({task: {id}});
-        // const data = envs.map(({ createTime, updateTime, ...rest }) => rest);
-        return {data};
+    async remove(id: number, user) {
+        const env = await this.envRepository.findOne({ where: { id, user } });
+        if (!env) return new HttpResponse({ showType: 1, success: false, message: '未找到ENV' });
+        await this.envRepository.remove(env);
+        return new HttpResponse({ showType: 1 });
     }
 }

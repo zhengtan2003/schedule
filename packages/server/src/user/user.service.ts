@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { HttpResponse } from '@/http-response';
 
 @Injectable()
 export class UserService {
@@ -26,10 +27,14 @@ export class UserService {
     }
 
     async findOne(id: number) {
-        const { password, ...data } = await this.userRepository.findOne({
+        const user = await this.userRepository.findOne({
             where: { id },
         });
-        return { data };
+
+        const { password, ...data } = user;
+        return new HttpResponse({
+            data,
+        });
     }
 
     repository() {

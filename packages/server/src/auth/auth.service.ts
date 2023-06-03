@@ -1,8 +1,9 @@
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { UserService } from '../user/user.service';
+import { UserService } from '@/user/user.service';
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { HttpResponse } from '@/http-response';
 
 @Injectable()
 export class AuthService {
@@ -18,21 +19,25 @@ export class AuthService {
         if (!user) {
             const user = await this.userService.create(loginDto);
             const accessToken = this.jwtService.sign({ id: user.id });
-            return {
+            return new HttpResponse({
                 data: { accessToken },
                 message: '注册成功',
                 showType: 1,
-            };
+            });
         }
         if (!(await user.comparePassword(password))) {
-            throw new BadRequestException('密码错误');
+            return new HttpResponse({
+                message: '密码错误',
+                showType: 1,
+                success: false,
+            });
         }
         const accessToken = this.jwtService.sign({ id: user.id });
-        return {
+        return new HttpResponse({
             data: { accessToken },
             message: '登录成功',
             showType: 1,
-        };
+        });
     }
 
     async register(registerDto: RegisterDto) {

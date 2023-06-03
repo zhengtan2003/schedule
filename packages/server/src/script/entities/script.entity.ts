@@ -1,9 +1,11 @@
-import { User } from '../../user/entities/user.entity';
+import { User } from '@/user/entities/user.entity';
+import { Task } from '@/task/entities/task.entity';
 import {
     Column,
     CreateDateColumn,
     Entity,
     ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
@@ -20,6 +22,8 @@ export class Script {
     remark: string;
     @Column({ nullable: true })
     updateURL: string;
+    @OneToMany(() => Task, (task) => task.script)
+    task: { id: any };
     @ManyToOne(() => User, (user) => user.script)
     user: User;
     @PrimaryGeneratedColumn()

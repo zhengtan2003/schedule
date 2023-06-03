@@ -1,14 +1,13 @@
-import React, {useRef} from 'react';
-import {Drawer, Space} from 'antd';
-import {DrawerProps} from 'antd/es/drawer';
-import {envSearch, envDelete} from "@/services/env";
-import {ActionType, ProColumns, ProTable} from "@ant-design/pro-components";
-import UpsertEnv from "./UpsertEnv";
-import {DeleteButton} from '@/components';
+import React, { useRef, useState } from 'react';
+import UpsertEnv from './UpsertEnv';
+import { Drawer, Button } from 'antd';
+import { DeleteButton } from '@/components';
+import { EnvControllerList, EnvControllerRemove } from '@/services/env';
+import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
 
 interface EnvDrawerProps {
-    record: any;
-    onClose: DrawerProps['onClose']
+    taskId: string;
+    taskName: string;
 }
 
 interface DataType {
@@ -19,77 +18,80 @@ interface DataType {
     createTime: string;
 }
 
-const request = (params: any, sort: any, filter: any) => envSearch({data: {params, filter, sort}});
+const request = (params: any, sort: any, filter: any) => EnvControllerList({ params, filter, sort });
 
 const EnvDrawer: React.FC<EnvDrawerProps> = (props) => {
-    const {record: PRecord = {}} = props;
+    const { taskId, taskName } = props;
+    const [open, setOpen] = useState<boolean>(false);
     const actionRef = useRef<ActionType>();
     const columns: ProColumns<DataType>[] = [
         {
-            title: "序号",
-            width: "60px",
-            valueType: "indexBorder"
+            title: 'env',
+            dataIndex: 'processEnv',
+            width: '260px',
+            ellipsis: true,
         },
         {
-            title: "备注",
-            dataIndex: "remark"
+            title: '备注',
+            dataIndex: 'remark',
         },
         {
-            title: "更新时间",
-            width: "170px",
+            title: '更新时间',
+            width: '170px',
             dataIndex: 'updateTime',
             valueType: 'dateTime',
-            hideInSearch: true
         },
         {
-            title: "创建时间",
-            width: "170px",
+            title: '创建时间',
+            width: '170px',
             dataIndex: 'createTime',
             valueType: 'dateTime',
-            hideInSearch: true
         },
         {
-            title: "操作",
+            title: '操作',
             key: 'action',
-            fixed: "right",
+            fixed: 'right',
             render: (_: any, record: DataType) => {
                 return (
                     <>
-                        <UpsertEnv record={record}
-                                   taskId={PRecord.id}
-                                   onSuccess={actionRef.current?.reload}/>
+                        <UpsertEnv taskId={taskId}
+                                   envId={record.id}
+                                   onSuccess={() => actionRef.current?.reload()} />
                         <DeleteButton record={record}
-                                      onOk={() => envDelete({data: {id: record.id}}).then(() => {
-                                          actionRef.current?.reload()
-                                      })}/>
+                                      onOk={() => EnvControllerRemove({ id: record.id }).then(() => actionRef.current?.reload())} />
                     </>
-                )
-            }
-        }
-    ]
+                );
+            },
+        },
+    ];
     const toolBarRender = () => {
         return [
-            <UpsertEnv key={"upsert"}
-                       record={props.record}
+            <UpsertEnv key={'upsert'}
+                       taskId={taskId}
                        onSuccess={() => {
-                           actionRef.current?.reload()
-                       }}/>
-        ]
-    }
+                           actionRef.current?.reload();
+                       }} />,
+        ];
+    };
     return (
-        <Drawer size={'large'}
-                destroyOnClose
-                open={!!PRecord.id}
-                title={PRecord.name}
-                onClose={props.onClose}>
-            <ProTable rowKey={"id"}
-                      cardBordered
-                      columns={columns}
-                      request={request}
-                      scroll={{x: 1300}}
-                      actionRef={actionRef}
-                      toolBarRender={toolBarRender}/>
-        </Drawer>
+        <>
+            <Button type={'link'} size={'small'} onClick={() => setOpen(true)}>配置ENV</Button>
+            <Drawer open={open}
+                    size={'large'}
+                    destroyOnClose
+                    title={taskName}
+                    onClose={() => setOpen(false)}>
+                <ProTable rowKey={'id'}
+                          cardBordered
+                          search={false}
+                          params={{ taskId }}
+                          columns={columns}
+                          request={request}
+                          scroll={{ x: 1300 }}
+                          actionRef={actionRef}
+                          toolBarRender={toolBarRender} />
+            </Drawer>
+        </>
     );
 };
 

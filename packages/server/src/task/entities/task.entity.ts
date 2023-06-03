@@ -7,7 +7,9 @@ import {
     ManyToOne,
     OneToMany,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import { User } from '@/user/entities/user.entity';
+import { Script } from '@/script/entities/script.entity';
+import { Env } from '@/env/entities/env.entity';
 
 @Entity()
 export class Task {
@@ -17,10 +19,14 @@ export class Task {
     startTime: string;
     @Column({ nullable: true })
     endTime: string;
-    @Column({ nullable: true, default: 'waiting' })
-    status: 'waiting' | 'processing' | 'error';
+    @Column({ nullable: true, default: 1 })
+    status: 0 | 1 | 2;
     @Column({ nullable: true, default: '00 09 * * *' })
     cronTime: string;
+    @ManyToOne(() => Script, (script) => script.task)
+    script: { id: string };
+    @OneToMany(() => Env, (env) => env.task)
+    env: Env;
     @ManyToOne(() => User, (user) => user.task)
     user: User;
     @PrimaryGeneratedColumn()

@@ -20,6 +20,7 @@ const initialValues = {
 };
 
 const Upsert = () => {
+    const editorRef = useRef(null);
     const params: any = useParams();
     const formRef = useRef<ProFormInstance>();
     const { loading } = useRequest(() => ScriptControllerFindOne(params), {
@@ -70,6 +71,11 @@ const Upsert = () => {
                                         height='50vh'
                                         theme={'vs-dark'}
                                         language={language}
+                                        onValidate={(markers) => {
+                                            if (!markers.length) return;
+                                            const errorMessages = markers.map(marker => marker.message);
+                                            formRef.current?.setFields([{ name: 'code', errors: errorMessages }]);
+                                        }}
                                         options={{
                                             automaticLayout: true,
                                             suggestOnTriggerCharacters: true, // 启用编辑提示

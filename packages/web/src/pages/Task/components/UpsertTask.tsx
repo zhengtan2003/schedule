@@ -1,6 +1,5 @@
 import {
     ModalForm,
-    ProForm,
     ProFormDateRangePicker,
     ProFormSelect,
     ProFormText,
@@ -8,12 +7,18 @@ import {
 import { Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import CronParser from 'cron-parser';
-import { ScriptControllerOptions } from '@/services/script';
+import { ScriptControllerSelect } from '@/services/script';
+import { TaskControllerCreate } from '@/services/task';
 
-const UpsertTask = () => {
+interface UpsertTaskProps {
+    onSuccess: () => void;
+}
+
+const UpsertTask: React.FC<UpsertTaskProps> = (props) => {
     return (
         <ModalForm
             title={'新建任务'}
+            width={'400px'}
             trigger={
                 <Button type='primary'>
                     <PlusOutlined />
@@ -21,19 +26,22 @@ const UpsertTask = () => {
                 </Button>
             }
             onFinish={async (body) => {
-                console.log(body);
+                const { success } = await TaskControllerCreate(body);
+                if (success) props.onSuccess();
+                return success;
             }}
             modalProps={{ destroyOnClose: true }}>
-            <ProFormSelect showSearch
-                           request={ScriptControllerOptions} />
+            <ProFormSelect
+                label='脚本'
+                name='scriptId'
+                rules={[{ required: true }]}
+                request={ScriptControllerSelect} />
             <ProFormText
-                width='md'
                 name='name'
                 label='任务名称'
                 rules={[{ required: true }]}
             />
             <ProFormText
-                width='md'
                 name={'cronTime'}
                 label={'执行频率'}
                 rules={[{ required: true }, {
@@ -48,10 +56,10 @@ const UpsertTask = () => {
                     },
                 }]} />
             <ProFormDateRangePicker
-                width='md'
                 label={'生效时间'}
-                tooltip={'不填就是无限'}
+                width={'100%' as any}
                 name={'effectiveDateRange'}
+                tooltip={'不填无限执行，永不停止'}
             />
         </ModalForm>
     );

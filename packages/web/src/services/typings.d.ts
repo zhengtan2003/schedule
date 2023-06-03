@@ -1,4 +1,6 @@
 declare namespace API {
+  type CreateEnvDto = {};
+
   type CreateScriptDto = {};
 
   type CreateTaskDto = {};
@@ -8,6 +10,18 @@ declare namespace API {
     email: string;
     /** 密码 */
     password: string;
+  };
+
+  type EnvControllerFindOneParams = {
+    id: string;
+  };
+
+  type EnvControllerFormParams = {
+    id: string;
+  };
+
+  type EnvControllerRemoveParams = {
+    id: string;
   };
 
   type ListBodyDto = {};
@@ -21,10 +35,6 @@ declare namespace API {
 
   type ScriptControllerFindOneParams = {
     id: string;
-  };
-
-  type ScriptControllerOptionsParams = {
-    keyword: string;
   };
 
   type ScriptControllerRemoveParams = {
@@ -43,9 +53,15 @@ declare namespace API {
     id: string;
   };
 
+  type TaskControllerStartParams = {
+    id: string;
+  };
+
   type TaskControllerUpdateParams = {
     id: string;
   };
+
+  type UpdateEnvDto = {};
 
   type UpdateScriptDto = {};
 

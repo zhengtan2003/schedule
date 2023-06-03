@@ -10,6 +10,7 @@ import { Script } from './entities/script.entity';
     ],
     controllers: [ScriptController],
     providers: [ScriptService],
+    exports: [ScriptService],
 })
 export class ScriptModule {
 }

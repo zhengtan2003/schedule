@@ -11,4 +11,6 @@ export class CreateTaskDto {
     @IsOptional()
     endTime?: string;
     cronTime?: string;
+    @IsNotEmpty()
+    scriptId: string;
 }

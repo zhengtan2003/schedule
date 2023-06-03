@@ -1,38 +1,50 @@
-import {EnvService} from './env.service';
-import {ApiBearerAuth, ApiOperation, ApiTags} from '@nestjs/swagger';
-import {Controller, Post, Body, Request, Query, Delete, Get} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, Query } from '@nestjs/common';
+import { EnvService } from './env.service';
+import { CreateEnvDto } from './dto/create-env.dto';
+import { UpdateEnvDto } from './dto/update-env.dto';
+import { User } from '@/decorators/user.decorator';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ListBodyDto } from '@/dto/list-body.dto';
 
+@ApiBearerAuth()
 @ApiTags('env')
 @Controller('env')
 export class EnvController {
-    constructor(private envService: EnvService) {
+    constructor(private readonly envService: EnvService) {
     }
 
-    @ApiOperation({summary: '更新', operationId: 'env_upsert'})
-    @ApiBearerAuth()
+    @ApiOperation({ summary: '创建' })
     @Post()
-    upsert(@Body() body, @Query('taskId') taskId, @Request() request) {
-        return this.envService.upsert(body, taskId, request);
+    create(@Body() createEnvDto: CreateEnvDto, @User() user) {
+        return this.envService.create(createEnvDto, user);
     }
 
-    @ApiOperation({summary: '获取', operationId: 'env_get'})
-    @ApiBearerAuth()
+    @ApiOperation({ summary: '列表' })
+    @Post('list')
+    list(@Body() listBody: ListBodyDto, @User() user) {
+        return this.envService.list(listBody, user);
+    }
+
+
     @Get()
-    get(@Query('id') id, @Request() request) {
-        return this.envService.get(id, request);
+    findOne(@Query('id') id: string, @User() user) {
+        return this.envService.findOne(+id, user);
     }
 
-    @ApiOperation({summary: '删除', operationId: 'env_delete'})
-    @ApiBearerAuth()
+    @Get('form')
+    form(@Query('id') id: string, @User() user) {
+        return this.envService.form(+id, user);
+    }
+
+    @ApiOperation({ summary: '更新' })
+    @Patch()
+    update(@Body() updateEnvDto: UpdateEnvDto, @User() user) {
+        return this.envService.update(updateEnvDto, user);
+    }
+
+    @ApiOperation({ summary: '删除' })
     @Delete()
-    delete(@Query('id') id, @Request() request) {
-        return this.envService.delete(id, request);
-    }
-
-    @ApiOperation({summary: '列表', operationId: 'env_search'})
-    @ApiBearerAuth()
-    @Post('search')
-    search(@Body() body, @Request() request) {
-        return this.envService.search(body, request);
+    remove(@Query('id') id: string, @User() user) {
+        return this.envService.remove(+id, user);
     }
 }

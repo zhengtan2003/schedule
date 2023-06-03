@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { fileSuffixMap } from './constants';
 import { UpdateScriptDto } from './dto/update-script.dto';
 import { CreateScriptDto } from './dto/create-script.dto';
+import { HttpResponse } from '@/http-response';
 
 @Injectable()
 export class ScriptService {
@@ -15,7 +16,9 @@ export class ScriptService {
         private scriptRepository: Repository<Script>,
     ) {
     }
-
+    repository() {
+        return this.scriptRepository;
+    }
     async creat(creatScriptDto: CreateScriptDto, user) {
         const { name, language, remark, code } = creatScriptDto;
         const script = new Script();
@@ -27,9 +30,7 @@ export class ScriptService {
         if (!fs.existsSync(script.filePath)) fs.mkdirSync(path.dirname(script.filePath), { recursive: true });
         fs.writeFileSync(script.filePath, code);
         await this.scriptRepository.save(script);
-        return {
-            showType: 1,
-        };
+        return new HttpResponse({ showType: 1 });
     }
 
     async update(id: number, updateScriptDto: UpdateScriptDto, user) {
@@ -40,9 +41,7 @@ export class ScriptService {
         script.language = language;
         await this.scriptRepository.save(script);
         if (fs.existsSync(script.filePath)) fs.writeFileSync(script.filePath, code);
-        return {
-            showType: 1,
-        };
+        return new HttpResponse({ showType: 1 });
     }
 
     async list({ params }, { user }) {
@@ -50,16 +49,14 @@ export class ScriptService {
         const [data, total] = await this.scriptRepository.findAndCount({
             where: {
                 user: { id: user.id },
-                // name: params.name,
-                // status: params.status
             },
             take: pageSize,
             skip: (current - 1) * pageSize,
         });
-        return {
+        return new HttpResponse({
             data,
             total,
-        };
+        });
     }
 
     async findOne(id: number, user) {
@@ -80,15 +77,14 @@ export class ScriptService {
         if (!script) throw new NotFoundException();
         if (fs.existsSync(script.filePath)) fs.unlinkSync(script.filePath);
         await this.scriptRepository.remove(script);
-        return {
+        return new HttpResponse({
             showType: 1,
-        };
+        });
     }
 
-    async options() {
-        // console.log(user);
-        // const scripts = await this.scriptRepository.find({ where: { user } });
-        // const data = scripts.map(({ name, id }) => ({ label: name, value: id }));
-        // return { data };
+    async select(user) {
+        const scripts = await this.scriptRepository.find({ where: { user } });
+        if (!scripts) return [];
+        return scripts.map(({ name, id }) => ({ label: name, value: id }));
     }
 }

@@ -4,10 +4,10 @@ import {
     ProTable,
 } from '@ant-design/pro-components';
 import type { ActionType } from '@ant-design/pro-components';
-// import { Button } from 'antd';
-import { TaskControllerList } from '@/services/task';
-// import DeleteButton from '@/components/DeleteButton';
-import { UpsertTask } from './components';
+import { Button } from 'antd';
+import { TaskControllerList, TaskControllerStart, TaskControllerRemove } from '@/services/task';
+import { ActionButton, DeleteAction } from '@/components';
+import { UpsertTask, EnvDrawer } from './components';
 
 export interface DataType {
     key: React.Key;
@@ -17,13 +17,10 @@ export interface DataType {
     updateTime: string;
     createTime: string;
     updateURL: string;
-    status: 'waiting' | 'processing';
+    status: 0 | 1 | 2;
 }
 
-const request = (params: any, sort: any, filter: any) => TaskControllerList({ params, filter, sort });
-
 const Task: React.FC = () => {
-    const [record, setRecord] = useState<DataType>();
     const actionRef = useRef<ActionType>();
     const columns: ProColumns<DataType>[] = [
         {
@@ -37,11 +34,11 @@ const Task: React.FC = () => {
             dataIndex: 'status',
             valueEnum: () => (
                 {
-                    waiting: {
+                    1: {
                         text: '待开始',
                         status: 'Warning',
                     },
-                    processing: {
+                    2: {
                         text: '运行中',
                         status: 'Processing',
                     },
@@ -90,29 +87,29 @@ const Task: React.FC = () => {
             render: (_: any, record: DataType) => {
                 return (
                     <>
+                        <EnvDrawer taskId={record.id}
+                                   taskName={record.name} />
                         {/*<Button type={'link'}*/}
                         {/*        size={'small'}*/}
-                        {/*        onClick={() => {*/}
-                        {/*            setRecord(record);*/}
-                        {/*        }}>配置ENV</Button>*/}
-                        {/*{record.status === 'waiting' && (*/}
-                        {/*    <ActionButton record={record}*/}
-                        {/*                  request={taskStart}*/}
-                        {/*                  onSuccess={actionRef.current?.reload}>开始</ActionButton>*/}
-                        {/*)}*/}
+                        {/*        onClick={() => TaskControllerStart({ id: record.id })}>开始</Button>*/}
+                        {record.status === 1 && (
+                            <ActionButton record={record}
+                                          request={TaskControllerStart}
+                                          onSuccess={() => actionRef.current?.reload()}>开始</ActionButton>
+                        )}
                         {/*{record.status === 'processing' && (*/}
                         {/*    <ActionButton record={record}*/}
                         {/*                  request={taskStop}*/}
                         {/*                  onSuccess={actionRef.current?.reload}>停止</ActionButton>*/}
                         {/*)}*/}
                         {/*{!!record.updateURL && <UpsertTask record={record} onSuccess={actionRef.current?.reload} />}*/}
-                        {/*<DeleteButton record={record}*/}
-                        {/*              onOk={async () => {*/}
-                        {/*                  const { success } = await taskDelete({ params: { id: record.id } });*/}
-                        {/*                  if (success) {*/}
-                        {/*                      actionRef.current?.reload();*/}
-                        {/*                  }*/}
-                        {/*              }} />*/}
+                        <DeleteAction record={record}
+                                      onOk={async () => {
+                                          const { success } = await TaskControllerRemove({ id: record.id });
+                                          if (success) {
+                                              actionRef.current?.reload();
+                                          }
+                                      }} />
                     </>
                 );
             },
@@ -121,10 +118,7 @@ const Task: React.FC = () => {
     const toolBarRender = () => {
         return [
             <UpsertTask key={'upsert'}
-                        // onSuccess={() => {
-                        //     actionRef.current?.reload();
-                        // }}
-            />,
+                        onSuccess={() => actionRef.current?.reload()} />,
             // <UploadButton key={'upload'}
             //               onSuccess={() => {
             //                   actionRef.current?.reload();
@@ -135,13 +129,11 @@ const Task: React.FC = () => {
         <PageContainer>
             <ProTable
                 rowKey={'id'}
-                request={request}
                 columns={columns}
                 scroll={{ x: 1300 }}
                 actionRef={actionRef}
-                toolBarRender={toolBarRender} />
-            {/*<EnvDrawer record={record}*/}
-            {/*           onClose={() => setRecord(undefined)} />*/}
+                toolBarRender={toolBarRender}
+                request={(params, sort, filter) => TaskControllerList({ params, filter, sort })} />
         </PageContainer>
     );
 };

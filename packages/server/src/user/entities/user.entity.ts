@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Task } from '../../task/entities/task.entity';
-import { Env } from '../../env/env.entity';
-import { Script } from '../../script/entities/script.entity';
+import { Task } from '@/task/entities/task.entity';
+import { Env } from '@/env/entities/env.entity';
+import { Script } from '@/script/entities/script.entity';
 
 @Entity()
 export class User {
@@ -21,6 +21,7 @@ export class User {
     readonly createTime: Date;
     @UpdateDateColumn()
     readonly updateTime: Date;
+
     async comparePassword(password: string): Promise<boolean> {
         return password === this.password;
     }

@@ -1,5 +1,6 @@
-import {Controller, OnModuleInit} from '@nestjs/common';
+import {Controller, OnModuleInit,Get} from '@nestjs/common';
 import { AppService } from './app.service';
+import { spawn } from 'child_process';
 
 @Controller()
 export class AppController implements OnModuleInit {

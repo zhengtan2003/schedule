@@ -7,6 +7,7 @@ import { TaskModule } from './task/task.module';
 import { AppController } from './app.controller';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ScriptModule } from './script/script.module';
+import { EnvModule } from './env/env.module';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { ScriptModule } from './script/script.module';
         }),
         UserModule,
         AuthModule,
+        EnvModule,
         TaskModule,
         ScriptModule,
         ScheduleModule.forRoot(),
