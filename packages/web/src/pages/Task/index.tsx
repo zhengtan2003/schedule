@@ -4,10 +4,10 @@ import {
     ProTable,
 } from '@ant-design/pro-components';
 import type { ActionType } from '@ant-design/pro-components';
-import { Button } from 'antd';
-import { TaskControllerList, TaskControllerStart, TaskControllerRemove } from '@/services/task';
+
 import { ActionButton, DeleteAction } from '@/components';
 import { UpsertTask, EnvDrawer } from './components';
+import { TaskControllerList, TaskControllerStart, TaskControllerRemove, TaskControllerStop } from '@/services/task';
 
 export interface DataType {
     key: React.Key;
@@ -89,19 +89,14 @@ const Task: React.FC = () => {
                     <>
                         <EnvDrawer taskId={record.id}
                                    taskName={record.name} />
-                        {/*<Button type={'link'}*/}
-                        {/*        size={'small'}*/}
-                        {/*        onClick={() => TaskControllerStart({ id: record.id })}>开始</Button>*/}
-                        {record.status === 1 && (
-                            <ActionButton record={record}
-                                          request={TaskControllerStart}
+                        {
+                            record.status === 2 ?
+                            <ActionButton request={() => TaskControllerStop({ id: record.id })}
+                                          onSuccess={() => actionRef.current?.reload()}>停止</ActionButton> :
+
+                            <ActionButton request={() => TaskControllerStart({ id: record.id })}
                                           onSuccess={() => actionRef.current?.reload()}>开始</ActionButton>
-                        )}
-                        {/*{record.status === 'processing' && (*/}
-                        {/*    <ActionButton record={record}*/}
-                        {/*                  request={taskStop}*/}
-                        {/*                  onSuccess={actionRef.current?.reload}>停止</ActionButton>*/}
-                        {/*)}*/}
+                        }
                         {/*{!!record.updateURL && <UpsertTask record={record} onSuccess={actionRef.current?.reload} />}*/}
                         <DeleteAction record={record}
                                       onOk={async () => {

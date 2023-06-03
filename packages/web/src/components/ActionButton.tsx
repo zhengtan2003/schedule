@@ -3,7 +3,6 @@ import { Button } from 'antd';
 import { useRequest } from '@umijs/max';
 
 interface ActionButtonProps {
-    record: any;
     children?: React.ReactNode;
     request: (...args: any) => Promise<any>;
     onSuccess: (data: any, params: any) => void;
@@ -18,9 +17,7 @@ const ActionButton: React.FC<ActionButtonProps> = (props) => {
         <Button type={'link'}
                 size={'small'}
                 loading={loading}
-                onClick={() => {
-                    run({ id: props.record.id });
-                }}>
+                onClick={run}>
             {props.children}
         </Button>
     );

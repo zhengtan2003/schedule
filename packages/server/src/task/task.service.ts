@@ -81,10 +81,25 @@ export class TaskService {
         });
         this.schedulerRegistry.addCronJob(cronName, cronJob);
         cronJob.start();
-        // if (task.status !== "processing") {
-        //     task.status = "processing";
-        //     await this.taskRepository.save(task)
-        // }
+        if (task.status !== 2) {
+            task.status = 2;
+            await this.taskRepository.save(task);
+        }
+        return new HttpResponse({
+            showType: 1,
+        });
+    }
+
+    async stop(id: number, user) {
+        const cronName = this.getCronName(user.id, id);
+        try {
+            await this.schedulerRegistry.deleteCronJob(cronName);
+        } catch (e) {
+
+        }
+        const task = await this.taskRepository.findOne({ where: { id, user: { id: user.id } } });
+        task.status = 1;
+        await this.taskRepository.save(task);
         return new HttpResponse({
             showType: 1,
         });

@@ -4,13 +4,13 @@
 // API 唯一标识：
 import * as user from './user';
 import * as auth from './auth';
+import * as env from './env';
 import * as task from './task';
 import * as script from './script';
-import * as env from './env';
 export default {
   user,
   auth,
+  env,
   task,
   script,
-  env,
 };

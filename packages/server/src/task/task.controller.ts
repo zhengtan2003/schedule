@@ -47,4 +47,9 @@ export class TaskController {
     start(@Query('id') id: string, @User() user) {
         return this.taskService.start(+id, user);
     }
+    @ApiOperation({summary:'停止'})
+    @Get('stop')
+    stop(@Query('id') id: string, @User() user){
+        return this.taskService.stop(+id, user);
+    }
 }

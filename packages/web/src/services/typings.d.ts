@@ -57,6 +57,10 @@ declare namespace API {
     id: string;
   };
 
+  type TaskControllerStopParams = {
+    id: string;
+  };
+
   type TaskControllerUpdateParams = {
     id: string;
   };
