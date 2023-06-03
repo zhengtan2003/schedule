@@ -10,6 +10,7 @@ import {
 import { User } from '@/user/entities/user.entity';
 import { Script } from '@/script/entities/script.entity';
 import { Env } from '@/env/entities/env.entity';
+import { TaskLog } from './task-log.entity';
 
 @Entity()
 export class Task {
@@ -25,6 +26,8 @@ export class Task {
     cronTime: string;
     @ManyToOne(() => Script, (script) => script.task)
     script: { id: string };
+    @OneToMany(() => TaskLog, (TaskLog) => TaskLog.task)
+    log: { id: any };
     @OneToMany(() => Env, (env) => env.task)
     env: Env;
     @ManyToOne(() => User, (user) => user.task)

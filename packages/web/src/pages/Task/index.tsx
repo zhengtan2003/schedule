@@ -8,6 +8,7 @@ import type { ActionType } from '@ant-design/pro-components';
 import { ActionButton, DeleteAction } from '@/components';
 import { UpsertTask, EnvDrawer } from './components';
 import { TaskControllerList, TaskControllerStart, TaskControllerRemove, TaskControllerStop } from '@/services/task';
+import TaskLogDrawer from '@/pages/Task/components/TaskLogDrawer';
 
 export interface DataType {
     key: React.Key;
@@ -91,12 +92,14 @@ const Task: React.FC = () => {
                                    taskName={record.name} />
                         {
                             record.status === 2 ?
-                            <ActionButton request={() => TaskControllerStop({ id: record.id })}
-                                          onSuccess={() => actionRef.current?.reload()}>停止</ActionButton> :
+                                <ActionButton request={() => TaskControllerStop({ id: record.id })}
+                                              onSuccess={() => actionRef.current?.reload()}>停止</ActionButton> :
 
-                            <ActionButton request={() => TaskControllerStart({ id: record.id })}
-                                          onSuccess={() => actionRef.current?.reload()}>开始</ActionButton>
+                                <ActionButton request={() => TaskControllerStart({ id: record.id })}
+                                              onSuccess={() => actionRef.current?.reload()}>开始</ActionButton>
                         }
+                        <TaskLogDrawer taskId={record.id}
+                                       taskName={record.name} />
                         {/*{!!record.updateURL && <UpsertTask record={record} onSuccess={actionRef.current?.reload} />}*/}
                         <DeleteAction record={record}
                                       onOk={async () => {

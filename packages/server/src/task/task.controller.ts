@@ -5,6 +5,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@/decorators/user.decorator';
 import { ListBodyDto } from '@/dto/list-body.dto';
+import { CreateTaskLogDto } from '@/task/dto/create-task-log.dto';
 
 @ApiBearerAuth()
 @ApiTags('task')
@@ -51,5 +52,15 @@ export class TaskController {
     @Get('stop')
     stop(@Query('id') id: string, @User() user){
         return this.taskService.stop(+id, user);
+    }
+    @ApiOperation({summary:'创建日志'})
+    @Post('log')
+    createLog(@Body() createTaskLogDto: CreateTaskLogDto, @User() user) {
+        return this.taskService.createLog(createTaskLogDto);
+    }
+    @ApiOperation({summary:'获得日志'})
+    @Post('log/list')
+    logList(@Body() listBody: ListBodyDto){
+        return this.taskService.logList(listBody);
     }
 }

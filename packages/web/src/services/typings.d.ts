@@ -5,6 +5,8 @@ declare namespace API {
 
   type CreateTaskDto = {};
 
+  type CreateTaskLogDto = {};
+
   type CreateUserDto = {
     /** 邮箱 */
     email: string;

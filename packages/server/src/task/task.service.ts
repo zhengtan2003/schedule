@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { spawn } from 'child_process';
 import { Injectable } from '@nestjs/common';
 import { Task } from './entities/task.entity';
+import { TaskLog } from './entities/task-log.entity';
 import { HttpResponse } from '@/http-response';
 import { EnvService } from '@/env/env.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,6 +20,8 @@ export class TaskService {
     constructor(
         @InjectRepository(Task)
         private taskRepository: Repository<Task>,
+        @InjectRepository(TaskLog)
+        private taskLogRepository: Repository<TaskLog>,
         @InjectRepository(Env)
         private envRepository: Repository<Env>,
         private envService: EnvService,
@@ -55,10 +58,12 @@ export class TaskService {
     }
 
     async start(id: number, user) {
+        const outputLog = []; // 缓存输出的数组
         const cronName = this.getCronName(user.id, id);
         const task = await this.taskRepository.findOne({ where: { id, user } });
         if (!task) return new HttpResponse({ success: false, showType: 1 });
         const cronJob = new CronJob(task.cronTime, async () => {
+            console.log('cronJob');
             const envs = await this.envService.repository().find({ where: { task: { id }, user } });
             const script = await this.scriptService.repository().findOne({ where: { task: { id }, user } });
             envs.forEach((env) => {
@@ -69,13 +74,16 @@ export class TaskService {
                     },
                 });
                 cp.stdout.on('data', (data) => {
-                    console.log(`stdout: ${data}`);
+                    outputLog.push(`${data}`);
                 });
                 cp.stderr.on('data', (data) => {
-                    console.error(`stderr: ${data}`);
+                    outputLog.push(`${data}`);
                 });
                 cp.on('close', (code) => {
-                    console.log(`脚本执行结束，退出码：${code}`);
+                    this.createLog({
+                        taskId: id,
+                        log: outputLog.join(),
+                    });
                 });
             });
         });
@@ -121,4 +129,30 @@ export class TaskService {
         await this.taskRepository.remove(task);
         return new HttpResponse({ showType: 1 });
     }
+
+    async createLog(createTaskDto) {
+        const { log, taskId } = createTaskDto;
+        const taskLog = new TaskLog();
+        taskLog.log = log;
+        taskLog.task = { id: taskId };
+        await this.taskLogRepository.save(taskLog);
+        return new HttpResponse();
+    }
+
+    async logList({ params }) {
+        const { current = 1, pageSize = 10, taskId } = params;
+        const [data, total] = await this.taskLogRepository.findAndCount({
+            where: {
+                task: { id: taskId },
+            },
+            take: pageSize,
+            skip: (current - 1) * pageSize,
+        });
+
+        return new HttpResponse({
+            data,
+            total,
+        });
+    }
 }
+
