@@ -1,17 +1,18 @@
 import { CronJob } from 'cron';
+import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 import { spawn } from 'child_process';
 import { Injectable } from '@nestjs/common';
 import { Task } from './entities/task.entity';
-import { TaskLog } from './entities/task-log.entity';
 import { HttpResponse } from '@/http-response';
 import { EnvService } from '@/env/env.service';
+import { Env } from '@/env/entities/env.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TaskLog } from './entities/task-log.entity';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ScriptService } from '@/script/script.service';
-import { Env } from '@/env/entities/env.entity';
 
 
 @Injectable()
@@ -58,12 +59,12 @@ export class TaskService {
     }
 
     async start(id: number, user) {
-        const outputLog = []; // 缓存输出的数组
-        const cronName = this.getCronName(user.id, id);
+        const cronName = uuidv4();
         const task = await this.taskRepository.findOne({ where: { id, user } });
         if (!task) return new HttpResponse({ success: false, showType: 1 });
         const cronJob = new CronJob(task.cronTime, async () => {
             console.log('cronJob');
+            let output = '';
             const envs = await this.envService.repository().find({ where: { task: { id }, user } });
             const script = await this.scriptService.repository().findOne({ where: { task: { id }, user } });
             envs.forEach((env) => {
@@ -74,39 +75,37 @@ export class TaskService {
                     },
                 });
                 cp.stdout.on('data', (data) => {
-                    outputLog.push(`${data}`);
+                    output += data.toString();
                 });
                 cp.stderr.on('data', (data) => {
-                    outputLog.push(`${data}`);
+                    output += `\x1b[31;1m${data}`;
+
                 });
                 cp.on('close', (code) => {
                     this.createLog({
                         taskId: id,
-                        log: outputLog.join(),
+                        log: output,
                     });
+                    output = '';
                 });
             });
         });
         this.schedulerRegistry.addCronJob(cronName, cronJob);
         cronJob.start();
-        if (task.status !== 2) {
-            task.status = 2;
-            await this.taskRepository.save(task);
-        }
+        task.status = 2;
+        task.cronName = cronName;
+        await this.taskRepository.save(task);
         return new HttpResponse({
             showType: 1,
         });
     }
 
     async stop(id: number, user) {
-        const cronName = this.getCronName(user.id, id);
-        try {
-            await this.schedulerRegistry.deleteCronJob(cronName);
-        } catch (e) {
-
-        }
-        const task = await this.taskRepository.findOne({ where: { id, user: { id: user.id } } });
+        const task = await this.taskRepository.findOne({ where: { id, user } });
+        if (!task) return new HttpResponse({ success: false, showType: 1 });
+        await this.schedulerRegistry.deleteCronJob(task.cronName);
         task.status = 1;
+        task.cronName = null;
         await this.taskRepository.save(task);
         return new HttpResponse({
             showType: 1,
@@ -123,7 +122,9 @@ export class TaskService {
 
     async remove(id: number, user) {
         const envs = await this.envRepository.find({ where: { task: { id }, user } });
-        await this.envRepository.remove(envs);
+        if (envs) await this.envRepository.remove(envs);
+        const taskLog = await this.taskLogRepository.find({ where: { task: { id } } });
+        if(taskLog) await this.taskLogRepository.remove(taskLog)
         const task = await this.taskRepository.findOne({ where: { id, user } });
         if (!task) return new HttpResponse({ showType: 1, success: false });
         await this.taskRepository.remove(task);
@@ -147,6 +148,9 @@ export class TaskService {
             },
             take: pageSize,
             skip: (current - 1) * pageSize,
+            order: {
+                createTime: 'DESC'
+            }
         });
 
         return new HttpResponse({

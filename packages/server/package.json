@@ -24,11 +24,15 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.5",
     "@nestjs/jwt": "^10.0.3",
+    "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-socket.io": "^9.4.2",
+    "@nestjs/platform-ws": "^9.4.2",
     "@nestjs/schedule": "^2.2.2",
     "@nestjs/serve-static": "^3.0.1",
     "@nestjs/swagger": "^6.3.0",
     "@nestjs/typeorm": "^9.0.1",
+    "@nestjs/websockets": "^9.4.2",
     "axios": "^1.4.0",
     "body-parser": "^1.20.2",
     "class-transformer": "^0.5.1",
@@ -38,7 +42,9 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.5",
-    "typeorm": "^0.3.16"
+    "typeorm": "^0.3.16",
+    "uuid": "^9.0.0",
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.3.0",

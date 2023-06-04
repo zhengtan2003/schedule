@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Script } from './entities/script.entity';
 import * as fs from 'fs';
 import * as path from 'path';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { fileSuffixMap } from './constants';
+import { HttpResponse } from '@/http-response';
+import { Script } from './entities/script.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateScriptDto } from './dto/update-script.dto';
 import { CreateScriptDto } from './dto/create-script.dto';
-import { HttpResponse } from '@/http-response';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class ScriptService {
@@ -16,9 +16,11 @@ export class ScriptService {
         private scriptRepository: Repository<Script>,
     ) {
     }
+
     repository() {
         return this.scriptRepository;
     }
+
     async creat(creatScriptDto: CreateScriptDto, user) {
         const { name, language, remark, code } = creatScriptDto;
         const script = new Script();
@@ -40,7 +42,8 @@ export class ScriptService {
         script.remark = remark;
         script.language = language;
         await this.scriptRepository.save(script);
-        if (fs.existsSync(script.filePath)) fs.writeFileSync(script.filePath, code);
+        if (!fs.existsSync(script.filePath)) fs.mkdirSync(path.dirname(script.filePath), { recursive: true });
+        fs.writeFileSync(script.filePath, code);
         return new HttpResponse({ showType: 1 });
     }
 

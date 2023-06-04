@@ -15,7 +15,7 @@ export class TaskLog {
     @Column('longtext')
     log: string;
     @ManyToOne(() => Task, (task) => task.log)
-    task: { id: string };
+    task: { id: any };
     @OneToMany(() => Env, (env) => env.task)
     env: Env;
     @PrimaryGeneratedColumn()

@@ -6,8 +6,8 @@ export class ListBodyDto {
         pageSize?: number;
         current?: number;
     };
-    @IsNotEmpty()
+
     sort: Record<string, any>;
-    @IsNotEmpty()
+
     filter: Record<string, any>;
 }

@@ -24,6 +24,8 @@ export class Task {
     status: 0 | 1 | 2;
     @Column({ nullable: true, default: '00 09 * * *' })
     cronTime: string;
+    @Column({ nullable: true })
+    cronName: string;
     @ManyToOne(() => Script, (script) => script.task)
     script: { id: string };
     @OneToMany(() => TaskLog, (TaskLog) => TaskLog.task)
@@ -39,3 +41,5 @@ export class Task {
     @UpdateDateColumn()
     readonly updateTime: Date;
 }
+
+

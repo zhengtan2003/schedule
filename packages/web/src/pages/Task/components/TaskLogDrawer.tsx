@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Drawer, Button } from 'antd';
+import { useRequest } from '@umijs/max';
+import { Drawer, Button, Timeline, Typography } from 'antd';
 import { TaskControllerLogList } from '@/services/task';
 import { ProColumns, ProTable } from '@ant-design/pro-components';
 
@@ -16,9 +17,11 @@ interface DataType {
     createTime: string;
 }
 
+const { Title } = Typography;
 const TaskLogDrawer: React.FC<TaskLogDrawerProps> = (props) => {
     const { taskId, taskName } = props;
     const [open, setOpen] = useState<boolean>(false);
+    const { data } = useRequest(() => TaskControllerLogList({ params: { current: 1, pageSize: 100 } }));
     const columns: ProColumns<DataType>[] = [
         {
             title: '创建时间',
@@ -27,10 +30,10 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = (props) => {
             valueType: 'dateTime',
         },
         {
-            title:"日志",
+            title: '日志',
             dataIndex: 'log',
             valueType: 'code',
-        }
+        },
     ];
     return (
         <>
@@ -40,17 +43,18 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = (props) => {
                     destroyOnClose
                     title={`${taskName}-日志`}
                     onClose={() => setOpen(false)}>
-                <ProTable rowKey={'id'}
-                          cardBordered
-                          search={false}
-                          columns={columns}
-                          params={{ taskId }}
-                          scroll={{ x: "auto" }}
-                          request={(params: any, sort: any, filter: any) => TaskControllerLogList({
-                              params,
-                              filter,
-                              sort,
-                          })} />
+                <Timeline items={data?.map((item) => {
+                    return {
+                        color: 'green',
+                        // label: item.createTime,
+                        children: (
+                            <Typography>
+                                <Title level={5}> {item.createTime}</Title>
+                                <pre>{item.log}</pre>
+                            </Typography>
+                        ),
+                    };
+                })} />
             </Drawer>
         </>
     );
