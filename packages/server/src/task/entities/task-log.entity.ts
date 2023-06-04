@@ -14,6 +14,8 @@ import {
 export class TaskLog {
     @Column('longtext')
     log: string;
+    @Column()
+    status: string;
     @ManyToOne(() => Task, (task) => task.log)
     task: { id: any };
     @OneToMany(() => Env, (env) => env.task)

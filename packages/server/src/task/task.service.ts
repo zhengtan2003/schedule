@@ -12,12 +12,11 @@ import { TaskLog } from './entities/task-log.entity';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { CreateTaskLogDto } from './dto/create-task-log.dto';
 import { ScriptService } from '@/script/script.service';
-
 
 @Injectable()
 export class TaskService {
-
     constructor(
         @InjectRepository(Task)
         private taskRepository: Repository<Task>,
@@ -28,12 +27,7 @@ export class TaskService {
         private envService: EnvService,
         private scriptService: ScriptService,
         private schedulerRegistry: SchedulerRegistry,
-    ) {
-    }
-
-    getCronName(userId, taskId) {
-        return `cron_task_${userId}_${taskId}`;
-    }
+    ) {}
 
     async create(createTaskDto: CreateTaskDto, user) {
         const { name, startTime, endTime, cronTime, scriptId } = createTaskDto;
@@ -65,8 +59,13 @@ export class TaskService {
         const cronJob = new CronJob(task.cronTime, async () => {
             console.log('cronJob');
             let output = '';
-            const envs = await this.envService.repository().find({ where: { task: { id }, user } });
-            const script = await this.scriptService.repository().findOne({ where: { task: { id }, user } });
+            const statusArray = [];
+            const envs = await this.envService
+                .repository()
+                .find({ where: { task: { id }, user } });
+            const script = await this.scriptService
+                .repository()
+                .findOne({ where: { task: { id }, user } });
             envs.forEach((env) => {
                 const cp = spawn('node', [script.filePath], {
                     env: {
@@ -75,16 +74,24 @@ export class TaskService {
                     },
                 });
                 cp.stdout.on('data', (data) => {
-                    output += data.toString();
+                    output += `${data}`;
+                    statusArray.push(true);
                 });
                 cp.stderr.on('data', (data) => {
-                    output += `\x1b[31;1m${data}`;
-
+                    output += `${data}`;
+                    statusArray.push(false);
                 });
-                cp.on('close', (code) => {
+                cp.on('close', () => {
+                    let status = 'warning';
+                    if (statusArray.every((t) => t === true)) {
+                        status = 'success';
+                    } else if (statusArray.every((t) => t === false)) {
+                        status = 'error';
+                    }
                     this.createLog({
                         taskId: id,
                         log: output,
+                        status,
                     });
                     output = '';
                 });
@@ -103,7 +110,9 @@ export class TaskService {
     async stop(id: number, user) {
         const task = await this.taskRepository.findOne({ where: { id, user } });
         if (!task) return new HttpResponse({ success: false, showType: 1 });
-        await this.schedulerRegistry.deleteCronJob(task.cronName);
+        try {
+            await this.schedulerRegistry.deleteCronJob(task.cronName);
+        } catch (e) {}
         task.status = 1;
         task.cronName = null;
         await this.taskRepository.save(task);
@@ -121,20 +130,25 @@ export class TaskService {
     }
 
     async remove(id: number, user) {
-        const envs = await this.envRepository.find({ where: { task: { id }, user } });
+        const envs = await this.envRepository.find({
+            where: { task: { id }, user },
+        });
         if (envs) await this.envRepository.remove(envs);
-        const taskLog = await this.taskLogRepository.find({ where: { task: { id } } });
-        if(taskLog) await this.taskLogRepository.remove(taskLog)
+        const taskLog = await this.taskLogRepository.find({
+            where: { task: { id } },
+        });
+        if (taskLog) await this.taskLogRepository.remove(taskLog);
         const task = await this.taskRepository.findOne({ where: { id, user } });
         if (!task) return new HttpResponse({ showType: 1, success: false });
         await this.taskRepository.remove(task);
         return new HttpResponse({ showType: 1 });
     }
 
-    async createLog(createTaskDto) {
-        const { log, taskId } = createTaskDto;
+    async createLog(createTaskDto: CreateTaskLogDto) {
+        const { log, taskId, status } = createTaskDto;
         const taskLog = new TaskLog();
         taskLog.log = log;
+        taskLog.status = status;
         taskLog.task = { id: taskId };
         await this.taskLogRepository.save(taskLog);
         return new HttpResponse();
@@ -149,8 +163,8 @@ export class TaskService {
             take: pageSize,
             skip: (current - 1) * pageSize,
             order: {
-                createTime: 'DESC'
-            }
+                createTime: 'DESC',
+            },
         });
 
         return new HttpResponse({
@@ -159,4 +173,3 @@ export class TaskService {
         });
     }
 }
-

@@ -1,7 +1,8 @@
-import { IsNotEmpty, IsString, IsOptional, IsDateString } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateTaskLogDto {
     log: string;
     @IsNotEmpty()
-    taskId:string
+    taskId: any;
+    status: string;
 }

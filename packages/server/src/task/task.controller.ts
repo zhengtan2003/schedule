@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Query, Delete, Request } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Query,
+    Delete,
+    Request,
+} from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -11,8 +20,7 @@ import { CreateTaskLogDto } from '@/task/dto/create-task-log.dto';
 @ApiTags('task')
 @Controller('task')
 export class TaskController {
-    constructor(private readonly taskService: TaskService) {
-    }
+    constructor(private readonly taskService: TaskService) {}
 
     @ApiOperation({ summary: '创建' })
     @Post()
@@ -48,19 +56,14 @@ export class TaskController {
     start(@Query('id') id: string, @User() user) {
         return this.taskService.start(+id, user);
     }
-    @ApiOperation({summary:'停止'})
+    @ApiOperation({ summary: '停止' })
     @Get('stop')
-    stop(@Query('id') id: string, @User() user){
+    stop(@Query('id') id: string, @User() user) {
         return this.taskService.stop(+id, user);
     }
-    @ApiOperation({summary:'创建日志'})
-    @Post('log')
-    createLog(@Body() createTaskLogDto: CreateTaskLogDto, @User() user) {
-        return this.taskService.createLog(createTaskLogDto);
-    }
-    @ApiOperation({summary:'获得日志'})
+    @ApiOperation({ summary: '获得日志' })
     @Post('log/list')
-    logList(@Body() listBody: ListBodyDto){
+    logList(@Body() listBody: ListBodyDto) {
         return this.taskService.logList(listBody);
     }
 }

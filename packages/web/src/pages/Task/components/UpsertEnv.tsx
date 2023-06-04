@@ -7,7 +7,6 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Form, message } from 'antd';
 import { EnvControllerCreate, EnvControllerForm, EnvControllerUpdate } from '@/services/env';
-import { useRequest } from '@umijs/max';
 import Editor from '@monaco-editor/react';
 
 interface UpsertEnvProps {
