@@ -31,12 +31,17 @@ const authHeaderInterceptor = (url: string, options: RequestOptions) => {
 export const request: RequestConfig = {
   errorConfig: {
     errorThrower: (res) => {
-      const { success, data, code, msg, showType } =
-        res as unknown as ResponseStructure;
+      const {
+        success,
+        data,
+        code,
+        message: errorMessage,
+        showType,
+      } = res as unknown as ResponseStructure;
       if (!success) {
-        const error: any = new Error(msg);
+        const error: any = new Error(errorMessage);
         error.name = 'BizError';
-        error.info = { code, msg, showType, data };
+        error.info = { code, errorMessage, showType, data };
         throw error; // 抛出自制的错误
       }
     },
@@ -48,28 +53,26 @@ export const request: RequestConfig = {
       if (error.name === 'BizError') {
         const errorInfo: ResponseStructure | undefined = error.info;
         if (errorInfo) {
-          const { msg, code } = errorInfo;
+          const { errorMessage, code } = errorInfo;
           switch (errorInfo.showType) {
             case ErrorShowType.SILENT:
               // do nothing
               break;
-            case ErrorShowType.WARN_MESSAGE:
-              message.warning(msg);
+            case 1:
+              message.error(errorMessage);
               break;
-            case ErrorShowType.ERROR_MESSAGE:
-              message.error(msg);
+            case 2:
+              message.warning(errorMessage);
               break;
             case ErrorShowType.NOTIFICATION:
               notification.open({
-                description: msg,
+                description: errorMessage,
                 message: code,
               });
               break;
             case ErrorShowType.REDIRECT:
               // TODO: redirect
               break;
-            default:
-              message.error(msg);
           }
         }
       } else if (error.response) {
@@ -87,7 +90,7 @@ export const request: RequestConfig = {
   },
   responseInterceptors: [
     (response: any) => {
-      if (response.data.showType) {
+      if (response.data.success && response.data.showType) {
         message.success(response.data.message);
       }
       return response;

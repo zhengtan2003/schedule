@@ -5,8 +5,6 @@ declare namespace API {
 
   type CreateTaskDto = {};
 
-  type CreateTaskLogDto = {};
-
   type CreateUserDto = {
     /** 邮箱 */
     email: string;
@@ -46,6 +44,8 @@ declare namespace API {
   type ScriptControllerUpdateParams = {
     id: string;
   };
+
+  type SubscribeDto = {};
 
   type TaskControllerFindOneParams = {
     id: string;

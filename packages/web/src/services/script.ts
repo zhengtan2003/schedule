@@ -83,10 +83,25 @@ export async function ScriptControllerList(
   });
 }
 
-/** 此处后端没有提供注释 GET /api/script/select */
+/** list-用于antd select GET /api/script/select */
 export async function ScriptControllerSelect(options?: { [key: string]: any }) {
   return request<any>('/api/script/select', {
     method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** 订阅 POST /api/script/subscribe */
+export async function ScriptControllerSubscribe(
+  body: API.SubscribeDto,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/script/subscribe', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   });
 }

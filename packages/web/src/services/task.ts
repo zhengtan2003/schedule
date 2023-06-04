@@ -79,21 +79,6 @@ export async function TaskControllerList(body: API.ListBodyDto, options?: { [key
   });
 }
 
-/** 创建日志 POST /api/task/log */
-export async function TaskControllerCreateLog(
-  body: API.CreateTaskLogDto,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/log', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
 /** 获得日志 POST /api/task/log/list */
 export async function TaskControllerLogList(
   body: API.ListBodyDto,

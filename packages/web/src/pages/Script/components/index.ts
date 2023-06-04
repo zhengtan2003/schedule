@@ -1,1 +1,1 @@
-export { default as UpdateInput } from './UpdateInput';
+export { default as Subscribe } from './Subscribe';

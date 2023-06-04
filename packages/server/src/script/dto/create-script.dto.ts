@@ -12,5 +12,8 @@ export class CreateScriptDto {
     language: string;
     @IsString()
     @IsOptional()
+    updateURL?: string;
+    @IsString()
+    @IsOptional()
     remark?: string;
 }
