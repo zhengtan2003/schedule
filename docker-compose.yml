@@ -26,14 +26,17 @@ services:
       dockerfile: Dockerfile
     ports:
       - "7002:3000"
+    volumes:
+      - ./app/server/dist/script/files:/script
     depends_on:
-      - database
+      - db
 
-  database:
+  db:
     image: mysql:8.0
     container_name: database
     restart: always
     environment:
+      - TZ=Asia/Shanghai
       - MYSQL_DATABASE=schedule
       - MYSQL_ROOT_PASSWORD=schedule123456
     ports:

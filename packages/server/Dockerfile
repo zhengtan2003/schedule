@@ -12,4 +12,4 @@ EXPOSE 3000
 
 RUN npm install pm2 -g
 
-CMD [ "pm2-runtime", "npm", "--", "run", "start:prod" ]
+CMD ["pm2", "start", "npm", "--name", "schedule-service", "--", "start:prod"]
