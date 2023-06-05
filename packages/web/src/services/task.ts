@@ -67,9 +67,12 @@ export async function TaskControllerUpdate(
   });
 }
 
-/** 列表 POST /api/task/list */
-export async function TaskControllerList(body: API.ListBodyDto, options?: { [key: string]: any }) {
-  return request<any>('/api/task/list', {
+/** 获得日志 POST /api/task/log/search */
+export async function TaskControllerLogSearch(
+  body: API.SearchDto,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/task/log/search', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -79,12 +82,9 @@ export async function TaskControllerList(body: API.ListBodyDto, options?: { [key
   });
 }
 
-/** 获得日志 POST /api/task/log/list */
-export async function TaskControllerLogList(
-  body: API.ListBodyDto,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/log/list', {
+/** 列表 POST /api/task/search */
+export async function TaskControllerSearch(body: API.SearchDto, options?: { [key: string]: any }) {
+  return request<any>('/api/task/search', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

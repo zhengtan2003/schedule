@@ -1,17 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, Query } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Delete,
+    Query,
+} from '@nestjs/common';
 import { EnvService } from './env.service';
 import { CreateEnvDto } from './dto/create-env.dto';
 import { UpdateEnvDto } from './dto/update-env.dto';
 import { User } from '@/decorators/user.decorator';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ListBodyDto } from '@/dto/list-body.dto';
+import { SearchDto } from '@/dto/search.dto';
 
 @ApiBearerAuth()
 @ApiTags('env')
 @Controller('env')
 export class EnvController {
-    constructor(private readonly envService: EnvService) {
-    }
+    constructor(private readonly envService: EnvService) {}
 
     @ApiOperation({ summary: '创建' })
     @Post()
@@ -20,11 +27,10 @@ export class EnvController {
     }
 
     @ApiOperation({ summary: '列表' })
-    @Post('list')
-    list(@Body() listBody: ListBodyDto, @User() user) {
-        return this.envService.list(listBody, user);
+    @Post('search')
+    search(@Body() searchDto: SearchDto, @User() user) {
+        return this.envService.search(searchDto, user);
     }
-
 
     @Get()
     findOne(@Query('id') id: string, @User() user) {

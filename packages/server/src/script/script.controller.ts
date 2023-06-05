@@ -1,3 +1,10 @@
+import { SearchDto } from '@/dto/search.dto';
+import { ScriptService } from './script.service';
+import { User } from '@/decorators/user.decorator';
+import { UpdateScriptDto } from './dto/update-script.dto';
+import { CreateScriptDto } from './dto/create-script.dto';
+import { SubscribeDto } from '@/script/dto/subscribe.dto';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
     Controller,
     Get,
@@ -5,16 +12,9 @@ import {
     Body,
     Patch,
     Delete,
-    Request,
     Query,
 } from '@nestjs/common';
-import { ScriptService } from './script.service';
-import { ListBodyDto } from '@/dto/list-body.dto';
-import { User } from '@/decorators/user.decorator';
-import { UpdateScriptDto } from './dto/update-script.dto';
-import { CreateScriptDto } from './dto/create-script.dto';
-import { SubscribeDto } from '@/script/dto/subscribe.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+
 @ApiBearerAuth()
 @ApiTags('script')
 @Controller('script')
@@ -38,16 +38,17 @@ export class ScriptController {
     }
 
     @ApiOperation({ summary: '列表' })
-    @Post('list')
-    list(@Body() listBody: ListBodyDto, @Request() request) {
-        return this.scriptService.list(listBody, request);
+    @Post('search')
+    search(@Body() searchDto: SearchDto, @User() user) {
+        return this.scriptService.search(searchDto, user);
     }
 
     @ApiOperation({ summary: '获取' })
     @Get()
-    findOne(@Query('id') id: string, @User() user) {
-        return this.scriptService.findOne(+id, user);
+    retrieve(@Query('id') id: string, @User() user) {
+        return this.scriptService.retrieve(+id, user);
     }
+
     @ApiOperation({ summary: 'list-用于antd select' })
     @Get('select')
     select(@User() user) {
@@ -55,10 +56,11 @@ export class ScriptController {
     }
 
     @ApiOperation({ summary: '删除' })
-    @Delete(':id')
+    @Delete()
     remove(@Query('id') id: string, @User() user) {
         return this.scriptService.remove(+id, user);
     }
+
     @ApiOperation({ summary: '订阅' })
     @Post('subscribe')
     subscribe(@Body() subscribeDto: SubscribeDto, @User() user) {

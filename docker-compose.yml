@@ -1,4 +1,4 @@
-version: '3'
+version: '3.9'
 services:
   web:
     image: zhengtan2003/schedule-web
@@ -14,6 +14,8 @@ services:
   server:
     image: zhengtan2003/schedule-server
     container_name: server
+    volumes:
+      - script:/app/server/dist/script/files
     environment:
       - PORT=3000
       - DATABASE_HOST=database
@@ -26,14 +28,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "7002:3000"
-    volumes:
-      - ./app/server/dist/script/files:/script
     depends_on:
-      - db
+      - database
 
-  db:
+  database:
     image: mysql:8.0
     container_name: database
+    volumes:
+      - mysql:/var/lib/mysql
     restart: always
     environment:
       - TZ=Asia/Shanghai
@@ -41,5 +43,12 @@ services:
       - MYSQL_ROOT_PASSWORD=schedule123456
     ports:
       - "7001:3306"
-    volumes:
-      - ./data:/var/lib/mysql
+
+volumes:
+  mysql:
+  script:
+    driver: local
+    driver_opts:
+      type: none
+      device: /app/server/dist/script/files
+      o: bind

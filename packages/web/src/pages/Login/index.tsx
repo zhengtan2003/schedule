@@ -1,8 +1,8 @@
 import { AuthControllerLogin } from '@/services/auth';
-import { LockTwoTone,MailTwoTone } from '@ant-design/icons';
-import { LoginForm, ProFormText} from '@ant-design/pro-components';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
-import { Helmet,history,useModel } from '@umijs/max';
+import { Helmet, history, useModel } from '@umijs/max';
 import CryptoJS from 'crypto-js';
 import { flushSync } from 'react-dom';
 import { defaultSettings } from '../../../config/defaultSettings';
@@ -34,11 +34,11 @@ const Login: React.FC = () => {
   };
   const onFinish = async (values: any) => {
     const { data } = await AuthControllerLogin({
-      email: values.email,
+      username: values.username,
       password: CryptoJS.SHA256(values.password).toString(),
     });
     localStorage.setItem('authorization', `Bearer ${data.accessToken}`);
-    const userInfo = await fetchUserInfo();
+    await fetchUserInfo();
     const urlParams = new URL(window.location.href).searchParams;
     history.push(urlParams.get('redirect') || '/');
   };
@@ -53,29 +53,22 @@ const Login: React.FC = () => {
         <LoginForm
           title="Schedule"
           onFinish={onFinish}
-          logo={<img alt="logo" src="/logo.svg" />}
+          logo={<img alt="logo" src="/logo.jpg" />}
           contentStyle={{ minWidth: 280, maxWidth: '75vw' }}
-          subTitle={'Ant Design 是西湖区最具影响力的 Web 设计规范'}
+          subTitle={'🪐 努力打造出最具人性化的的脚本管理工具。'}
           submitter={{ searchConfig: { submitText: '登录 / 注册' } }}
         >
           <ProFormText
-            name="email"
-            placeholder={'邮箱'}
-            fieldProps={{ size: 'large', prefix: <MailTwoTone /> }}
-            rules={[
-              { required: true, message: '请输入邮箱' },
-              { type: 'email' },
-            ]}
+            name="username"
+            placeholder={'用户名'}
+            fieldProps={{ size: 'large', prefix: <UserOutlined /> }}
+            rules={[{ required: true, message: '请输入用户名' }]}
           />
           <ProFormText.Password
             name="password"
             placeholder={'密码'}
-            fieldProps={{ size: 'large', prefix: <LockTwoTone /> }}
-            rules={[
-              { required: true, message: '请输入密码' },
-              { min: 4 },
-              { max: 20 },
-            ]}
+            fieldProps={{ size: 'large', prefix: <LockOutlined /> }}
+            rules={[{ required: true, message: '请输入密码' }]}
           />
         </LoginForm>
       </div>

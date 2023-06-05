@@ -1,23 +1,23 @@
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-import { UserService } from '@/user/user.service';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { HttpResponse } from '@/http-response';
-
+import { UserService } from '@/user/user.service';
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
-    ) {
-    }
+    ) {}
 
     async login(loginDto: LoginDto) {
-        const { email, password } = loginDto;
-        const user = await this.userService.repository().findOne({ where: { email } });
+        const { username, password } = loginDto;
+        const user = await this.userService.findOne(
+            { where: { username } },
+            true,
+        );
         if (!user) {
-            const user = await this.userService.create(loginDto);
+            const user = await this.userService.create({ username, password });
             const accessToken = this.jwtService.sign({ id: user.id });
             return new HttpResponse({
                 data: { accessToken },
@@ -38,13 +38,5 @@ export class AuthService {
             message: '登录成功',
             showType: 1,
         });
-    }
-
-    async register(registerDto: RegisterDto) {
-        const { password, ...data } = await this.userService.create(registerDto);
-        return {
-            data,
-            success: true,
-        };
     }
 }

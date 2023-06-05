@@ -88,7 +88,7 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
 
   const { currentUser } = initialState;
 
-  if (!currentUser || !currentUser.email) {
+  if (!currentUser || !currentUser.username) {
     return loading;
   }
 
@@ -118,11 +118,13 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
   ];
 
   return (
-    <HeaderDropdown menu={{
+    <HeaderDropdown
+      menu={{
         selectedKeys: [],
         onClick: onMenuClick,
         items: menuItems,
-      }}>
+      }}
+    >
       {children}
     </HeaderDropdown>
   );

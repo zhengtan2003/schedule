@@ -1,8 +1,8 @@
 import { DeleteAction } from '@/components';
 import { DataType } from '@/pages/Task';
 import {
-  ScriptControllerList,
   ScriptControllerRemove,
+  ScriptControllerSearch,
 } from '@/services/script';
 import { PlusOutlined } from '@ant-design/icons';
 import {
@@ -15,9 +15,6 @@ import { history } from '@umijs/max';
 import { Button } from 'antd';
 import { useRef } from 'react';
 import Subscribe from './components/Subscribe';
-
-const request = (params: any, sort: any, filter: any) =>
-  ScriptControllerList({ params, sort, filter });
 
 const Script = () => {
   const actionRef = useRef<ActionType>();
@@ -63,6 +60,8 @@ const Script = () => {
       dataIndex: 'updateTime',
       valueType: 'dateTime',
       hideInSearch: true,
+      sorter: true,
+      defaultSortOrder: 'descend',
     },
     {
       title: '创建时间',
@@ -70,6 +69,7 @@ const Script = () => {
       dataIndex: 'createTime',
       valueType: 'dateTime',
       hideInSearch: true,
+      sorter: true,
     },
     {
       title: '操作',
@@ -100,11 +100,13 @@ const Script = () => {
     <PageContainer>
       <ProTable
         rowKey={'id'}
-        request={request}
         columns={columns}
         scroll={{ x: 1300 }}
         actionRef={actionRef}
         toolBarRender={toolBarRender}
+        request={(params, sort, filter) =>
+          ScriptControllerSearch({ params, sort, filter })
+        }
       />
     </PageContainer>
   );

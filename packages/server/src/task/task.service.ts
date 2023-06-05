@@ -2,7 +2,7 @@ import { CronJob } from 'cron';
 import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 import { spawn } from 'child_process';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Task } from './entities/task.entity';
 import { HttpResponse } from '@/http-response';
 import { EnvService } from '@/env/env.service';
@@ -14,6 +14,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateTaskLogDto } from './dto/create-task-log.dto';
 import { ScriptService } from '@/script/script.service';
+import { searchOptions } from '@/utils';
 
 @Injectable()
 export class TaskService {
@@ -42,30 +43,40 @@ export class TaskService {
         return new HttpResponse({ showType: 1 });
     }
 
-    async list({ params }, user) {
-        const { current = 1, pageSize = 10 } = params;
-        const [data, total] = await this.taskRepository.findAndCount({
-            where: { user: { id: user.id } },
-            take: pageSize,
-            skip: (current - 1) * pageSize,
-        });
+    async search(searchDto, user) {
+        const [data, total] = await this.taskRepository.findAndCount(
+            searchOptions(searchDto, { where: { user } }),
+        );
         return new HttpResponse({ data, total });
+    }
+
+    async findOne(options, skipException = false) {
+        const task = await this.taskRepository.findOne(options);
+        if (!task && !skipException) {
+            throw new NotFoundException('未找到任务');
+        }
+        return task;
+    }
+
+    async find(options) {
+        const tasks = await this.taskRepository.find(options);
+        return tasks ?? [];
     }
 
     async start(id: number, user) {
         const cronName = uuidv4();
-        const task = await this.taskRepository.findOne({ where: { id, user } });
-        if (!task) return new HttpResponse({ success: false, showType: 1 });
+        const task = await this.findOne({ where: { id, user } });
+        console.log(`开启定时任务：${cronName}，${task.cronTime}`);
         const cronJob = new CronJob(task.cronTime, async () => {
-            console.log('cronJob');
+            console.log(`任务执行中：${task.cronName}，${task.cronTime}`);
             let output = '';
             const statusArray = [];
             const envs = await this.envService
                 .repository()
                 .find({ where: { task: { id }, user } });
-            const script = await this.scriptService
-                .repository()
-                .findOne({ where: { task: { id }, user } });
+            const script = await this.scriptService.findOne({
+                where: { task: { id }, user },
+            });
             envs.forEach((env) => {
                 const cp = spawn('node', [script.filePath], {
                     env: {
@@ -108,8 +119,8 @@ export class TaskService {
     }
 
     async stop(id: number, user) {
-        const task = await this.taskRepository.findOne({ where: { id, user } });
-        if (!task) return new HttpResponse({ success: false, showType: 1 });
+        const task = await this.findOne({ where: { id, user } });
+        console.log(`停止定时任务：${task.cronName}，${task.cronTime}`);
         try {
             await this.schedulerRegistry.deleteCronJob(task.cronName);
         } catch (e) {}
@@ -119,10 +130,6 @@ export class TaskService {
         return new HttpResponse({
             showType: 1,
         });
-    }
-
-    findOne(id: number) {
-        return `This action returns a #${id} task`;
     }
 
     update(id: number, updateTaskDto: UpdateTaskDto) {
@@ -154,19 +161,12 @@ export class TaskService {
         return new HttpResponse();
     }
 
-    async logList({ params }) {
-        const { current = 1, pageSize = 10, taskId } = params;
-        const [data, total] = await this.taskLogRepository.findAndCount({
-            where: {
-                task: { id: taskId },
-            },
-            take: pageSize,
-            skip: (current - 1) * pageSize,
-            order: {
-                createTime: 'DESC',
-            },
-        });
-
+    async logSearch(searchDto) {
+        const [data, total] = await this.taskLogRepository.findAndCount(
+            searchOptions(searchDto, {
+                where: { task: { id: searchDto.params.taskId } },
+            }),
+        );
         return new HttpResponse({
             data,
             total,

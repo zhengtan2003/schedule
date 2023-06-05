@@ -6,15 +6,13 @@ import {
     Patch,
     Query,
     Delete,
-    Request,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@/decorators/user.decorator';
-import { ListBodyDto } from '@/dto/list-body.dto';
-import { CreateTaskLogDto } from '@/task/dto/create-task-log.dto';
+import { SearchDto } from '@/dto/search.dto';
 
 @ApiBearerAuth()
 @ApiTags('task')
@@ -29,9 +27,9 @@ export class TaskController {
     }
 
     @ApiOperation({ summary: '列表' })
-    @Post('list')
-    list(@Body() listBody: ListBodyDto, @User() user) {
-        return this.taskService.list(listBody, user);
+    @Post('search')
+    search(@Body() searchDto: SearchDto, @User() user) {
+        return this.taskService.search(searchDto, user);
     }
 
     @Get()
@@ -62,8 +60,8 @@ export class TaskController {
         return this.taskService.stop(+id, user);
     }
     @ApiOperation({ summary: '获得日志' })
-    @Post('log/list')
-    logList(@Body() listBody: ListBodyDto) {
-        return this.taskService.logList(listBody);
+    @Post('log/search')
+    logSearch(@Body() searchDto: SearchDto) {
+        return this.taskService.logSearch(searchDto);
     }
 }

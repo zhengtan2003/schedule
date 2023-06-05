@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+} from 'typeorm';
 import { Task } from '@/task/entities/task.entity';
 import { Env } from '@/env/entities/env.entity';
 import { Script } from '@/script/entities/script.entity';
@@ -6,7 +13,7 @@ import { Script } from '@/script/entities/script.entity';
 @Entity()
 export class User {
     @Column()
-    email: string;
+    username: string;
     @Column()
     password: string;
     @OneToMany(() => Task, (task) => task.user)

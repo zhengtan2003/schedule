@@ -1,51 +1,42 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { User } from './entities/user.entity';
 import { HttpResponse } from '@/http-response';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
-    ) {
-    }
+    ) {}
 
-    create(createUserDto: CreateUserDto) {
-        const { email, password } = createUserDto;
+    async create(createUserDto: CreateUserDto) {
+        const { username, password } = createUserDto;
         const user = new User();
-        user.email = email;
+        user.username = username;
         user.password = password;
         return this.userRepository.save(user);
     }
 
-    findAll() {
-        return `This action returns all user`;
-    }
-
-    async findOne(id: number) {
-        const user = await this.userRepository.findOne({
-            where: { id },
-        });
-
-        const { password, ...data } = user;
+    async current(user) {
+        const { username } = await this.findOne({ where: user });
         return new HttpResponse({
-            data,
+            data: { username },
         });
     }
 
-    repository() {
-        return this.userRepository;
+    async findOne(options, skipException = false) {
+        const user = await this.userRepository.findOne(options);
+        if (!user && !skipException) {
+            throw new NotFoundException('未找到用户');
+        }
+        return user;
     }
 
-    update(id: number, updateUserDto: UpdateUserDto) {
-        return `This action updates a #${id} user`;
-    }
-
-    remove(id: number) {
-        return `This action removes a #${id} user`;
+    async findAll() {
+        const users = await this.userRepository.find();
+        return users ?? [];
     }
 }

@@ -77,9 +77,9 @@ export async function EnvControllerForm(
   });
 }
 
-/** 列表 POST /api/env/list */
-export async function EnvControllerList(body: API.ListBodyDto, options?: { [key: string]: any }) {
-  return request<any>('/api/env/list', {
+/** 列表 POST /api/env/search */
+export async function EnvControllerSearch(body: API.SearchDto, options?: { [key: string]: any }) {
+  return request<any>('/api/env/search', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

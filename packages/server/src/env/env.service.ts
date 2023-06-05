@@ -5,14 +5,14 @@ import { Env } from './entities/env.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HttpResponse } from '@/http-response';
+import { searchOptions } from '@/utils';
 
 @Injectable()
 export class EnvService {
     constructor(
         @InjectRepository(Env)
         private envRepository: Repository<Env>,
-    ) {
-    }
+    ) {}
 
     repository() {
         return this.envRepository;
@@ -28,16 +28,15 @@ export class EnvService {
         return new HttpResponse({ showType: 1 });
     }
 
-    async list({ params }, user) {
-        const { current = 1, pageSize = 10, taskId } = params;
-        const [data, total] = await this.envRepository.findAndCount({
-            where: {
-                task: { id: taskId },
-                user: user,
-            },
-            take: pageSize,
-            skip: (current - 1) * pageSize,
-        });
+    async search(searchDto, user) {
+        const [data, total] = await this.envRepository.findAndCount(
+            searchOptions(searchDto, {
+                where: {
+                    user,
+                    task: { id: searchDto.params.taskId },
+                },
+            }),
+        );
         return new HttpResponse({
             data,
             total,
@@ -46,7 +45,12 @@ export class EnvService {
 
     async findOne(id: number, user) {
         const env = await this.envRepository.findOne({ where: { id, user } });
-        if (!env) return new HttpResponse({ showType: 1, success: false, message: '未找到ENV' });
+        if (!env)
+            return new HttpResponse({
+                showType: 1,
+                success: false,
+                message: '未找到ENV',
+            });
         return new HttpResponse({
             data: env,
         });
@@ -54,15 +58,27 @@ export class EnvService {
 
     async form(id: number, user) {
         const env = await this.envRepository.findOne({ where: { id, user } });
-        if (!env) return new HttpResponse({ showType: 1, success: false, message: '未找到ENV' });
+        if (!env)
+            return new HttpResponse({
+                showType: 1,
+                success: false,
+                message: '未找到ENV',
+            });
         const { processEnv, remark } = env;
         return { processEnv, remark };
     }
 
     async update(updateEnvDto: UpdateEnvDto, user) {
         const { id, processEnv, remark } = updateEnvDto;
-        const env = await this.envRepository.findOne({ where: { id: +id, user } });
-        if (!env) return new HttpResponse({ showType: 1, success: false, message: '未找到ENV' });
+        const env = await this.envRepository.findOne({
+            where: { id: +id, user },
+        });
+        if (!env)
+            return new HttpResponse({
+                showType: 1,
+                success: false,
+                message: '未找到ENV',
+            });
         env.remark = remark;
         env.processEnv = processEnv;
         await this.envRepository.save(env);
@@ -71,7 +87,12 @@ export class EnvService {
 
     async remove(id: number, user) {
         const env = await this.envRepository.findOne({ where: { id, user } });
-        if (!env) return new HttpResponse({ showType: 1, success: false, message: '未找到ENV' });
+        if (!env)
+            return new HttpResponse({
+                showType: 1,
+                success: false,
+                message: '未找到ENV',
+            });
         await this.envRepository.remove(env);
         return new HttpResponse({ showType: 1 });
     }

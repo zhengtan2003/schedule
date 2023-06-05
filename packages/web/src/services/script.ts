@@ -3,9 +3,9 @@
 import { request } from '@umijs/max';
 
 /** 获取 GET /api/script */
-export async function ScriptControllerFindOne(
+export async function ScriptControllerRetrieve(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.ScriptControllerFindOneParams,
+  params: API.ScriptControllerRetrieveParams,
   options?: { [key: string]: any },
 ) {
   return request<any>('/api/script', {
@@ -32,6 +32,21 @@ export async function ScriptControllerCreat(
   });
 }
 
+/** 删除 DELETE /api/script */
+export async function ScriptControllerRemove(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.ScriptControllerRemoveParams,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/script', {
+    method: 'DELETE',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
 /** 更新 PATCH /api/script */
 export async function ScriptControllerUpdate(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -52,28 +67,12 @@ export async function ScriptControllerUpdate(
   });
 }
 
-/** 删除 DELETE /api/script/${param0} */
-export async function ScriptControllerRemove(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.ScriptControllerRemoveParams,
+/** 列表 POST /api/script/search */
+export async function ScriptControllerSearch(
+  body: API.SearchDto,
   options?: { [key: string]: any },
 ) {
-  const { id: param0, ...queryParams } = params;
-  return request<any>(`/api/script/${param0}`, {
-    method: 'DELETE',
-    params: {
-      ...queryParams,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 列表 POST /api/script/list */
-export async function ScriptControllerList(
-  body: API.ListBodyDto,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/script/list', {
+  return request<any>('/api/script/search', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

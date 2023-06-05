@@ -1,6 +1,6 @@
 import {
   ScriptControllerCreat,
-  ScriptControllerFindOne,
+  ScriptControllerRetrieve,
   ScriptControllerUpdate,
 } from '@/services/script';
 import type { ProFormInstance } from '@ant-design/pro-components';
@@ -26,7 +26,7 @@ const initialValues = {
 const Upsert = () => {
   const params: any = useParams();
   const formRef = useRef<ProFormInstance>();
-  const { loading } = useRequest(() => ScriptControllerFindOne(params), {
+  const { loading } = useRequest(() => ScriptControllerRetrieve(params), {
     ready: !!params.id,
     onSuccess: (data) => formRef.current?.setFieldsValue(data),
   });

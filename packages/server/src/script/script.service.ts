@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateScriptDto } from './dto/update-script.dto';
 import { CreateScriptDto } from './dto/create-script.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { searchOptions } from '@/utils';
 
 @Injectable()
 export class ScriptService {
@@ -19,16 +20,13 @@ export class ScriptService {
         private httpService: HttpService,
     ) {}
 
-    repository() {
-        return this.scriptRepository;
-    }
-
     async creat(creatScriptDto: CreateScriptDto, user) {
-        const { name, language, remark, code } = creatScriptDto;
+        const { name, language, updateURL, remark, code } = creatScriptDto;
         const script = new Script();
         script.name = name;
         script.remark = remark;
         script.language = language;
+        script.updateURL = updateURL;
         script.user = user;
         script.filePath = path.join(
             __dirname,
@@ -59,36 +57,39 @@ export class ScriptService {
         return new HttpResponse({ showType: 1 });
     }
 
-    async list({ params }, { user }) {
-        const { current = 1, pageSize = 10 } = params;
-        const [data, total] = await this.scriptRepository.findAndCount({
-            where: {
-                user: { id: user.id },
-            },
-            take: pageSize,
-            skip: (current - 1) * pageSize,
-        });
+    async search(searchDto, user) {
+        const [data, total] = await this.scriptRepository.findAndCount(
+            searchOptions(searchDto, { where: { user } }),
+        );
         return new HttpResponse({
             data,
             total,
         });
     }
 
-    async findOne(id: number, user) {
-        const script = await this.scriptRepository.findOne({
-            where: { id, user },
-        });
-        if (!script) throw new NotFoundException();
-        const { filePath, createTime, updateTime, ...data } = script;
-        const code = fs.existsSync(filePath)
-            ? fs.readFileSync(filePath, 'utf8')
-            : '';
+    readFile(filePath: string) {
+        if (fs.existsSync(filePath)) return fs.readFileSync(filePath, 'utf8');
+    }
+
+    async retrieve(id, user) {
+        const script = await this.findOne({ where: { id, user } });
         return {
             data: {
-                ...data,
-                code,
+                name: script.name,
+                remark: script.remark,
+                language: script.language,
+                updateURL: script.updateURL,
+                code: this.readFile(script.filePath),
             },
         };
+    }
+
+    async findOne(options, skipException = false) {
+        const script = await this.scriptRepository.findOne(options);
+        if (!script && !skipException) {
+            throw new NotFoundException('未找到脚本');
+        }
+        return script;
     }
 
     async remove(id: number, user) {
@@ -127,10 +128,11 @@ export class ScriptService {
             };
             return this.creat(
                 {
-                    name: metadata.name ?? fileName,
-                    language: languageMap[fileExt] ?? 'javascript',
+                    updateURL,
                     code: data,
                     remark: metadata.remark,
+                    name: metadata.name ?? fileName,
+                    language: languageMap[fileExt] ?? 'javascript',
                 },
                 user,
             );

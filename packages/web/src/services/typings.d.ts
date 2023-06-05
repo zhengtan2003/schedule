@@ -6,8 +6,8 @@ declare namespace API {
   type CreateTaskDto = {};
 
   type CreateUserDto = {
-    /** 邮箱 */
-    email: string;
+    /** 用户名 */
+    username: string;
     /** 密码 */
     password: string;
   };
@@ -24,26 +24,26 @@ declare namespace API {
     id: string;
   };
 
-  type ListBodyDto = {};
-
   type LoginDto = {
     /** 邮箱 */
-    email: string;
+    username: string;
     /** 密码 */
     password: string;
-  };
-
-  type ScriptControllerFindOneParams = {
-    id: string;
   };
 
   type ScriptControllerRemoveParams = {
     id: string;
   };
 
+  type ScriptControllerRetrieveParams = {
+    id: string;
+  };
+
   type ScriptControllerUpdateParams = {
     id: string;
   };
+
+  type SearchDto = {};
 
   type SubscribeDto = {};
 
@@ -72,23 +72,4 @@ declare namespace API {
   type UpdateScriptDto = {};
 
   type UpdateTaskDto = {};
-
-  type UpdateUserDto = {
-    /** 邮箱 */
-    email?: string;
-    /** 密码 */
-    password?: string;
-  };
-
-  type UserControllerFindOneParams = {
-    id: string;
-  };
-
-  type UserControllerRemoveParams = {
-    id: string;
-  };
-
-  type UserControllerUpdateParams = {
-    id: string;
-  };
 }

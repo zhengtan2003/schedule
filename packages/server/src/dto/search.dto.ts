@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class ListBodyDto {
+export class SearchDto {
     @IsNotEmpty()
     params: {
         pageSize?: number;
