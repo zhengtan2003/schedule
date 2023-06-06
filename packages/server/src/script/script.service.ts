@@ -39,7 +39,7 @@ export class ScriptService {
         script.updateURL = updateURL;
         script.user = user;
         script.filePath = path.join(
-            'assets',
+            'data',
             'files',
             `${user.id}`,
             language,

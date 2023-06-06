@@ -15,7 +15,7 @@ services:
     image: zhengtan2003/schedule-server
     container_name: server
     volumes:
-      - assets:/app/server/assets
+      - data:/app/server/data
     environment:
       - PORT=3000
       - DATABASE_HOST=database
@@ -46,4 +46,4 @@ services:
 
 volumes:
   mysql:
-  assets:
+  data:

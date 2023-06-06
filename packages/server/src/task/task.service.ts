@@ -195,7 +195,7 @@ export class TaskService {
         env.user = user;
         env.task = { id: taskId };
         env.filePath = path.join(
-            'assets',
+            'data',
             'files',
             `${user.id}`,
             'envs',
