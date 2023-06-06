@@ -22,6 +22,7 @@
     "cron-parser": "4.8.1",
     "crypto-js": "4.1.1",
     "dayjs": "^1.11.7",
+    "dotenv": "^16.1.4",
     "swagger-ui-dist": "4.19.0"
   },
   "devDependencies": {

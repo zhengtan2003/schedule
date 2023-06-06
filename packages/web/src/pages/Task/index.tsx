@@ -1,6 +1,6 @@
-import { ActionButton, DeleteAction } from '@/components';
-import TaskLogDrawer from '@/pages/Task/components/TaskLogDrawer';
+import { ActionButton, DeleteButton } from '@/components';
 import {
+  TaskControllerDebug,
   TaskControllerRemove,
   TaskControllerSearch,
   TaskControllerStart,
@@ -13,7 +13,7 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import React, { useRef } from 'react';
-import { EnvDrawer, UpsertTask } from './components';
+import { Env, TaskLog, UpsertTask } from './components';
 
 export interface DataType {
   key: React.Key;
@@ -90,13 +90,18 @@ const Task: React.FC = () => {
       title: '操作',
       key: 'action',
       fixed: 'right',
-      width: '230px',
+      width: '280px',
       hideInSearch: true,
       render: (_: any, record: DataType) => {
         return (
           <>
-            <TaskLogDrawer taskId={record.id} taskName={record.name} />
-            <EnvDrawer taskId={record.id} taskName={record.name} />
+            <TaskLog taskId={record.id} taskName={record.name} />
+            <Env taskId={record.id} taskName={record.name} />
+            <ActionButton
+              request={() => TaskControllerDebug({ id: record.id })}
+            >
+              调试
+            </ActionButton>
             {record.status === 2 ? (
               <ActionButton
                 request={() => TaskControllerStop({ id: record.id })}
@@ -112,34 +117,22 @@ const Task: React.FC = () => {
                 开始
               </ActionButton>
             )}
-            <DeleteAction
-              record={record}
+            <DeleteButton
+              title={`确认删除【${record.name}】吗？`}
               onOk={async () => {
                 const { success } = await TaskControllerRemove({
                   id: record.id,
                 });
-                if (success) {
-                  actionRef.current?.reload();
-                }
+                if (success) actionRef.current?.reload();
               }}
-            />
+            >
+              删除
+            </DeleteButton>
           </>
         );
       },
     },
   ];
-  const toolBarRender = () => {
-    return [
-      <UpsertTask
-        key={'upsert'}
-        onSuccess={() => actionRef.current?.reload()}
-      />,
-      // <UploadButton key={'upload'}
-      //               onSuccess={() => {
-      //                   actionRef.current?.reload();
-      //               }} />,
-    ];
-  };
   return (
     <PageContainer>
       <ProTable
@@ -147,7 +140,12 @@ const Task: React.FC = () => {
         columns={columns}
         scroll={{ x: 1300 }}
         actionRef={actionRef}
-        toolBarRender={toolBarRender}
+        toolBarRender={() => [
+          <UpsertTask
+            key={'upsert'}
+            onSuccess={() => actionRef.current?.reload()}
+          />,
+        ]}
         request={(params, sort, filter) =>
           TaskControllerSearch({ params, filter, sort })
         }

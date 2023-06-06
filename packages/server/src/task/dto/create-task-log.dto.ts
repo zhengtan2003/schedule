@@ -5,4 +5,5 @@ export class CreateTaskLogDto {
     @IsNotEmpty()
     taskId: any;
     status: string;
+    type: string;
 }

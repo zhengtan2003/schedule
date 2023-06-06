@@ -2,24 +2,9 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
-/** 获取 GET /api/script */
-export async function ScriptControllerRetrieve(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.ScriptControllerRetrieveParams,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/script', {
-    method: 'GET',
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 创建 POST /api/script */
-export async function ScriptControllerCreat(
-  body: API.CreateScriptDto,
+/** 创建/更新 POST /api/script */
+export async function ScriptControllerUpsert(
+  body: API.UpsertScriptDto,
   options?: { [key: string]: any },
 ) {
   return request<any>('/api/script', {
@@ -47,22 +32,25 @@ export async function ScriptControllerRemove(
   });
 }
 
-/** 更新 PATCH /api/script */
-export async function ScriptControllerUpdate(
+/** 用于antd from组件 GET /api/script/antd/from */
+export async function ScriptControllerAntdFrom(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.ScriptControllerUpdateParams,
-  body: API.UpdateScriptDto,
+  params: API.ScriptControllerAntdFromParams,
   options?: { [key: string]: any },
 ) {
-  return request<any>('/api/script', {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  return request<any>('/api/script/antd/from', {
+    method: 'GET',
     params: {
       ...params,
     },
-    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 用于antd select组件 GET /api/script/antd/select */
+export async function ScriptControllerAntdSelect(options?: { [key: string]: any }) {
+  return request<any>('/api/script/antd/select', {
+    method: 'GET',
     ...(options || {}),
   });
 }
@@ -78,14 +66,6 @@ export async function ScriptControllerSearch(
       'Content-Type': 'application/json',
     },
     data: body,
-    ...(options || {}),
-  });
-}
-
-/** list-用于antd select GET /api/script/select */
-export async function ScriptControllerSelect(options?: { [key: string]: any }) {
-  return request<any>('/api/script/select', {
-    method: 'GET',
     ...(options || {}),
   });
 }

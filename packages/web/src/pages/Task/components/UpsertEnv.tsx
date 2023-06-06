@@ -1,69 +1,50 @@
 import {
-  EnvControllerCreate,
-  EnvControllerForm,
-  EnvControllerUpdate,
-} from '@/services/env';
-import { PlusOutlined } from '@ant-design/icons';
+  TaskControllerEnvAntdFrom,
+  TaskControllerUpsertEnv,
+} from '@/services/task';
 import {
   ModalForm,
   ProFormInstance,
   ProFormText,
 } from '@ant-design/pro-components';
 import Editor from '@monaco-editor/react';
-import { Button, Form } from 'antd';
+import { Form } from 'antd';
 import { useRef } from 'react';
 
 interface UpsertEnvProps {
-  envId?: string;
+  id?: string;
   taskId?: string;
+  title?: string;
   onSuccess: () => void;
+  trigger?: JSX.Element;
 }
 
 const UpsertEnv: React.FC<UpsertEnvProps> = (props) => {
-  const { envId, taskId } = props;
+  const { id, taskId, trigger, title } = props;
   const formRef = useRef<ProFormInstance>();
-  const trigger = !!envId ? (
-    <Button type={'link'} size={'small'}>
-      编辑
-    </Button>
-  ) : (
-    <Button type={'primary'}>
-      <PlusOutlined />
-      新建
-    </Button>
-  );
   return (
     <ModalForm
+      title={title}
       formRef={formRef}
       trigger={trigger}
-      title={envId ? '编辑' : '新建'}
+      params={{ id, taskId }}
       modalProps={{ destroyOnClose: true }}
-      request={!!envId ? () => EnvControllerForm({ id: envId }) : undefined}
+      request={TaskControllerEnvAntdFrom as any}
       onFinish={async (body) => {
-        const { success } = !!envId
-          ? await EnvControllerUpdate(body)
-          : await EnvControllerCreate(body);
+        const { success } = await TaskControllerUpsertEnv(body);
         if (success) props.onSuccess();
         return success;
       }}
     >
-      <ProFormText hidden name={'id'} initialValue={envId} />
+      <ProFormText hidden name={'id'} initialValue={id} />
       <ProFormText hidden name={'taskId'} initialValue={taskId} />
-      <Form.Item label={'env'} name={'processEnv'} rules={[{ required: true }]}>
+      <Form.Item label={'.env'} name={'code'} rules={[{ required: true }]}>
         <Editor
           height="50vh"
           theme={'vs-dark'}
-          language={'json'}
-          onValidate={(markers) => {
-            if (!markers.length) return;
-            const errorMessages = markers.map((marker) => marker.message);
-            formRef.current?.setFields([
-              { name: 'processEnv', errors: errorMessages },
-            ]);
-          }}
           options={{
             automaticLayout: true,
-            suggestOnTriggerCharacters: true, // 启用编辑提示
+            suggestOnTriggerCharacters: true,
           }}
         />
       </Form.Item>

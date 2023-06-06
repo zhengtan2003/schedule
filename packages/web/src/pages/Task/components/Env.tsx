@@ -1,11 +1,15 @@
 import { DeleteButton, ProDrawer } from '@/components';
-import { EnvControllerRemove, EnvControllerSearch } from '@/services/env';
+import {
+  TaskControllerEnvSearch,
+  TaskControllerRemoveEnv,
+} from '@/services/task';
+import { PlusOutlined } from '@ant-design/icons';
 import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
 import { Button } from 'antd';
 import React, { useRef } from 'react';
 import UpsertEnv from './UpsertEnv';
 
-interface EnvDrawerProps {
+interface EnvProps {
   taskId: string;
   taskName: string;
 }
@@ -18,7 +22,7 @@ interface DataType {
   createTime: string;
 }
 
-const EnvDrawer: React.FC<EnvDrawerProps> = (props) => {
+const Env: React.FC<EnvProps> = (props) => {
   const { taskId, taskName } = props;
   const actionRef = useRef<ActionType>();
   const columns: ProColumns<DataType>[] = [
@@ -56,13 +60,19 @@ const EnvDrawer: React.FC<EnvDrawerProps> = (props) => {
           <>
             <UpsertEnv
               taskId={taskId}
-              envId={record.id}
+              id={record.id}
+              title={'编辑'}
               onSuccess={() => actionRef.current?.reload()}
+              trigger={
+                <Button type={'link'} size={'small'}>
+                  编辑
+                </Button>
+              }
             />
             <DeleteButton
-              record={record}
+              title={`确定删除吗？`}
               onOk={() =>
-                EnvControllerRemove({ id: record.id }).then(() =>
+                TaskControllerRemoveEnv({ taskId, id: record.id }).then(() =>
                   actionRef.current?.reload(),
                 )
               }
@@ -72,17 +82,6 @@ const EnvDrawer: React.FC<EnvDrawerProps> = (props) => {
       },
     },
   ];
-  const toolBarRender = () => {
-    return [
-      <UpsertEnv
-        key={'upsert'}
-        taskId={taskId}
-        onSuccess={() => {
-          actionRef.current?.reload();
-        }}
-      />,
-    ];
-  };
   return (
     <ProDrawer
       size={'large'}
@@ -102,13 +101,26 @@ const EnvDrawer: React.FC<EnvDrawerProps> = (props) => {
         columns={columns}
         scroll={{ x: 1300 }}
         actionRef={actionRef}
-        toolBarRender={toolBarRender}
+        toolBarRender={() => [
+          <UpsertEnv
+            key={'upsert'}
+            taskId={taskId}
+            onSuccess={() => {
+              actionRef.current?.reload();
+            }}
+            trigger={
+              <Button type={'primary'} icon={<PlusOutlined />}>
+                新建
+              </Button>
+            }
+          />,
+        ]}
         request={(params, sort, filter) =>
-          EnvControllerSearch({ params, filter, sort })
+          TaskControllerEnvSearch({ params, filter, sort })
         }
       />
     </ProDrawer>
   );
 };
 
-export default EnvDrawer;
+export default Env;

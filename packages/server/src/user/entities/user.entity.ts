@@ -7,7 +7,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { Task } from '@/task/entities/task.entity';
-import { Env } from '@/env/entities/env.entity';
+import { TaskEnv } from '@/task/entities/task-env.entity';
 import { Script } from '@/script/entities/script.entity';
 
 @Entity()
@@ -18,8 +18,8 @@ export class User {
     password: string;
     @OneToMany(() => Task, (task) => task.user)
     task: Task[];
-    @OneToMany(() => Env, (env) => env.user)
-    env: Env[];
+    @OneToMany(() => TaskEnv, (taskEnv) => taskEnv.user)
+    env: TaskEnv[];
     @OneToMany(() => Script, (script) => script.user)
     script: Script[];
     @PrimaryGeneratedColumn()

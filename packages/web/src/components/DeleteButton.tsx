@@ -1,35 +1,37 @@
+import { ExclamationCircleFilled } from '@ant-design/icons';
+import { Button, Modal } from 'antd';
+import { ButtonProps } from 'antd/es/button';
+import { ModalFuncProps } from 'antd/es/modal';
 import React from 'react';
-import {Button, Modal} from "antd";
-import {ExclamationCircleFilled} from '@ant-design/icons'
 
-const {confirm} = Modal;
+const { confirm } = Modal;
 
 interface DeleteButtonProps {
-    record: any;
-    onOk?: (...args: any[]) => any;
-    onCancel?: (...args: any[]) => any;
+  type?: ButtonProps['type'];
+  size?: ButtonProps['size'];
+  children?: React.ReactNode;
+  title?: ModalFuncProps['title'];
+  onOk?: ModalFuncProps['onOk'];
+  onCancel?: ModalFuncProps['onCancel'];
 }
 
 const DeleteButton: React.FC<DeleteButtonProps> = (props) => {
-    const {record} = props;
-    const onClick = () => {
-        confirm({
-            title: `确定删除${record.name ? `【${record.name}】` : ''}吗？`,
-            icon: <ExclamationCircleFilled/>,
-            content: '删除后不可恢复',
-            okType: 'danger',
-            onOk: props.onOk,
-            onCancel: props.onCancel,
-        });
-    }
-    return (
-        <Button danger
-                type={"link"}
-                size={"small"}
-                onClick={onClick}>
-            删除
-        </Button>
-    );
+  const { title, children, type = 'link', size = 'small' } = props;
+  const onClick = () => {
+    confirm({
+      title,
+      okType: 'danger',
+      content: '删除后不可恢复',
+      onOk: props.onOk,
+      onCancel: props.onCancel,
+      icon: <ExclamationCircleFilled />,
+    });
+  };
+  return (
+    <Button danger type={type} size={size} onClick={onClick}>
+      {children}
+    </Button>
+  );
 };
 
 export default DeleteButton;

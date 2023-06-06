@@ -2,23 +2,8 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
-/** 此处后端没有提供注释 GET /api/task */
-export async function TaskControllerFindOne(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerFindOneParams,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task', {
-    method: 'GET',
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 创建 POST /api/task */
-export async function TaskControllerCreate(
+/** 创建/更新 POST /api/task */
+export async function TaskControllerUpsert(
   body: API.CreateTaskDto,
   options?: { [key: string]: any },
 ) {
@@ -47,22 +32,92 @@ export async function TaskControllerRemove(
   });
 }
 
-/** 更新 PATCH /api/task */
-export async function TaskControllerUpdate(
+/** 调试 GET /api/task/debug */
+export async function TaskControllerDebug(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerUpdateParams,
-  body: API.UpdateTaskDto,
+  params: API.TaskControllerDebugParams,
   options?: { [key: string]: any },
 ) {
-  return request<any>('/api/task', {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  return request<any>('/api/task/debug', {
+    method: 'GET',
     params: {
       ...params,
     },
+    ...(options || {}),
+  });
+}
+
+/** 创建env/更新env POST /api/task/env */
+export async function TaskControllerUpsertEnv(
+  body: API.UpsertTaskEnvDto,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/task/env', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     data: body,
+    ...(options || {}),
+  });
+}
+
+/** 删除env DELETE /api/task/env */
+export async function TaskControllerRemoveEnv(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.TaskControllerRemoveEnvParams,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/task/env', {
+    method: 'DELETE',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
+/** 用于antd from组件 GET /api/task/env/antd/from */
+export async function TaskControllerEnvAntdFrom(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.TaskControllerEnvAntdFromParams,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/task/env/antd/from', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
+/** env列表 POST /api/task/env/search */
+export async function TaskControllerEnvSearch(
+  body: API.SearchDto,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/task/env/search', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 此处后端没有提供注释 POST /api/task/log/remove/all */
+export async function TaskControllerRemoveAllLog(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.TaskControllerRemoveAllLogParams,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/task/log/remove/all', {
+    method: 'POST',
+    params: {
+      ...params,
+    },
     ...(options || {}),
   });
 }

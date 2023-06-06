@@ -1,9 +1,7 @@
 import {
-  ScriptControllerCreat,
-  ScriptControllerRetrieve,
-  ScriptControllerUpdate,
+  ScriptControllerAntdFrom,
+  ScriptControllerUpsert,
 } from '@/services/script';
-import type { ProFormInstance } from '@ant-design/pro-components';
 import {
   FooterToolbar,
   PageContainer,
@@ -15,38 +13,29 @@ import {
   ProFormTextArea,
 } from '@ant-design/pro-components';
 import Editor from '@monaco-editor/react';
-import { history, useParams, useRequest } from '@umijs/max';
+import { history, useParams } from '@umijs/max';
 import { Form } from 'antd';
-import { useRef } from 'react';
-
-const initialValues = {
-  language: 'javascript',
-};
 
 const Upsert = () => {
-  const params: any = useParams();
-  const formRef = useRef<ProFormInstance>();
-  const { loading } = useRequest(() => ScriptControllerRetrieve(params), {
-    ready: !!params.id,
-    onSuccess: (data) => formRef.current?.setFieldsValue(data),
-  });
+  const params = useParams();
   const onFinish = async (body: any) => {
-    const { success } = params.id
-      ? await ScriptControllerUpdate(params, body)
-      : await ScriptControllerCreat(body);
+    const { success } = await ScriptControllerUpsert(body);
     if (success) history.push('/script');
   };
   return (
     <PageContainer>
       <ProCard>
         <ProForm
-          formRef={formRef}
-          loading={loading}
-          submitter={{
-            render: (_, dom) => <FooterToolbar>{dom.reverse()}</FooterToolbar>,
-          }}
+          params={params}
           onFinish={onFinish}
-          initialValues={initialValues}
+          initialValues={{
+            id: params.id,
+            language: 'javascript',
+          }}
+          request={ScriptControllerAntdFrom as any}
+          submitter={{
+            render: (_, dom) => <FooterToolbar>{dom}</FooterToolbar>,
+          }}
         >
           <ProFormText hidden name={'id'} />
           <ProForm.Group>

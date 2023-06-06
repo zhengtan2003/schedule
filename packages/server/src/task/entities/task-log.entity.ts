@@ -1,5 +1,5 @@
 import { Task } from './task.entity';
-import { Env } from '@/env/entities/env.entity';
+import { TaskEnv } from '@/task/entities/task-env.entity';
 import {
     Entity,
     PrimaryGeneratedColumn,
@@ -16,10 +16,12 @@ export class TaskLog {
     log: string;
     @Column()
     status: string;
+    @Column()
+    type: string;
     @ManyToOne(() => Task, (task) => task.log)
     task: { id: any };
-    @OneToMany(() => Env, (env) => env.task)
-    env: Env;
+    @OneToMany(() => TaskEnv, (taskEnv) => taskEnv.task)
+    env: TaskEnv;
     @PrimaryGeneratedColumn()
     readonly id: number;
     @CreateDateColumn()

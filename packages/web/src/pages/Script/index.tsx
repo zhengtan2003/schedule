@@ -1,4 +1,4 @@
-import { DeleteAction } from '@/components';
+import { DeleteButton } from '@/components';
 import { DataType } from '@/pages/Task';
 import {
   ScriptControllerRemove,
@@ -85,14 +85,16 @@ const Script = () => {
         >
           编辑
         </Button>,
-        <DeleteAction
+        <DeleteButton
           key={'delete'}
-          record={record}
+          title={`确认删除【${record.name}】吗？`}
           onOk={async () => {
             const { success } = await ScriptControllerRemove({ id: record.id });
             if (success) actionRef.current?.reload();
           }}
-        />,
+        >
+          删除
+        </DeleteButton>,
       ],
     },
   ];

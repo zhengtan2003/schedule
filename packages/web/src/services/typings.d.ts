@@ -1,8 +1,4 @@
 declare namespace API {
-  type CreateEnvDto = {};
-
-  type CreateScriptDto = {};
-
   type CreateTaskDto = {};
 
   type CreateUserDto = {
@@ -12,18 +8,6 @@ declare namespace API {
     password: string;
   };
 
-  type EnvControllerFindOneParams = {
-    id: string;
-  };
-
-  type EnvControllerFormParams = {
-    id: string;
-  };
-
-  type EnvControllerRemoveParams = {
-    id: string;
-  };
-
   type LoginDto = {
     /** 邮箱 */
     username: string;
@@ -31,15 +15,11 @@ declare namespace API {
     password: string;
   };
 
+  type ScriptControllerAntdFromParams = {
+    id: string;
+  };
+
   type ScriptControllerRemoveParams = {
-    id: string;
-  };
-
-  type ScriptControllerRetrieveParams = {
-    id: string;
-  };
-
-  type ScriptControllerUpdateParams = {
     id: string;
   };
 
@@ -47,8 +27,22 @@ declare namespace API {
 
   type SubscribeDto = {};
 
-  type TaskControllerFindOneParams = {
+  type TaskControllerDebugParams = {
     id: string;
+  };
+
+  type TaskControllerEnvAntdFromParams = {
+    id: string;
+    taskId: string;
+  };
+
+  type TaskControllerRemoveAllLogParams = {
+    taskId: string;
+  };
+
+  type TaskControllerRemoveEnvParams = {
+    id: string;
+    taskId: string;
   };
 
   type TaskControllerRemoveParams = {
@@ -63,13 +57,7 @@ declare namespace API {
     id: string;
   };
 
-  type TaskControllerUpdateParams = {
-    id: string;
-  };
+  type UpsertScriptDto = {};
 
-  type UpdateEnvDto = {};
-
-  type UpdateScriptDto = {};
-
-  type UpdateTaskDto = {};
+  type UpsertTaskEnvDto = {};
 }

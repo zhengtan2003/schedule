@@ -6,19 +6,19 @@ import {
     Column,
     ManyToOne,
 } from 'typeorm';
+import { Task } from './task.entity';
 import { User } from '@/user/entities/user.entity';
-import { Task } from '@/task/entities/task.entity';
 
 @Entity()
-export class Env {
+export class TaskEnv {
     @Column()
-    processEnv: string;
+    filePath: string;
     @Column({ nullable: true })
     remark: string;
     @ManyToOne(() => Task, (Task) => Task.env)
     task: { id: any };
     @ManyToOne(() => User, (User) => User.env)
-    user: User;
+    user: { id: any };
     @PrimaryGeneratedColumn()
     readonly id: number;
     @CreateDateColumn()

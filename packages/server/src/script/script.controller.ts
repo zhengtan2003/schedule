@@ -1,19 +1,9 @@
 import { SearchDto } from '@/dto/search.dto';
 import { ScriptService } from './script.service';
 import { User } from '@/decorators/user.decorator';
-import { UpdateScriptDto } from './dto/update-script.dto';
-import { CreateScriptDto } from './dto/create-script.dto';
-import { SubscribeDto } from '@/script/dto/subscribe.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-    Controller,
-    Get,
-    Post,
-    Body,
-    Patch,
-    Delete,
-    Query,
-} from '@nestjs/common';
+import { UpsertScriptDto, SubscribeDto } from '@/script/dto/script.dto';
+import { Controller, Get, Post, Body, Delete, Query } from '@nestjs/common';
 
 @ApiBearerAuth()
 @ApiTags('script')
@@ -21,20 +11,12 @@ import {
 export class ScriptController {
     constructor(private readonly scriptService: ScriptService) {}
 
-    @ApiOperation({ summary: '创建' })
+    @ApiOperation({ summary: '创建/更新' })
     @Post()
-    creat(@Body() creatScriptDto: CreateScriptDto, @User() user) {
-        return this.scriptService.creat(creatScriptDto, user);
-    }
-
-    @ApiOperation({ summary: '更新' })
-    @Patch()
-    update(
-        @Query('id') id: string,
-        @Body() updateScriptDto: UpdateScriptDto,
-        @User() user,
-    ) {
-        return this.scriptService.update(+id, updateScriptDto, user);
+    upsert(@Body() upsertScriptDto: UpsertScriptDto, @User() user) {
+        if (upsertScriptDto.id)
+            return this.scriptService.update(upsertScriptDto, user);
+        return this.scriptService.creat(upsertScriptDto, user);
     }
 
     @ApiOperation({ summary: '列表' })
@@ -42,19 +24,6 @@ export class ScriptController {
     search(@Body() searchDto: SearchDto, @User() user) {
         return this.scriptService.search(searchDto, user);
     }
-
-    @ApiOperation({ summary: '获取' })
-    @Get()
-    retrieve(@Query('id') id: string, @User() user) {
-        return this.scriptService.retrieve(+id, user);
-    }
-
-    @ApiOperation({ summary: 'list-用于antd select' })
-    @Get('select')
-    select(@User() user) {
-        return this.scriptService.select(user);
-    }
-
     @ApiOperation({ summary: '删除' })
     @Delete()
     remove(@Query('id') id: string, @User() user) {
@@ -65,5 +34,16 @@ export class ScriptController {
     @Post('subscribe')
     subscribe(@Body() subscribeDto: SubscribeDto, @User() user) {
         return this.scriptService.subscribe(subscribeDto, user);
+    }
+
+    @ApiOperation({ summary: '用于antd from组件' })
+    @Get('antd/from')
+    antdFrom(@Query('id') id: string, @User() user) {
+        return this.scriptService.antdFrom(id, user);
+    }
+    @ApiOperation({ summary: '用于antd select组件' })
+    @Get('antd/select')
+    antdSelect(@User() user) {
+        return this.scriptService.antdSelect(user);
     }
 }

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
-import { EnvModule } from './env/env.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
@@ -26,7 +25,6 @@ import { ScriptModule } from './script/script.module';
         }),
         UserModule,
         AuthModule,
-        EnvModule,
         TaskModule,
         ScriptModule,
         ScheduleModule.forRoot(),

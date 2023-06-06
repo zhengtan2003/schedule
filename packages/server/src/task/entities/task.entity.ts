@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '@/user/entities/user.entity';
 import { Script } from '@/script/entities/script.entity';
-import { Env } from '@/env/entities/env.entity';
+import { TaskEnv } from '@/task/entities/task-env.entity';
 import { TaskLog } from './task-log.entity';
 
 @Entity()
@@ -28,10 +28,10 @@ export class Task {
     cronName: string;
     @ManyToOne(() => Script, (script) => script.task)
     script: { id: string };
-    @OneToMany(() => TaskLog, (TaskLog) => TaskLog.task)
-    log: { id: any };
-    @OneToMany(() => Env, (env) => env.task)
-    env: Env;
+    @OneToMany(() => TaskLog, (taskLog) => taskLog.task)
+    log: TaskLog[];
+    @OneToMany(() => TaskEnv, (taskEnv) => taskEnv.task)
+    env: TaskEnv[];
     @ManyToOne(() => User, (user) => user.task)
     user: User;
     @PrimaryGeneratedColumn()
@@ -41,5 +41,3 @@ export class Task {
     @UpdateDateColumn()
     readonly updateTime: Date;
 }
-
-

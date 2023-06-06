@@ -1,8 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class CreateEnvDto {
+export class UpsertTaskEnvDto {
+    id: string;
     @IsNotEmpty()
-    processEnv: string;
+    code: string;
     @IsNotEmpty()
     taskId: string;
     remark: string;
