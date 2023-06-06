@@ -39,11 +39,12 @@ export class ScriptService {
         script.updateURL = updateURL;
         script.user = user;
         script.filePath = path.join(
-            __dirname,
+            'assets',
             'files',
             `${user.id}`,
             language,
-            `${Date.now()}.${fileSuffixMap[language]}`,
+            `${Date.now()}`,
+            `index.${fileSuffixMap[language]}`,
         );
         writeFileSync(script.filePath, code);
         await this.scriptRepository.save(script);

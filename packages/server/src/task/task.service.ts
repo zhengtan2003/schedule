@@ -10,12 +10,10 @@ import { TaskLog } from './entities/task-log.entity';
 import { TaskEnv } from './entities/task-env.entity';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateTaskLogDto } from './dto/create-task-log.dto';
 import { ScriptService } from '@/script/script.service';
 import { searchOptions, unlinkSync, writeFileSync } from '@/utils';
 import * as path from 'path';
-import { fileSuffixMap } from '@/script/constants';
 import { readFileSync } from '@/utils/read-file-sync';
 import * as dotenv from 'dotenv';
 
@@ -197,9 +195,11 @@ export class TaskService {
         env.user = user;
         env.task = { id: taskId };
         env.filePath = path.join(
-            __dirname,
+            'assets',
             'files',
-            `${user.id}_${taskId}_${Date.now()}`,
+            `${user.id}`,
+            'envs',
+            `${Date.now()}`,
             `.env`,
         );
         writeFileSync(env.filePath, code);

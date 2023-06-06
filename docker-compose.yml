@@ -15,7 +15,7 @@ services:
     image: zhengtan2003/schedule-server
     container_name: server
     volumes:
-      - script:/app/server/dist/script/files
+      - assets:/app/server/assets
     environment:
       - PORT=3000
       - DATABASE_HOST=database
@@ -46,9 +46,4 @@ services:
 
 volumes:
   mysql:
-  script:
-    driver: local
-    driver_opts:
-      type: none
-      device: /app/server/dist/script/files
-      o: bind
+  assets:
