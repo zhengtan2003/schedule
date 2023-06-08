@@ -1,19 +1,20 @@
 import { ActionButton, DeleteButton } from '@/components';
 import {
-  TaskControllerDebug,
   TaskControllerRemove,
   TaskControllerSearch,
   TaskControllerStart,
   TaskControllerStop,
 } from '@/services/task';
+import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType } from '@ant-design/pro-components';
 import {
   PageContainer,
   ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
+import { Button } from 'antd';
 import React, { useRef } from 'react';
-import { Env, TaskLog, UpsertTask } from './components';
+import { ActionDropdown, UpsertTask } from './components';
 
 export interface DataType {
   key: React.Key;
@@ -55,27 +56,20 @@ const Task: React.FC = () => {
       dataIndex: 'cronTime',
       hideInSearch: true,
     },
-    {
-      title: '下次执行时间',
-      width: '170px',
-      dataIndex: 'nextExecutionTime',
-      valueType: 'dateTime',
-      hideInSearch: true,
-    },
-    {
-      title: '任务开始时间',
-      width: '170px',
-      dataIndex: 'startTime',
-      valueType: 'date',
-      hideInSearch: true,
-    },
-    {
-      title: '任务结束时间',
-      width: '170px',
-      dataIndex: 'endTime',
-      valueType: 'date',
-      hideInSearch: true,
-    },
+    // {
+    //   title: '任务开始时间',
+    //   width: '170px',
+    //   dataIndex: 'startTime',
+    //   valueType: 'date',
+    //   hideInSearch: true,
+    // },
+    // {
+    //   title: '任务结束时间',
+    //   width: '170px',
+    //   dataIndex: 'endTime',
+    //   valueType: 'date',
+    //   hideInSearch: true,
+    // },
     {
       title: '更新时间',
       width: '170px',
@@ -97,18 +91,10 @@ const Task: React.FC = () => {
       title: '操作',
       key: 'action',
       fixed: 'right',
-      width: '280px',
       hideInSearch: true,
       render: (_: any, record: DataType) => {
         return (
           <>
-            <TaskLog taskId={record.id} taskName={record.name} />
-            <Env taskId={record.id} taskName={record.name} />
-            <ActionButton
-              request={() => TaskControllerDebug({ id: record.id })}
-            >
-              调试
-            </ActionButton>
             {record.status === 2 ? (
               <ActionButton
                 request={() => TaskControllerStop({ id: record.id })}
@@ -124,6 +110,15 @@ const Task: React.FC = () => {
                 开始
               </ActionButton>
             )}
+            <UpsertTask
+              id={record.id}
+              trigger={
+                <Button type={'link'} size={'small'}>
+                  编辑
+                </Button>
+              }
+              onSuccess={() => actionRef.current?.reload()}
+            />
             <DeleteButton
               title={`确认删除【${record.name}】吗？`}
               onOk={async () => {
@@ -135,6 +130,7 @@ const Task: React.FC = () => {
             >
               删除
             </DeleteButton>
+            <ActionDropdown taskId={record.id} taskName={record.name} />
           </>
         );
       },
@@ -150,6 +146,12 @@ const Task: React.FC = () => {
         toolBarRender={() => [
           <UpsertTask
             key={'upsert'}
+            trigger={
+              <Button type="primary">
+                <PlusOutlined />
+                新建
+              </Button>
+            }
             onSuccess={() => actionRef.current?.reload()}
           />,
         ]}

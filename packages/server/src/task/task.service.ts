@@ -1,10 +1,8 @@
-import * as path from 'path';
 import { CronJob } from 'cron';
 import * as dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 import { spawn } from 'child_process';
-import parser from 'cron-parser';
 import { Task } from '@/task/entities/task.entity';
 import { HttpResponse } from '@/http-response';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,12 +12,7 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { UpsertTaskDto } from './dto/task.dto';
 import { CreateTaskLogDto } from './dto/create-task-log.dto';
 import { ScriptService } from '@/script/script.service';
-import {
-    searchOptions,
-    unlinkSync,
-    writeFileSync,
-    readFileSync,
-} from '@/utils';
+import { searchOptions } from '@/utils';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
@@ -165,6 +158,18 @@ export class TaskService {
         return new HttpResponse({ showType: 1 });
     }
 
+    async retrieve(id: number, user) {
+        const task = await this.findOneTask({
+            where: { id, user },
+            relations: ['script'],
+        });
+        return {
+            name: task.name,
+            cronTime: task.cronTime,
+            scriptId: task.script.id,
+        };
+    }
+
     //env
     async findOneEnv(options, skipException = false) {
         const taskEnv = await this.taskEnvRepository.findOne(options);
@@ -262,21 +267,5 @@ export class TaskService {
         });
         await this.taskLogRepository.remove(task.log);
         return new HttpResponse();
-    }
-
-    async schemaForm(taskId, user) {
-        const task = await this.findOneTask({
-            where: { id: taskId, user },
-            relations: ['script'],
-        });
-        const { columns } = JSON.parse(task.script?.schemaForm);
-        return {
-            columns: JSON.parse(columns),
-        };
-        // try {
-        //
-        // } catch (e) {
-        //     return {};
-        // }
     }
 }

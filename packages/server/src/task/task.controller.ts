@@ -1,12 +1,4 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Body,
-    Patch,
-    Query,
-    Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Delete } from '@nestjs/common';
 import { TaskService } from '@/task/task.service';
 import { UpsertTaskDto } from '@/task/dto/task.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -56,7 +48,11 @@ export class TaskController {
     debug(@Query('id') id: string, @User() user) {
         return this.taskService.debug(+id, user);
     }
-
+    @ApiOperation({ summary: '' })
+    @Get()
+    retrieve(@Query('id') id: string, @User() user) {
+        return this.taskService.retrieve(+id, user);
+    }
     //env
     @ApiOperation({ summary: '创建env/更新env' })
     @Post('env')

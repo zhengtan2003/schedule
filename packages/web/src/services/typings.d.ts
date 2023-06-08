@@ -1,6 +1,4 @@
 declare namespace API {
-  type CreateSchemaDto = {};
-
   type CreateUserDto = {
     /** 用户名 */
     username: string;
@@ -13,18 +11,6 @@ declare namespace API {
     username: string;
     /** 密码 */
     password: string;
-  };
-
-  type SchemaControllerFindOneParams = {
-    id: string;
-  };
-
-  type SchemaControllerRemoveParams = {
-    id: string;
-  };
-
-  type SchemaControllerUpdateParams = {
-    id: string;
   };
 
   type ScriptControllerRemoveParams = {
@@ -59,6 +45,10 @@ declare namespace API {
     id: string;
   };
 
+  type TaskControllerRetrieveParams = {
+    id: string;
+  };
+
   type TaskControllerStartParams = {
     id: string;
   };
@@ -66,8 +56,6 @@ declare namespace API {
   type TaskControllerStopParams = {
     id: string;
   };
-
-  type UpdateSchemaDto = {};
 
   type UpsertScriptDto = {};
 

@@ -2,6 +2,21 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
+/** 此处后端没有提供注释 GET /api/task */
+export async function TaskControllerRetrieve(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.TaskControllerRetrieveParams,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/task', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
 /** 创建/更新 POST /api/task */
 export async function TaskControllerUpsert(
   body: API.UpsertTaskDto,

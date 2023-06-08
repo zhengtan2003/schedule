@@ -35,8 +35,8 @@ export class UserService {
         return user;
     }
 
-    async findAll() {
-        const users = await this.userRepository.find();
+    async find(options) {
+        const users = await this.userRepository.find(options);
         return users ?? [];
     }
 }

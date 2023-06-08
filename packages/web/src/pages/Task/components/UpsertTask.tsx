@@ -1,29 +1,58 @@
 import { ScriptControllerEnum } from '@/services/script';
-import { TaskControllerUpsert } from '@/services/task';
-import { PlusOutlined } from '@ant-design/icons';
+import { TaskControllerRetrieve, TaskControllerUpsert } from '@/services/task';
 import {
   DrawerForm,
-  ProFormDateRangePicker,
   ProFormSelect,
   ProFormText,
 } from '@ant-design/pro-components';
-import { Button } from 'antd';
+import { Form } from 'antd';
+import CronParser from 'cron-parser';
+import dayjs from 'dayjs';
+import { isEmpty } from 'lodash';
 
 interface UpsertTaskProps {
+  id?: string;
+  trigger?: JSX.Element;
   onSuccess: () => void;
 }
 
+const dateFormat = (date: Date) => dayjs(date).format('YYYY-MM-DD HH:mm:ss');
 const UpsertTask: React.FC<UpsertTaskProps> = (props) => {
+  const { trigger, id } = props;
+  const [form] = Form.useForm<{ name: string; age: number }>();
+  const cronTimeValue = Form.useWatch('cronTime', form);
+  const CronTimeExtra = () => {
+    if (isEmpty(cronTimeValue)) return null;
+    try {
+      const interval = CronParser.parseExpression(cronTimeValue);
+      return (
+        <div>
+          <div>接下来7次的执行时间：</div>
+          <div>{dateFormat(interval.next().toDate())}</div>
+          <div>{dateFormat(interval.next().toDate())}</div>
+          <div>{dateFormat(interval.next().toDate())}</div>
+          <div>{dateFormat(interval.next().toDate())}</div>
+          <div>{dateFormat(interval.next().toDate())}</div>
+          <div>{dateFormat(interval.next().toDate())}</div>
+          <div>{dateFormat(interval.next().toDate())}</div>
+        </div>
+      );
+    } catch (error) {
+      return null;
+    }
+  };
   return (
     <DrawerForm
-      title={'新建任务'}
+      form={form}
+      title={id ? '编辑任务' : '新建任务'}
       width={'400px'}
-      trigger={
-        <Button type="primary">
-          <PlusOutlined />
-          新建
-        </Button>
-      }
+      params={{ id }}
+      request={TaskControllerRetrieve as any}
+      trigger={trigger}
+      initialValues={{
+        scriptId: id,
+        cronTime: '0 7 * * *',
+      }}
       drawerProps={{ destroyOnClose: true }}
       onFinish={async (body) => {
         const { success } = await TaskControllerUpsert(body);
@@ -34,16 +63,36 @@ const UpsertTask: React.FC<UpsertTaskProps> = (props) => {
       <ProFormSelect
         label={'脚本'}
         name={'scriptId'}
+        fieldProps={{
+          disabled: !!id,
+        }}
         rules={[{ required: true }]}
         request={ScriptControllerEnum}
       />
       <ProFormText name={'name'} label={'任务名称'} />
-      <ProFormText name={'cronTime'} label={'执行频率'} />
-      <ProFormDateRangePicker
-        label={'生效时间'}
-        width={'100%' as any}
-        name={'effectiveDateRange'}
-        tooltip={'不填无限执行，永不停止'}
+      {/*<ProFormDateRangePicker*/}
+      {/*  label={'生效时间'}*/}
+      {/*  width={'100%' as any}*/}
+      {/*  name={'effectiveDateRange'}*/}
+      {/*  tooltip={'不填无限执行，永不停止'}*/}
+      {/*/>*/}
+      <ProFormText
+        label={'执行频率'}
+        name={'cronTime'}
+        extra={<CronTimeExtra />}
+        rules={[
+          { required: true },
+          {
+            validator: (_, value) => {
+              try {
+                CronParser.parseExpression(value);
+                return Promise.resolve();
+              } catch (error) {
+                return Promise.reject('Cron 表达式无效');
+              }
+            },
+          },
+        ]}
       />
     </DrawerForm>
   );
