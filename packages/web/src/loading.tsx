@@ -1,4 +1,4 @@
-import { Player } from '@lottiefiles/react-lottie-player';
+import AtomicSpinner from 'atomic-spinner';
 
 const Loading = () => {
   return (
@@ -9,12 +9,7 @@ const Loading = () => {
       }}
       className={'flex justify-center items-center'}
     >
-      <Player
-        loop
-        autoplay
-        src="/lottie.json"
-        style={{ height: '300px', width: '300px' }}
-      />
+      <AtomicSpinner />
     </div>
   );
 };
