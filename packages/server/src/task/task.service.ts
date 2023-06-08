@@ -159,6 +159,7 @@ export class TaskService {
     }
 
     async retrieve(id: number, user) {
+        if (!id) return {};
         const task = await this.findOneTask({
             where: { id, user },
             relations: ['script'],
