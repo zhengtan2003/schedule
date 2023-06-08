@@ -15,8 +15,8 @@ export class TaskLog {
     @Column('longtext')
     log: string;
     @Column()
-    status: string;
-    @Column()
+    status: number;
+    @Column({ nullable: true })
     type: string;
     @ManyToOne(() => Task, (task) => task.log)
     task: { id: any };

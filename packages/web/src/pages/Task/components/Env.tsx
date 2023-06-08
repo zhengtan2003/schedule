@@ -9,11 +9,6 @@ import { Button } from 'antd';
 import React, { useRef } from 'react';
 import UpsertEnv from './UpsertEnv';
 
-interface EnvProps {
-  taskId: string;
-  taskName: string;
-}
-
 interface DataType {
   key: React.Key;
   id: string;
@@ -22,19 +17,25 @@ interface DataType {
   createTime: string;
 }
 
+interface EnvProps {
+  taskId: string;
+  taskName: string;
+}
+
 const Env: React.FC<EnvProps> = (props) => {
   const { taskId, taskName } = props;
   const actionRef = useRef<ActionType>();
   const columns: ProColumns<DataType>[] = [
     {
       title: 'env',
-      dataIndex: 'processEnv',
+      dataIndex: 'code',
       width: '260px',
+      valueType: 'code',
       ellipsis: true,
     },
     {
-      title: '备注',
-      dataIndex: 'remark',
+      title: '描述',
+      dataIndex: 'description',
     },
     {
       title: '更新时间',
@@ -76,7 +77,9 @@ const Env: React.FC<EnvProps> = (props) => {
                   actionRef.current?.reload(),
                 )
               }
-            />
+            >
+              删除
+            </DeleteButton>
           </>
         );
       },
@@ -86,7 +89,7 @@ const Env: React.FC<EnvProps> = (props) => {
     <ProDrawer
       size={'large'}
       destroyOnClose
-      title={taskName}
+      title={`${taskName}-ENV`}
       trigger={
         <Button type={'link'} size={'small'}>
           配置ENV
@@ -105,6 +108,7 @@ const Env: React.FC<EnvProps> = (props) => {
           <UpsertEnv
             key={'upsert'}
             taskId={taskId}
+            title={'新建'}
             onSuccess={() => {
               actionRef.current?.reload();
             }}

@@ -1,5 +1,5 @@
 import {
-  ScriptControllerAntdFrom,
+  ScriptControllerRetrieve,
   ScriptControllerUpsert,
 } from '@/services/script';
 import {
@@ -10,7 +10,6 @@ import {
   ProFormDependency,
   ProFormSelect,
   ProFormText,
-  ProFormTextArea,
 } from '@ant-design/pro-components';
 import Editor from '@monaco-editor/react';
 import { history, useParams } from '@umijs/max';
@@ -32,37 +31,20 @@ const Upsert = () => {
             id: params.id,
             language: 'javascript',
           }}
-          request={ScriptControllerAntdFrom as any}
+          request={ScriptControllerRetrieve as any}
           submitter={{
             render: (_, dom) => <FooterToolbar>{dom}</FooterToolbar>,
           }}
         >
           <ProFormText hidden name={'id'} />
-          <ProForm.Group>
-            <ProFormText
-              width={'sm'}
-              name={'name'}
-              label={'脚本名称'}
-              rules={[{ required: true }]}
-            />
-            <ProFormText
-              width={'sm'}
-              name={'updateURL'}
-              label={'订阅更新地址'}
-              rules={[
-                { required: false },
-                { type: 'url', message: '请输入有效的 URL' },
-              ]}
-            />
-            <ProFormSelect
-              disabled
-              width={'sm'}
-              name={'language'}
-              label={'language'}
-              tooltip={'暂时只支持javascript，后续开放python、typescript、ruby'}
-              options={['javascript', 'python', 'typescript', 'ruby']}
-            />
-          </ProForm.Group>
+          <ProFormSelect
+            disabled
+            width={'sm'}
+            name={'language'}
+            label={'language'}
+            tooltip={'暂时只支持javascript，后续开放python、typescript、ruby'}
+            options={['javascript', 'python', 'typescript', 'ruby']}
+          />
           <ProFormDependency name={['language']}>
             {({ language }) => {
               return (
@@ -72,7 +54,7 @@ const Upsert = () => {
                   rules={[{ required: true }]}
                 >
                   <Editor
-                    height="50vh"
+                    height="60vh"
                     theme={'vs-dark'}
                     language={language}
                     options={{
@@ -84,7 +66,6 @@ const Upsert = () => {
               );
             }}
           </ProFormDependency>
-          <ProFormTextArea label={'备注'} name={'remark'} />
         </ProForm>
       </ProCard>
     </PageContainer>

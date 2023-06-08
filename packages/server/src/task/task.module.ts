@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TaskService } from './task.service';
-import { Task } from './entities/task.entity';
+import { TaskService } from '@/task/task.service';
+import { Task } from '@/task/entities/task.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TaskController } from './task.controller';
-import { TaskEnv } from './entities/task-env.entity';
-import { TaskLog } from './entities/task-log.entity';
+import { TaskController } from '@/task/task.controller';
+import { TaskEnv } from '@/task/entities/task-env.entity';
+import { TaskLog } from '@/task/entities/task-log.entity';
 import { ScriptModule } from '@/script/script.module';
 
 @Module({

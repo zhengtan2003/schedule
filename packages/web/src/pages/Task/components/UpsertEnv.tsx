@@ -1,9 +1,9 @@
 import {
-  TaskControllerEnvAntdFrom,
+  TaskControllerEnvRetrieve,
   TaskControllerUpsertEnv,
 } from '@/services/task';
 import {
-  ModalForm,
+  DrawerForm,
   ProFormInstance,
   ProFormText,
 } from '@ant-design/pro-components';
@@ -23,13 +23,13 @@ const UpsertEnv: React.FC<UpsertEnvProps> = (props) => {
   const { id, taskId, trigger, title } = props;
   const formRef = useRef<ProFormInstance>();
   return (
-    <ModalForm
+    <DrawerForm
       title={title}
       formRef={formRef}
       trigger={trigger}
       params={{ id, taskId }}
-      modalProps={{ destroyOnClose: true }}
-      request={TaskControllerEnvAntdFrom as any}
+      drawerProps={{ destroyOnClose: true }}
+      request={TaskControllerEnvRetrieve as any}
       onFinish={async (body) => {
         const { success } = await TaskControllerUpsertEnv(body);
         if (success) props.onSuccess();
@@ -49,7 +49,7 @@ const UpsertEnv: React.FC<UpsertEnvProps> = (props) => {
         />
       </Form.Item>
       <ProFormText label="备注" name="remark" />
-    </ModalForm>
+    </DrawerForm>
   );
 };
 export default UpsertEnv;

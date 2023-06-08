@@ -12,18 +12,20 @@ import {
 
 @Entity()
 export class Script {
-    @Column()
+    @Column({ nullable: true })
     name: string;
-    @Column()
+    @Column({ default: 'javascript' })
     language: string;
     @Column()
     filePath: string;
     @Column({ nullable: true })
-    remark: string;
+    description: string;
     @Column({ nullable: true })
     updateURL: string;
+    @Column({ nullable: true })
+    version: string;
     @OneToMany(() => Task, (task) => task.script)
-    task: { id: any };
+    task: any;
     @ManyToOne(() => User, (user) => user.script)
     user: User;
     @PrimaryGeneratedColumn()

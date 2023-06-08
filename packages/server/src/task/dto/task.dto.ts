@@ -1,8 +1,9 @@
-import { IsNotEmpty, IsString, IsOptional, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsDateString } from 'class-validator';
 
-export class CreateTaskDto {
-    @IsString()
-    @IsNotEmpty()
+export class UpsertTaskDto {
+    @IsOptional()
+    id?: string;
+    @IsOptional()
     name: string;
     @IsDateString()
     @IsOptional()

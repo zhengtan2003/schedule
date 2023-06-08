@@ -11,14 +11,14 @@ import { User } from '@/user/entities/user.entity';
 
 @Entity()
 export class TaskEnv {
-    @Column()
-    filePath: string;
+    @Column('longtext')
+    code: string;
     @Column({ nullable: true })
-    remark: string;
+    description: string;
     @ManyToOne(() => Task, (Task) => Task.env)
-    task: { id: any };
+    task: Task;
     @ManyToOne(() => User, (User) => User.env)
-    user: { id: any };
+    user: User;
     @PrimaryGeneratedColumn()
     readonly id: number;
     @CreateDateColumn()

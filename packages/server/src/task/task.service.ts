@@ -1,21 +1,26 @@
+import * as path from 'path';
 import { CronJob } from 'cron';
+import * as dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 import { spawn } from 'child_process';
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Task } from './entities/task.entity';
+import parser from 'cron-parser';
+import { Task } from '@/task/entities/task.entity';
 import { HttpResponse } from '@/http-response';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TaskLog } from './entities/task-log.entity';
-import { TaskEnv } from './entities/task-env.entity';
+import { TaskLog } from '@/task/entities/task-log.entity';
+import { TaskEnv } from '@/task/entities/task-env.entity';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { CreateTaskDto } from './dto/create-task.dto';
+import { UpsertTaskDto } from './dto/task.dto';
 import { CreateTaskLogDto } from './dto/create-task-log.dto';
 import { ScriptService } from '@/script/script.service';
-import { searchOptions, unlinkSync, writeFileSync } from '@/utils';
-import * as path from 'path';
-import { readFileSync } from '@/utils/read-file-sync';
-import * as dotenv from 'dotenv';
+import {
+    searchOptions,
+    unlinkSync,
+    writeFileSync,
+    readFileSync,
+} from '@/utils';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class TaskService {
@@ -38,13 +43,17 @@ export class TaskService {
         return task;
     }
 
-    async create(createTaskDto: CreateTaskDto, user) {
-        const { name, startTime, endTime, cronTime, scriptId } = createTaskDto;
-        const task = new Task();
-        task.name = name;
-        task.endTime = endTime;
+    async upsert(upsertTaskDto: UpsertTaskDto, user) {
+        const { id, scriptId, cronTime = '0 7 * * *' } = upsertTaskDto;
+        const task = !id
+            ? new Task()
+            : await this.findOneTask({
+                  where: { id, user },
+              });
         task.cronTime = cronTime;
-        task.startTime = startTime;
+        task.name = upsertTaskDto.name;
+        // task.endTime = upsertTaskDto.endTime;
+        // task.startTime = upsertTaskDto.startTime;
         task.user = user;
         task.script = { id: scriptId };
         await this.taskRepository.save(task);
@@ -66,22 +75,11 @@ export class TaskService {
     async start(id: number, user) {
         const cronName = uuidv4();
         const task = await this.findOneTask({
-            relations: ['env'],
             where: { id, user },
         });
-        const envs = task.env;
-        if (!envs.length) {
-            return new HttpResponse({
-                showType: 2,
-                success: false,
-                message: '请添加.env后再开始任务',
-            });
-        }
-        console.log(`开启定时任务：${cronName}，${task.cronTime}`);
-        const cronJob = new CronJob(task.cronTime, () => {
-            console.log(`任务执行中：${task.cronName}，${task.cronTime}`);
-            this.spawn(id, user);
-        });
+        const cronJob = new CronJob(task.cronTime, () =>
+            this.performTask(id, user),
+        );
         this.schedulerRegistry.addCronJob(cronName, cronJob);
         cronJob.start();
         task.status = 2;
@@ -106,64 +104,46 @@ export class TaskService {
         });
     }
 
-    async debug(id: number, user) {
-        const task = await this.findOneTask({
-            relations: ['env'],
-            where: { id, user },
-        });
-        if (!task.env.length) {
-            return new HttpResponse({
-                showType: 2,
-                success: false,
-                message: '请添加.env后再开始任务',
-            });
-        }
-        this.spawn(id, user, 'debug');
-        return new HttpResponse({
-            showType: 1,
-            message: '任务执行成功，稍后可在日志中查看结果',
-        });
-    }
-
-    async spawn(id, user, type?: string) {
+    async performTask(id, user, type?: string) {
         const task = await this.findOneTask({
             relations: ['env', 'script'],
             where: { id, user },
         });
-        let output = '';
-        const statusArray = [];
+        let log = '';
+        let statusLog = 1;
+        const script = task.script;
         const envs = task.env;
-        const script = task.script as any;
         envs.forEach((env) => {
             const cp = spawn('node', [script.filePath], {
                 env: {
                     ...process.env,
-                    ...dotenv.parse(readFileSync(env.filePath)),
+                    ...dotenv.parse(env.code),
                 },
             });
             cp.stdout.on('data', (data) => {
-                output += `${data}`;
-                statusArray.push(true);
+                log += `${data}`;
             });
             cp.stderr.on('data', (data) => {
-                output += `${data}`;
-                statusArray.push(false);
+                log += `${data}`;
+                statusLog = 0;
             });
             cp.on('close', () => {
-                let status = 'warning';
-                if (statusArray.every((t) => t === true)) {
-                    status = 'success';
-                } else if (statusArray.every((t) => t === false)) {
-                    status = 'error';
-                }
                 this.createLog({
+                    log,
                     type,
-                    status,
                     taskId: id,
-                    log: output,
+                    status: statusLog,
                 });
-                output = '';
+                log = '';
             });
+        });
+    }
+
+    debug(id: number, user) {
+        this.performTask(id, user, 'debug');
+        return new HttpResponse({
+            showType: 1,
+            message: '任务执行成功，稍后可在日志中查看结果',
         });
     }
 
@@ -172,9 +152,15 @@ export class TaskService {
             where: { id, user },
             relations: ['env', 'log'],
         });
-        await Promise.all(task.env.map((env) => unlinkSync(env.filePath)));
-        await this.taskEnvRepository.remove(task.env);
-        await this.taskLogRepository.remove(task.log);
+        if (task.env.length) {
+            await this.taskEnvRepository.remove(task.env);
+        }
+        if (task.log.length) {
+            await this.taskLogRepository.remove(task.log);
+        }
+        if (task.cronName) {
+            await this.schedulerRegistry.deleteCronJob(task.cronName);
+        }
         await this.taskRepository.remove(task);
         return new HttpResponse({ showType: 1 });
     }
@@ -189,41 +175,38 @@ export class TaskService {
     }
 
     async creatEnv(upsertTaskEnvDto, user) {
-        const { code, taskId, remark } = upsertTaskEnvDto;
+        const { code, taskId, description } = upsertTaskEnvDto;
+        const task = new Task();
+        task.id = taskId;
         const env = new TaskEnv();
-        env.remark = remark;
+        env.code = code;
         env.user = user;
-        env.task = { id: taskId };
-        env.filePath = path.join(
-            'data',
-            'files',
-            `${user.id}`,
-            'envs',
-            `${Date.now()}`,
-            `.env`,
-        );
-        writeFileSync(env.filePath, code);
+        env.task = task;
+        env.description = description;
         await this.taskEnvRepository.save(env);
         return new HttpResponse({ showType: 1 });
     }
 
     async updateEnv(upsertTaskEnvDto, user) {
-        const { id, taskId, code, remark } = upsertTaskEnvDto;
+        const { id, taskId, code, description } = upsertTaskEnvDto;
+        const task = new Task();
+        task.id = taskId;
         const env = await this.findOneEnv({
-            where: { id, task: { id: taskId }, user },
+            where: { id, task, user },
         });
-        env.remark = remark;
-        writeFileSync(env.filePath, code);
+        env.code = code;
+        env.description = description;
         await this.taskEnvRepository.save(env);
         return new HttpResponse({ showType: 1 });
     }
 
     async removeEnv(removeTaskEnvDto, user) {
         const { id, taskId } = removeTaskEnvDto;
+        const task = new Task();
+        task.id = taskId;
         const env = await this.findOneEnv({
-            where: { id, task: { id: taskId }, user },
+            where: { id, task, user },
         });
-        unlinkSync(env.filePath);
         await this.taskEnvRepository.remove(env);
         return new HttpResponse({ showType: 1 });
     }
@@ -237,16 +220,14 @@ export class TaskService {
         return new HttpResponse({ data, total });
     }
 
-    async envAntdFrom({ id, taskId }, user) {
+    async envRetrieve({ id, taskId }, user) {
         if (!id) return {};
-        const env = await this.findOneEnv(
-            { where: { id, task: { id: taskId }, user } },
-            true,
-        );
-        const code = readFileSync(env.filePath);
+        const task = new Task();
+        task.id = taskId;
+        const env = await this.findOneEnv({ where: { id, task, user } }, true);
         return {
-            code,
-            remark: env.remark,
+            code: env.code,
+            description: env.description,
         };
     }
 
@@ -281,5 +262,21 @@ export class TaskService {
         });
         await this.taskLogRepository.remove(task.log);
         return new HttpResponse();
+    }
+
+    async schemaForm(taskId, user) {
+        const task = await this.findOneTask({
+            where: { id: taskId, user },
+            relations: ['script'],
+        });
+        const { columns } = JSON.parse(task.script?.schemaForm);
+        return {
+            columns: JSON.parse(columns),
+        };
+        // try {
+        //
+        // } catch (e) {
+        //     return {};
+        // }
     }
 }

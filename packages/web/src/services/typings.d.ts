@@ -1,5 +1,5 @@
 declare namespace API {
-  type CreateTaskDto = {};
+  type CreateSchemaDto = {};
 
   type CreateUserDto = {
     /** 用户名 */
@@ -15,7 +15,15 @@ declare namespace API {
     password: string;
   };
 
-  type ScriptControllerAntdFromParams = {
+  type SchemaControllerFindOneParams = {
+    id: string;
+  };
+
+  type SchemaControllerRemoveParams = {
+    id: string;
+  };
+
+  type SchemaControllerUpdateParams = {
     id: string;
   };
 
@@ -23,15 +31,17 @@ declare namespace API {
     id: string;
   };
 
-  type SearchDto = {};
+  type ScriptControllerRetrieveParams = {
+    id: string;
+  };
 
-  type SubscribeDto = {};
+  type SearchDto = {};
 
   type TaskControllerDebugParams = {
     id: string;
   };
 
-  type TaskControllerEnvAntdFromParams = {
+  type TaskControllerEnvRetrieveParams = {
     id: string;
     taskId: string;
   };
@@ -57,7 +67,11 @@ declare namespace API {
     id: string;
   };
 
+  type UpdateSchemaDto = {};
+
   type UpsertScriptDto = {};
+
+  type UpsertTaskDto = {};
 
   type UpsertTaskEnvDto = {};
 }

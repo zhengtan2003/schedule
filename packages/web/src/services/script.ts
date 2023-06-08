@@ -2,6 +2,21 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
+/** 此处后端没有提供注释 GET /api/script */
+export async function ScriptControllerRetrieve(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.ScriptControllerRetrieveParams,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/api/script', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
 /** 创建/更新 POST /api/script */
 export async function ScriptControllerUpsert(
   body: API.UpsertScriptDto,
@@ -32,24 +47,9 @@ export async function ScriptControllerRemove(
   });
 }
 
-/** 用于antd from组件 GET /api/script/antd/from */
-export async function ScriptControllerAntdFrom(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.ScriptControllerAntdFromParams,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/script/antd/from', {
-    method: 'GET',
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 用于antd select组件 GET /api/script/antd/select */
-export async function ScriptControllerAntdSelect(options?: { [key: string]: any }) {
-  return request<any>('/api/script/antd/select', {
+/** 此处后端没有提供注释 GET /api/script/enum */
+export async function ScriptControllerEnum(options?: { [key: string]: any }) {
+  return request<any>('/api/script/enum', {
     method: 'GET',
     ...(options || {}),
   });
@@ -71,16 +71,9 @@ export async function ScriptControllerSearch(
 }
 
 /** 订阅 POST /api/script/subscribe */
-export async function ScriptControllerSubscribe(
-  body: API.SubscribeDto,
-  options?: { [key: string]: any },
-) {
+export async function ScriptControllerSubscribe(options?: { [key: string]: any }) {
   return request<any>('/api/script/subscribe', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
     ...(options || {}),
   });
 }

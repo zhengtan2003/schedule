@@ -4,7 +4,7 @@ import { request } from '@umijs/max';
 
 /** 创建/更新 POST /api/task */
 export async function TaskControllerUpsert(
-  body: API.CreateTaskDto,
+  body: API.UpsertTaskDto,
   options?: { [key: string]: any },
 ) {
   return request<any>('/api/task', {
@@ -77,13 +77,13 @@ export async function TaskControllerRemoveEnv(
   });
 }
 
-/** 用于antd from组件 GET /api/task/env/antd/from */
-export async function TaskControllerEnvAntdFrom(
+/** 用于antd from组件 GET /api/task/env/retrieve */
+export async function TaskControllerEnvRetrieve(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerEnvAntdFromParams,
+  params: API.TaskControllerEnvRetrieveParams,
   options?: { [key: string]: any },
 ) {
-  return request<any>('/api/task/env/antd/from', {
+  return request<any>('/api/task/env/retrieve', {
     method: 'GET',
     params: {
       ...params,

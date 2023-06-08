@@ -14,20 +14,24 @@ import { TaskLog } from './task-log.entity';
 
 @Entity()
 export class Task {
-    @Column()
+    @Column({ nullable: true })
     name: string;
     @Column({ nullable: true })
     startTime: string;
     @Column({ nullable: true })
     endTime: string;
+    @Column('datetime', { nullable: true })
+    nextExecutionTime: Date;
     @Column({ nullable: true, default: 1 })
     status: 0 | 1 | 2;
-    @Column({ nullable: true, default: '00 09 * * *' })
+    @Column({ nullable: true, default: '0 7 * * *' })
     cronTime: string;
     @Column({ nullable: true })
     cronName: string;
+    @Column({ type: 'json', nullable: true })
+    envSchemaFormProps: JSON;
     @ManyToOne(() => Script, (script) => script.task)
-    script: { id: string };
+    script: any;
     @OneToMany(() => TaskLog, (taskLog) => taskLog.task)
     log: TaskLog[];
     @OneToMany(() => TaskEnv, (taskEnv) => taskEnv.task)
@@ -35,7 +39,7 @@ export class Task {
     @ManyToOne(() => User, (user) => user.task)
     user: User;
     @PrimaryGeneratedColumn()
-    readonly id: number;
+    id: number;
     @CreateDateColumn()
     readonly createTime: Date;
     @UpdateDateColumn()

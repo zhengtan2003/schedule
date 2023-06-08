@@ -2,7 +2,7 @@ import { SearchDto } from '@/dto/search.dto';
 import { ScriptService } from './script.service';
 import { User } from '@/decorators/user.decorator';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UpsertScriptDto, SubscribeDto } from '@/script/dto/script.dto';
+import { UpsertScriptDto } from '@/script/dto/script.dto';
 import { Controller, Get, Post, Body, Delete, Query } from '@nestjs/common';
 
 @ApiBearerAuth()
@@ -14,9 +14,7 @@ export class ScriptController {
     @ApiOperation({ summary: '创建/更新' })
     @Post()
     upsert(@Body() upsertScriptDto: UpsertScriptDto, @User() user) {
-        if (upsertScriptDto.id)
-            return this.scriptService.update(upsertScriptDto, user);
-        return this.scriptService.creat(upsertScriptDto, user);
+        return this.scriptService.upsert(upsertScriptDto, user);
     }
 
     @ApiOperation({ summary: '列表' })
@@ -24,6 +22,7 @@ export class ScriptController {
     search(@Body() searchDto: SearchDto, @User() user) {
         return this.scriptService.search(searchDto, user);
     }
+
     @ApiOperation({ summary: '删除' })
     @Delete()
     remove(@Query('id') id: string, @User() user) {
@@ -32,18 +31,19 @@ export class ScriptController {
 
     @ApiOperation({ summary: '订阅' })
     @Post('subscribe')
-    subscribe(@Body() subscribeDto: SubscribeDto, @User() user) {
+    subscribe(@Body() subscribeDto, @User() user) {
         return this.scriptService.subscribe(subscribeDto, user);
     }
 
-    @ApiOperation({ summary: '用于antd from组件' })
-    @Get('antd/from')
-    antdFrom(@Query('id') id: string, @User() user) {
-        return this.scriptService.antdFrom(id, user);
+    @ApiOperation({ summary: '' })
+    @Get()
+    retrieve(@Query('id') id: string, @User() user) {
+        return this.scriptService.retrieve(id, user);
     }
-    @ApiOperation({ summary: '用于antd select组件' })
-    @Get('antd/select')
-    antdSelect(@User() user) {
-        return this.scriptService.antdSelect(user);
+
+    @ApiOperation({ summary: '' })
+    @Get('enum')
+    enum(@User() user) {
+        return this.scriptService.enum(user);
     }
 }

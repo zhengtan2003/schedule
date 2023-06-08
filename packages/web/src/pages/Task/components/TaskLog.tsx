@@ -15,9 +15,8 @@ interface TaskLogDrawerProps {
 }
 
 const colorMap: any = {
-  warning: '#faad14',
-  success: '#52c41a',
-  error: '#ff4d4f',
+  1: '#52c41a',
+  0: '#ff4d4f',
 };
 
 const { Title } = Typography;

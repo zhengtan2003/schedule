@@ -41,8 +41,20 @@ const Script = () => {
       dataIndex: 'name',
     },
     {
-      title: 'language',
+      title: '版本',
       width: '70px',
+      dataIndex: 'version',
+      hideInSearch: true,
+    },
+    {
+      title: '描述',
+      width: '160px',
+      dataIndex: 'description',
+      hideInSearch: true,
+    },
+    {
+      title: 'language',
+      width: '90px',
       dataIndex: 'language',
       hideInSearch: true,
     },

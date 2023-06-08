@@ -13,6 +13,7 @@ import {
     readFileSync,
     writeFileSync,
 } from '@/utils';
+import { analysisComment } from '@/utils/analysisComment';
 
 @Injectable()
 export class ScriptService {
@@ -30,15 +31,14 @@ export class ScriptService {
         return script;
     }
 
-    async creat(upsertScriptDto, user) {
-        const { name, language, updateURL, remark, code } = upsertScriptDto;
-        const script = new Script();
-        script.name = name;
-        script.remark = remark;
-        script.language = language;
-        script.updateURL = updateURL;
-        script.user = user;
-        script.filePath = path.join(
+    async upsert(upsertScriptDto, user) {
+        const { id, language, code } = upsertScriptDto;
+        const script = !id
+            ? new Script()
+            : await this.findOne({
+                  where: { id, user },
+              });
+        const filePath = path.join(
             'data',
             'files',
             `${user.id}`,
@@ -46,21 +46,16 @@ export class ScriptService {
             `${Date.now()}`,
             `index.${fileSuffixMap[language]}`,
         );
+        const userScrip = analysisComment(code);
+        script.user = user;
+        script.filePath = filePath;
+        script.name = userScrip.name;
+        script.version = userScrip.version;
+        script.language = userScrip.language;
+        script.updateURL = userScrip.updateURL;
+        script.description = userScrip.description;
         writeFileSync(script.filePath, code);
         await this.scriptRepository.save(script);
-        return new HttpResponse({ showType: 1 });
-    }
-
-    async update(upsertScriptDto, user) {
-        const { id, name, language, remark, code } = upsertScriptDto;
-        const script = await this.findOne({
-            where: { id, user },
-        });
-        script.name = name;
-        script.remark = remark;
-        script.language = language;
-        await this.scriptRepository.save(script);
-        writeFileSync(script.filePath, code);
         return new HttpResponse({ showType: 1 });
     }
 
@@ -85,38 +80,14 @@ export class ScriptService {
         });
     }
 
-    async antdSelect(user) {
-        const scripts = await this.scriptRepository.find({ where: { user } });
-        if (!scripts) return [];
-        return scripts.map(({ name, id }) => ({ label: name, value: id }));
-    }
-
     async subscribe(subscribeDto, user) {
         const { updateURL } = subscribeDto;
+        let code = '';
         try {
-            const { data } = await firstValueFrom(
+            const response = await firstValueFrom(
                 this.httpService.get(updateURL),
             );
-            const metadata: any = {};
-            for (const match of data.matchAll(/\/\/\s*@(\w+)\s+(.*)/g)) {
-                const [, key, value] = match;
-                metadata[key] = value;
-            }
-            const fileExt = path.extname(updateURL);
-            const fileName = path.basename(updateURL, fileExt);
-            const languageMap = {
-                '.js': 'javascript',
-            };
-            return this.creat(
-                {
-                    updateURL,
-                    code: data,
-                    remark: metadata.remark,
-                    name: metadata.name ?? fileName,
-                    language: languageMap[fileExt] ?? 'javascript',
-                },
-                user,
-            );
+            code = response.data;
         } catch (e) {
             return new HttpResponse({
                 success: false,
@@ -124,17 +95,37 @@ export class ScriptService {
                 message: `请求失败：${updateURL}`,
             });
         }
+        const { userScrip, schemaFormProps } = analysisComment(code);
+        const fileExt = path.extname(updateURL);
+        const fileName = path.basename(updateURL, fileExt);
+        const languageMap = {
+            '.js': 'javascript',
+        };
+        return this.upsert(
+            {
+                code,
+                updateURL,
+                schemaFormProps,
+                remark: userScrip.remark,
+                name: userScrip.name ?? fileName,
+                language: languageMap[fileExt] ?? 'javascript',
+            },
+            user,
+        );
     }
 
-    async antdFrom(id, user) {
+    async retrieve(id, user) {
         if (!id) return {};
         const script = await this.findOne({ where: { id, user } });
         const code = readFileSync(script.filePath);
         return {
             code,
-            name: script.name,
-            remark: script.remark,
             updateURL: script.updateURL,
         };
+    }
+    async enum(user) {
+        const scripts = await this.scriptRepository.find({ where: { user } });
+        if (!scripts) return [];
+        return scripts.map(({ name, id }) => ({ label: name, value: id }));
     }
 }

@@ -8,8 +8,7 @@ import {
     Delete,
 } from '@nestjs/common';
 import { TaskService } from '@/task/task.service';
-import { CreateTaskDto } from '@/task/dto/create-task.dto';
-import { UpdateTaskDto } from '@/task/dto/update-task.dto';
+import { UpsertTaskDto } from '@/task/dto/task.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@/decorators/user.decorator';
 import { SearchDto } from '@/dto/search.dto';
@@ -24,8 +23,8 @@ export class TaskController {
 
     @ApiOperation({ summary: '创建/更新' })
     @Post()
-    upsert(@Body() createTaskDto: CreateTaskDto, @User() user) {
-        return this.taskService.create(createTaskDto, user);
+    upsert(@Body() upsertTaskDto: UpsertTaskDto, @User() user) {
+        return this.taskService.upsert(upsertTaskDto, user);
     }
 
     @ApiOperation({ summary: '列表' })
@@ -85,12 +84,12 @@ export class TaskController {
     }
 
     @ApiOperation({ summary: '用于antd from组件' })
-    @Get('env/antd/from')
-    envAntdFrom(
+    @Get('env/retrieve')
+    envRetrieve(
         @Query() envAntdFromQueryDto: EnvAntdFromQueryDto,
         @User() user,
     ) {
-        return this.taskService.envAntdFrom(envAntdFromQueryDto, user);
+        return this.taskService.envRetrieve(envAntdFromQueryDto, user);
     }
 
     //log

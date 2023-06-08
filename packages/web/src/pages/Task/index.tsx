@@ -56,6 +56,13 @@ const Task: React.FC = () => {
       hideInSearch: true,
     },
     {
+      title: '下次执行时间',
+      width: '170px',
+      dataIndex: 'nextExecutionTime',
+      valueType: 'dateTime',
+      hideInSearch: true,
+    },
+    {
       title: '任务开始时间',
       width: '170px',
       dataIndex: 'startTime',
