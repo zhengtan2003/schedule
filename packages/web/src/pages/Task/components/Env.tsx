@@ -3,7 +3,7 @@ import {
   TaskControllerEnvSearch,
   TaskControllerRemoveEnv,
 } from '@/services/task';
-import { PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, FormOutlined, PlusOutlined } from '@ant-design/icons';
 import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
 import { Button } from 'antd';
 import React, { useRef } from 'react';
@@ -30,7 +30,6 @@ const Env: React.FC<EnvProps> = (props) => {
       title: 'env',
       dataIndex: 'code',
       width: '260px',
-      valueType: 'code',
       ellipsis: true,
     },
     {
@@ -66,7 +65,7 @@ const Env: React.FC<EnvProps> = (props) => {
               onSuccess={() => actionRef.current?.reload()}
               trigger={
                 <Button type={'link'} size={'small'}>
-                  编辑
+                  <FormOutlined />
                 </Button>
               }
             />
@@ -78,7 +77,7 @@ const Env: React.FC<EnvProps> = (props) => {
                 )
               }
             >
-              删除
+              <DeleteOutlined />
             </DeleteButton>
           </>
         );

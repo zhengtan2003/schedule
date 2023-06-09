@@ -14,7 +14,9 @@ export class ScriptController {
     @ApiOperation({ summary: '创建/更新' })
     @Post()
     upsert(@Body() upsertScriptDto: UpsertScriptDto, @User() user) {
-        return this.scriptService.upsert(upsertScriptDto, user);
+        if (upsertScriptDto.id)
+            return this.scriptService.update(upsertScriptDto, user);
+        return this.scriptService.creat(upsertScriptDto, user);
     }
 
     @ApiOperation({ summary: '列表' })

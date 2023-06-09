@@ -3,7 +3,7 @@ import {
   TaskControllerLogSearch,
   TaskControllerRemoveAllLog,
 } from '@/services/task';
-import { BugOutlined } from '@ant-design/icons';
+import { FieldTimeOutlined } from '@ant-design/icons';
 import { useRequest } from '@umijs/max';
 import { Button, Empty, Timeline, Typography } from 'antd';
 import dayjs from 'dayjs';
@@ -53,7 +53,7 @@ const TaskLog: React.FC<TaskLogDrawerProps> = (props) => {
             })
           }
         >
-          日志
+          <FieldTimeOutlined />
         </Button>
       }
     >
@@ -61,14 +61,15 @@ const TaskLog: React.FC<TaskLogDrawerProps> = (props) => {
         <Timeline
           items={data?.map((item: any) => {
             return {
-              dot: item.type === 'debug' && <BugOutlined />,
               color: colorMap[item.status],
               children: (
                 <Typography>
                   <Title level={5}>
                     {dayjs(item.createTime).format('YYYY-MM-DD HH:mm:ss')}
                   </Title>
-                  <pre>{item.log}</pre>
+                  <pre style={{ background: '#000', color: '#F8F8F8' }}>
+                    {item.log}
+                  </pre>
                 </Typography>
               ),
             };

@@ -4,7 +4,7 @@ import {
   ScriptControllerRemove,
   ScriptControllerSearch,
 } from '@/services/script';
-import { PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, FormOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   ActionType,
   PageContainer,
@@ -95,7 +95,7 @@ const Script = () => {
           size={'small'}
           onClick={() => history.push(`/script/update/${record.id}`)}
         >
-          编辑
+          <FormOutlined />
         </Button>,
         <DeleteButton
           key={'delete'}
@@ -105,7 +105,7 @@ const Script = () => {
             if (success) actionRef.current?.reload();
           }}
         >
-          删除
+          <DeleteOutlined />
         </DeleteButton>,
       ],
     },

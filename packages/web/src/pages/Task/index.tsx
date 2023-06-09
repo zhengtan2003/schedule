@@ -1,11 +1,19 @@
 import { ActionButton, DeleteButton } from '@/components';
 import {
+  TaskControllerDebug,
   TaskControllerRemove,
   TaskControllerSearch,
   TaskControllerStart,
   TaskControllerStop,
 } from '@/services/task';
-import { PlusOutlined } from '@ant-design/icons';
+import {
+  BugOutlined,
+  DeleteOutlined,
+  FormOutlined,
+  PauseOutlined,
+  PlusOutlined,
+  RightOutlined,
+} from '@ant-design/icons';
 import type { ActionType } from '@ant-design/pro-components';
 import {
   PageContainer,
@@ -14,7 +22,9 @@ import {
 } from '@ant-design/pro-components';
 import { Button } from 'antd';
 import React, { useRef } from 'react';
-import { ActionDropdown, UpsertTask } from './components';
+import { UpsertTask } from './components';
+import Env from './components/Env';
+import TaskLog from './components/TaskLog';
 
 export interface DataType {
   key: React.Key;
@@ -95,30 +105,35 @@ const Task: React.FC = () => {
       render: (_: any, record: DataType) => {
         return (
           <>
+            <Env taskId={record.id} taskName={record.name} />
             {record.status === 2 ? (
               <ActionButton
+                icon={<PauseOutlined />}
                 request={() => TaskControllerStop({ id: record.id })}
                 onSuccess={() => actionRef.current?.reload()}
-              >
-                停止
-              </ActionButton>
+              />
             ) : (
               <ActionButton
+                icon={<RightOutlined />}
                 request={() => TaskControllerStart({ id: record.id })}
                 onSuccess={() => actionRef.current?.reload()}
-              >
-                开始
-              </ActionButton>
+              />
             )}
+            <ActionButton
+              request={() => TaskControllerDebug({ id: record.id })}
+            >
+              <BugOutlined />
+            </ActionButton>
             <UpsertTask
               id={record.id}
               trigger={
                 <Button type={'link'} size={'small'}>
-                  编辑
+                  <FormOutlined />
                 </Button>
               }
               onSuccess={() => actionRef.current?.reload()}
             />
+            <TaskLog taskId={record.id} taskName={record.name} />
             <DeleteButton
               title={`确认删除【${record.name}】吗？`}
               onOk={async () => {
@@ -128,9 +143,8 @@ const Task: React.FC = () => {
                 if (success) actionRef.current?.reload();
               }}
             >
-              删除
+              <DeleteOutlined />
             </DeleteButton>
-            <ActionDropdown taskId={record.id} taskName={record.name} />
           </>
         );
       },

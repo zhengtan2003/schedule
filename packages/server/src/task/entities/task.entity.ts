@@ -43,5 +43,5 @@ export class Task {
     @CreateDateColumn()
     readonly createTime: Date;
     @UpdateDateColumn()
-    readonly updateTime: Date;
+    updateTime: Date;
 }

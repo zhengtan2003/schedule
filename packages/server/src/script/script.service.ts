@@ -31,13 +31,8 @@ export class ScriptService {
         return script;
     }
 
-    async upsert(upsertScriptDto, user) {
-        const { id, language, code } = upsertScriptDto;
-        const script = !id
-            ? new Script()
-            : await this.findOne({
-                  where: { id, user },
-              });
+    async creat(upsertScriptDto, user) {
+        const { language, code } = upsertScriptDto;
         const filePath = path.join(
             'data',
             'files',
@@ -46,6 +41,7 @@ export class ScriptService {
             `${Date.now()}`,
             `index.${fileSuffixMap[language]}`,
         );
+        const script = new Script();
         const userScrip = analysisComment(code);
         script.user = user;
         script.filePath = filePath;
@@ -54,8 +50,25 @@ export class ScriptService {
         script.language = userScrip.language;
         script.updateURL = userScrip.updateURL;
         script.description = userScrip.description;
-        writeFileSync(script.filePath, code);
         await this.scriptRepository.save(script);
+        writeFileSync(filePath, code);
+        return new HttpResponse({ showType: 1 });
+    }
+
+    async update(upsertScriptDto, user) {
+        const { id, code } = upsertScriptDto;
+        const script = await this.findOne({ where: { id, user } });
+        const userScrip = analysisComment(code);
+        writeFileSync(script.filePath, code);
+        await this.scriptRepository.update(
+            { id, user },
+            {
+                name: userScrip.name,
+                version: userScrip.version,
+                updateURL: userScrip.updateURL,
+                description: userScrip.description,
+            },
+        );
         return new HttpResponse({ showType: 1 });
     }
 
@@ -101,7 +114,7 @@ export class ScriptService {
         const languageMap = {
             '.js': 'javascript',
         };
-        return this.upsert(
+        return this.creat(
             {
                 code,
                 updateURL,
@@ -123,6 +136,7 @@ export class ScriptService {
             updateURL: script.updateURL,
         };
     }
+
     async enum(user) {
         const scripts = await this.scriptRepository.find({ where: { user } });
         if (!scripts) return [];

@@ -16,7 +16,9 @@ export class TaskController {
     @ApiOperation({ summary: '创建/更新' })
     @Post()
     upsert(@Body() upsertTaskDto: UpsertTaskDto, @User() user) {
-        return this.taskService.upsert(upsertTaskDto, user);
+        if (upsertTaskDto.id)
+            return this.taskService.update(upsertTaskDto, user);
+        return this.taskService.creat(upsertTaskDto, user);
     }
 
     @ApiOperation({ summary: '列表' })
@@ -46,13 +48,15 @@ export class TaskController {
     @ApiOperation({ summary: '调试' })
     @Get('debug')
     debug(@Query('id') id: string, @User() user) {
-        return this.taskService.debug(+id, user);
+        return this.taskService.debug(+id, user, true);
     }
+
     @ApiOperation({ summary: '' })
     @Get()
     retrieve(@Query('id') id: string, @User() user) {
         return this.taskService.retrieve(+id, user);
     }
+
     //env
     @ApiOperation({ summary: '创建env/更新env' })
     @Post('env')

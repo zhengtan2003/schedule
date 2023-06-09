@@ -12,6 +12,7 @@ import { isEmpty } from 'lodash';
 
 interface UpsertTaskProps {
   id?: string;
+  scriptId?: string;
   trigger?: JSX.Element;
   onSuccess: () => void;
 }
@@ -44,16 +45,16 @@ const UpsertTask: React.FC<UpsertTaskProps> = (props) => {
   return (
     <DrawerForm
       form={form}
-      title={id ? '编辑任务' : '新建任务'}
       width={'400px'}
       params={{ id }}
-      request={TaskControllerRetrieve as any}
+      title={id ? '编辑任务' : '新建任务'}
       trigger={trigger}
       initialValues={{
-        scriptId: id,
+        id,
         cronTime: '0 7 * * *',
       }}
       drawerProps={{ destroyOnClose: true }}
+      request={TaskControllerRetrieve as any}
       onFinish={async (body) => {
         const { success } = await TaskControllerUpsert(body);
         if (success) props.onSuccess();
@@ -69,6 +70,7 @@ const UpsertTask: React.FC<UpsertTaskProps> = (props) => {
         rules={[{ required: true }]}
         request={ScriptControllerEnum}
       />
+      <ProFormText name={'id'} hidden />
       <ProFormText name={'name'} label={'任务名称'} />
       {/*<ProFormDateRangePicker*/}
       {/*  label={'生效时间'}*/}

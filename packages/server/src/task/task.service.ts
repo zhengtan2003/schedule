@@ -36,20 +36,29 @@ export class TaskService {
         return task;
     }
 
-    async upsert(upsertTaskDto: UpsertTaskDto, user) {
-        const { id, scriptId, cronTime = '0 7 * * *' } = upsertTaskDto;
-        const task = !id
-            ? new Task()
-            : await this.findOneTask({
-                  where: { id, user },
-              });
+    async creat(upsertTaskDto: UpsertTaskDto, user) {
+        const { scriptId, cronTime = '0 7 * * *' } = upsertTaskDto;
+        const task = new Task();
+        task.user = user;
         task.cronTime = cronTime;
         task.name = upsertTaskDto.name;
-        // task.endTime = upsertTaskDto.endTime;
-        // task.startTime = upsertTaskDto.startTime;
-        task.user = user;
         task.script = { id: scriptId };
         await this.taskRepository.save(task);
+        return new HttpResponse({ showType: 1 });
+    }
+
+    async update(upsertTaskDto: UpsertTaskDto, user) {
+        const { id, cronTime = '0 7 * * *' } = upsertTaskDto;
+        await this.taskRepository.update(
+            {
+                id: +id,
+                user,
+            },
+            {
+                cronTime,
+                name: upsertTaskDto.name,
+            },
+        );
         return new HttpResponse({ showType: 1 });
     }
 
@@ -70,14 +79,23 @@ export class TaskService {
         const task = await this.findOneTask({
             where: { id, user },
         });
-        const cronJob = new CronJob(task.cronTime, () =>
-            this.performTask(id, user),
-        );
+        console.log(`开启任务：${cronName}，当前时间${new Date()}`);
+        const cronJob = new CronJob(task.cronTime, () => {
+            console.log(`执行任务：${cronName}`);
+            this.debug(id, user);
+        });
         this.schedulerRegistry.addCronJob(cronName, cronJob);
         cronJob.start();
-        task.status = 2;
-        task.cronName = cronName;
-        await this.taskRepository.save(task);
+        await this.taskRepository.update(
+            {
+                id,
+                user,
+            },
+            {
+                status: 2,
+                cronName,
+            },
+        );
         return new HttpResponse({
             showType: 1,
         });
@@ -97,7 +115,7 @@ export class TaskService {
         });
     }
 
-    async performTask(id, user, type?: string) {
+    async debug(id: number, user, needResponse?: boolean) {
         const task = await this.findOneTask({
             relations: ['env', 'script'],
             where: { id, user },
@@ -107,7 +125,8 @@ export class TaskService {
         const script = task.script;
         const envs = task.env;
         envs.forEach((env) => {
-            const cp = spawn('node', [script.filePath], {
+            const cp = spawn(`node ${script.filePath}`, {
+                shell: true,
                 env: {
                     ...process.env,
                     ...dotenv.parse(env.code),
@@ -123,21 +142,19 @@ export class TaskService {
             cp.on('close', () => {
                 this.createLog({
                     log,
-                    type,
                     taskId: id,
                     status: statusLog,
                 });
                 log = '';
+                console.log(`任务执行结束：${task.cronName}`);
             });
         });
-    }
-
-    debug(id: number, user) {
-        this.performTask(id, user, 'debug');
-        return new HttpResponse({
-            showType: 1,
-            message: '任务执行成功，稍后可在日志中查看结果',
-        });
+        if (needResponse) {
+            return new HttpResponse({
+                showType: 1,
+                message: '任务执行成功，稍后可在日志中查看结果',
+            });
+        }
     }
 
     async remove(id: number, user) {
@@ -239,10 +256,9 @@ export class TaskService {
 
     //log
     async createLog(createTaskDto: CreateTaskLogDto) {
-        const { log, taskId, status, type } = createTaskDto;
+        const { log, taskId, status } = createTaskDto;
         const taskLog = new TaskLog();
         taskLog.log = log;
-        taskLog.type = type;
         taskLog.status = status;
         taskLog.task = { id: taskId };
         await this.taskLogRepository.save(taskLog);
