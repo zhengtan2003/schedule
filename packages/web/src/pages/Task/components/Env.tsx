@@ -72,7 +72,7 @@ const Env: React.FC<EnvProps> = (props) => {
             <DeleteButton
               title={`确定删除吗？`}
               onOk={() =>
-                TaskEnvControllerRemove({ taskId, id: record.id }).then(() =>
+                TaskEnvControllerRemove({ id: record.id }).then(() =>
                   actionRef.current?.reload(),
                 )
               }
