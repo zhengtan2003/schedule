@@ -1,7 +1,7 @@
 import {
-  TaskControllerEnvRetrieve,
-  TaskControllerUpsertEnv,
-} from '@/services/task';
+  TaskEnvControllerForm,
+  TaskEnvControllerUpsertEnv,
+} from '@/services/taskEnv';
 import {
   DrawerForm,
   ProFormInstance,
@@ -28,16 +28,20 @@ const UpsertEnv: React.FC<UpsertEnvProps> = (props) => {
       formRef={formRef}
       trigger={trigger}
       params={{ id, taskId }}
+      initialValues={{
+        id,
+        taskId,
+      }}
       drawerProps={{ destroyOnClose: true }}
-      request={TaskControllerEnvRetrieve as any}
+      request={TaskEnvControllerForm as any}
       onFinish={async (body) => {
-        const { success } = await TaskControllerUpsertEnv(body);
+        const { success } = await TaskEnvControllerUpsertEnv(body);
         if (success) props.onSuccess();
         return success;
       }}
     >
-      <ProFormText hidden name={'id'} initialValue={id} />
-      <ProFormText hidden name={'taskId'} initialValue={taskId} />
+      <ProFormText hidden name={'id'} />
+      <ProFormText hidden name={'taskId'} />
       <Form.Item label={'.env'} name={'code'} rules={[{ required: true }]}>
         <Editor
           height="50vh"
@@ -48,7 +52,7 @@ const UpsertEnv: React.FC<UpsertEnvProps> = (props) => {
           }}
         />
       </Form.Item>
-      <ProFormText label="备注" name="remark" />
+      <ProFormText label="描述" name="description" />
     </DrawerForm>
   );
 };

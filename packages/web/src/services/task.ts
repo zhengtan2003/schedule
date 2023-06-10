@@ -3,9 +3,9 @@
 import { request } from '@umijs/max';
 
 /** 此处后端没有提供注释 GET /api/task */
-export async function TaskControllerRetrieve(
+export async function TaskControllerFrom(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerRetrieveParams,
+  params: API.TaskControllerFromParams,
   options?: { [key: string]: any },
 ) {
   return request<any>('/api/task', {
@@ -58,96 +58,6 @@ export async function TaskControllerDebug(
     params: {
       ...params,
     },
-    ...(options || {}),
-  });
-}
-
-/** 创建env/更新env POST /api/task/env */
-export async function TaskControllerUpsertEnv(
-  body: API.UpsertTaskEnvDto,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/env', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** 删除env DELETE /api/task/env */
-export async function TaskControllerRemoveEnv(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerRemoveEnvParams,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/env', {
-    method: 'DELETE',
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 用于antd from组件 GET /api/task/env/retrieve */
-export async function TaskControllerEnvRetrieve(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerEnvRetrieveParams,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/env/retrieve', {
-    method: 'GET',
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** env列表 POST /api/task/env/search */
-export async function TaskControllerEnvSearch(
-  body: API.SearchDto,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/env/search', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** 此处后端没有提供注释 POST /api/task/log/remove/all */
-export async function TaskControllerRemoveAllLog(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerRemoveAllLogParams,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/log/remove/all', {
-    method: 'POST',
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 获得日志 POST /api/task/log/search */
-export async function TaskControllerLogSearch(
-  body: API.SearchDto,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/log/search', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
     ...(options || {}),
   });
 }

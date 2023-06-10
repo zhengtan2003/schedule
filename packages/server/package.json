@@ -41,16 +41,12 @@
     "dayjs": "^1.11.7",
     "dotenv": "^16.1.4",
     "mysql2": "^3.3.2",
-    "node-pty": "^0.10.1",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.5",
-    "socket.io": "^4.6.2",
     "typeorm": "^0.3.16",
     "uuid": "^9.0.0",
-    "ws": "^8.13.0",
-    "xterm": "^5.2.0",
-    "xterm-headless": "^5.2.0"
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.3.0",

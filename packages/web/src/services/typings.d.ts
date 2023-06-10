@@ -27,25 +27,11 @@ declare namespace API {
     id: string;
   };
 
-  type TaskControllerEnvRetrieveParams = {
+  type TaskControllerFromParams = {
     id: string;
-    taskId: string;
-  };
-
-  type TaskControllerRemoveAllLogParams = {
-    taskId: string;
-  };
-
-  type TaskControllerRemoveEnvParams = {
-    id: string;
-    taskId: string;
   };
 
   type TaskControllerRemoveParams = {
-    id: string;
-  };
-
-  type TaskControllerRetrieveParams = {
     id: string;
   };
 
@@ -57,9 +43,22 @@ declare namespace API {
     id: string;
   };
 
+  type TaskEnvControllerFormParams = {
+    id: string;
+    taskId: string;
+  };
+
+  type TaskEnvControllerRemoveParams = {
+    id: string;
+  };
+
+  type TaskEnvDto = {};
+
+  type TaskLogControllerRemoveParams = {
+    taskId: string;
+  };
+
   type UpsertScriptDto = {};
 
   type UpsertTaskDto = {};
-
-  type UpsertTaskEnvDto = {};
 }

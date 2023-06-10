@@ -1,8 +1,8 @@
 import { DeleteButton, ProDrawer } from '@/components';
 import {
-  TaskControllerEnvSearch,
-  TaskControllerRemoveEnv,
-} from '@/services/task';
+  TaskEnvControllerRemove,
+  TaskEnvControllerSearch,
+} from '@/services/taskEnv';
 import { DeleteOutlined, FormOutlined, PlusOutlined } from '@ant-design/icons';
 import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
 import { Button } from 'antd';
@@ -72,7 +72,7 @@ const Env: React.FC<EnvProps> = (props) => {
             <DeleteButton
               title={`确定删除吗？`}
               onOk={() =>
-                TaskControllerRemoveEnv({ taskId, id: record.id }).then(() =>
+                TaskEnvControllerRemove({ taskId, id: record.id }).then(() =>
                   actionRef.current?.reload(),
                 )
               }
@@ -119,7 +119,7 @@ const Env: React.FC<EnvProps> = (props) => {
           />,
         ]}
         request={(params, sort, filter) =>
-          TaskControllerEnvSearch({ params, filter, sort })
+          TaskEnvControllerSearch({ params, filter, sort })
         }
       />
     </ProDrawer>

@@ -1,8 +1,8 @@
 import { DeleteButton, ProDrawer } from '@/components';
 import {
-  TaskControllerLogSearch,
-  TaskControllerRemoveAllLog,
-} from '@/services/task';
+  TaskLogControllerLogSearch,
+  TaskLogControllerRemove,
+} from '@/services/taskLog';
 import { FieldTimeOutlined } from '@ant-design/icons';
 import { useRequest } from '@umijs/max';
 import { Button, Empty, Timeline, Typography } from 'antd';
@@ -22,7 +22,7 @@ const colorMap: any = {
 const { Title } = Typography;
 const TaskLog: React.FC<TaskLogDrawerProps> = (props) => {
   const { taskId, taskName } = props;
-  const { run, data, refresh } = useRequest(TaskControllerLogSearch, {
+  const { run, data, refresh } = useRequest(TaskLogControllerLogSearch, {
     manual: true,
   });
   return (
@@ -32,7 +32,7 @@ const TaskLog: React.FC<TaskLogDrawerProps> = (props) => {
           size={'middle'}
           type={'default'}
           onOk={async () => {
-            const { success } = await TaskControllerRemoveAllLog({ taskId });
+            const { success } = await TaskLogControllerRemove({ taskId });
             if (success) refresh();
           }}
         >

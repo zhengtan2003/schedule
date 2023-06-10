@@ -33,6 +33,11 @@ const Upsert = () => {
           }}
           request={ScriptControllerRetrieve as any}
           submitter={{
+            resetButtonProps: {
+              style: {
+                display: 'none',
+              },
+            },
             render: (_, dom) => <FooterToolbar>{dom}</FooterToolbar>,
           }}
         >

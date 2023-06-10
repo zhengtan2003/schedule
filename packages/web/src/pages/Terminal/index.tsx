@@ -31,9 +31,12 @@ const Terminal = () => {
   const term = useRef<Xterm>();
   const command = useRef('');
   const terminalDOM = useRef(null);
-  const { sendMessage } = useWebSocket('ws://localhost:8080', {
+  const { sendMessage } = useWebSocket(`ws://${location.host}/ws`, {
     onMessage: ({ data }) => {
       term.current?.write(data.replace(/\n/g, '\r\n'));
+    },
+    onError: (event) => {
+      console.log(event);
     },
   });
   useEffect(() => {

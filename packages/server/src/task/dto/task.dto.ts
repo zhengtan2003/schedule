@@ -1,17 +1,22 @@
-import { IsNotEmpty, IsOptional, IsDateString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsDateString, IsInt, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpsertTaskDto {
-    @IsOptional()
-    id?: string;
-    @IsOptional()
-    name: string;
-    @IsDateString()
-    @IsOptional()
-    startTime?: string;
-    @IsDateString()
-    @IsOptional()
-    endTime?: string;
-    cronTime?: string;
-    @IsNotEmpty()
-    scriptId: string;
+  @IsOptional()
+  @IsInt()
+  @Transform(({ value }) => parseInt(value))
+  id?: number;
+  @IsOptional()
+  name: string;
+  @IsDateString()
+  @IsOptional()
+  startTime?: string;
+  @IsDateString()
+  @IsOptional()
+  endTime?: string;
+  cronTime?: string;
+  @IsNotEmpty()
+  @IsInt()
+  @Transform(({ value }) => parseInt(value))
+  scriptId: number;
 }
