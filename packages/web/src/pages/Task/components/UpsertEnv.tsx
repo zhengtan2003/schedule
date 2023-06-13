@@ -31,6 +31,7 @@ const UpsertEnv: React.FC<UpsertEnvProps> = (props) => {
       initialValues={{
         id,
         taskId,
+        code:`{\n\n}`
       }}
       drawerProps={{ destroyOnClose: true }}
       request={TaskEnvControllerForm as any}
@@ -42,10 +43,11 @@ const UpsertEnv: React.FC<UpsertEnvProps> = (props) => {
     >
       <ProFormText hidden name={'id'} />
       <ProFormText hidden name={'taskId'} />
-      <Form.Item label={'.env'} name={'code'} rules={[{ required: true }]}>
+      <Form.Item label={'env'} name={'code'} rules={[{ required: true }]}>
         <Editor
           height="50vh"
           theme={'vs-dark'}
+          language={'json'}
           options={{
             automaticLayout: true,
             suggestOnTriggerCharacters: true,

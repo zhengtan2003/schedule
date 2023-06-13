@@ -1,14 +1,11 @@
 import { ActionButton, DeleteButton } from '@/components';
 import {
-  TaskControllerDebug,
+  // TaskControllerDebug,
   TaskControllerRemove,
   TaskControllerSearch,
-  TaskControllerStart,
-  TaskControllerStop,
+  TaskControllerToggle,
 } from '@/services/task';
 import {
-  BugOutlined,
-  DeleteOutlined,
   FormOutlined,
   PauseOutlined,
   PlusOutlined,
@@ -20,7 +17,7 @@ import {
   ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import React, { useRef } from 'react';
 import { UpsertTask } from './components';
 import Env from './components/Env';
@@ -31,6 +28,8 @@ export interface DataType {
   id: string;
   name: string;
   version: string;
+  cronName: string;
+  cronTime: string;
   updateTime: string;
   createTime: string;
   updateURL: string;
@@ -106,34 +105,39 @@ const Task: React.FC = () => {
         return (
           <>
             <Env taskId={record.id} taskName={record.name} />
-            {record.status === 2 ? (
-              <ActionButton
-                icon={<PauseOutlined />}
-                request={() => TaskControllerStop({ id: record.id })}
-                onSuccess={() => actionRef.current?.reload()}
-              />
-            ) : (
-              <ActionButton
-                icon={<RightOutlined />}
-                request={() => TaskControllerStart({ id: record.id })}
-                onSuccess={() => actionRef.current?.reload()}
-              />
-            )}
             <ActionButton
-              request={() => TaskControllerDebug({ id: record.id })}
-            >
-              <BugOutlined />
-            </ActionButton>
+              onSuccess={() => actionRef.current?.reload()}
+              tooltip={record.status === 2 ? '停止' : '开始'}
+              icon={record.status === 2 ? <PauseOutlined /> : <RightOutlined />}
+              request={() =>
+                TaskControllerToggle({
+                  id: +record.id,
+                  cronName: record.cronName,
+                  cronTime: record.cronTime,
+                })
+              }
+            />
+            {/*<ActionButton*/}
+            {/*  request={() => TaskControllerDebug({ id: record.id })}*/}
+            {/*>*/}
+            {/*  <BugOutlined />*/}
+            {/*</ActionButton>*/}
             <UpsertTask
               id={record.id}
               trigger={
-                <Button type={'link'} size={'small'}>
-                  <FormOutlined />
-                </Button>
+                <Tooltip title={'编辑'}>
+                  <Button type={'link'} size={'small'}>
+                    <FormOutlined />
+                  </Button>
+                </Tooltip>
               }
               onSuccess={() => actionRef.current?.reload()}
             />
-            <TaskLog taskId={record.id} taskName={record.name} />
+            <TaskLog
+              taskId={record.id}
+              taskName={record.name}
+              cronTime={record.cronTime}
+            />
             <DeleteButton
               title={`确认删除【${record.name}】吗？`}
               onOk={async () => {
@@ -142,9 +146,7 @@ const Task: React.FC = () => {
                 });
                 if (success) actionRef.current?.reload();
               }}
-            >
-              <DeleteOutlined />
-            </DeleteButton>
+            />
           </>
         );
       },

@@ -12,6 +12,7 @@ import UpsertEnv from './UpsertEnv';
 interface DataType {
   key: React.Key;
   id: string;
+  code: JSON;
   remark: string;
   updateTime: string;
   createTime: string;
@@ -31,6 +32,9 @@ const Env: React.FC<EnvProps> = (props) => {
       dataIndex: 'code',
       width: '260px',
       ellipsis: true,
+      render: (_, record) => {
+        return <>{JSON.stringify(record.code)}</>;
+      },
     },
     {
       title: '描述',
@@ -91,7 +95,7 @@ const Env: React.FC<EnvProps> = (props) => {
       title={`${taskName}-ENV`}
       trigger={
         <Button type={'link'} size={'small'}>
-          配置ENV
+          ENV
         </Button>
       }
     >

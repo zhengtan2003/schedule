@@ -1,7 +1,6 @@
-import { ExclamationCircleFilled } from '@ant-design/icons';
-import { Button, Modal } from 'antd';
-import { ButtonProps } from 'antd/es/button';
-import { ModalFuncProps } from 'antd/es/modal';
+import { DeleteOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import type { ButtonProps, ModalFuncProps } from 'antd';
+import { Button, Modal, Tooltip } from 'antd';
 import React from 'react';
 
 const { confirm } = Modal;
@@ -16,7 +15,7 @@ interface DeleteButtonProps {
 }
 
 const DeleteButton: React.FC<DeleteButtonProps> = (props) => {
-  const { title, children, type = 'link', size = 'small' } = props;
+  const { title, type = 'link', size = 'small' } = props;
   const onClick = () => {
     confirm({
       title,
@@ -28,9 +27,11 @@ const DeleteButton: React.FC<DeleteButtonProps> = (props) => {
     });
   };
   return (
-    <Button danger type={type} size={size} onClick={onClick}>
-      {children}
-    </Button>
+    <Tooltip title={'删除'}>
+      <Button danger type={type} size={size} onClick={onClick}>
+        <DeleteOutlined />
+      </Button>
+    </Tooltip>
   );
 };
 

@@ -1,8 +1,9 @@
 import { useRequest } from '@umijs/max';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import React from 'react';
 
 interface ActionButtonProps {
+  tooltip?: React.ReactNode;
   icon?: React.ReactNode;
   children?: React.ReactNode;
   request: (...args: any) => Promise<any>;
@@ -15,15 +16,17 @@ const ActionButton: React.FC<ActionButtonProps> = (props) => {
     onSuccess: props.onSuccess,
   });
   return (
-    <Button
-      icon={props.icon}
-      type={'link'}
-      size={'small'}
-      loading={loading}
-      onClick={run}
-    >
-      {props.children}
-    </Button>
+    <Tooltip title={props.tooltip}>
+      <Button
+        icon={props.icon}
+        type={'link'}
+        size={'small'}
+        loading={loading}
+        onClick={run}
+      >
+        {props.children}
+      </Button>
+    </Tooltip>
   );
 };
 

@@ -47,21 +47,6 @@ export async function TaskControllerRemove(
   });
 }
 
-/** 调试 GET /api/task/debug */
-export async function TaskControllerDebug(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerDebugParams,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/debug', {
-    method: 'GET',
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
 /** 列表 POST /api/task/search */
 export async function TaskControllerSearch(body: API.SearchDto, options?: { [key: string]: any }) {
   return request<any>('/api/task/search', {
@@ -74,32 +59,14 @@ export async function TaskControllerSearch(body: API.SearchDto, options?: { [key
   });
 }
 
-/** 开始 GET /api/task/start */
-export async function TaskControllerStart(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerStartParams,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/start', {
-    method: 'GET',
-    params: {
-      ...params,
+/** 开始/停止 POST /api/task/toggle */
+export async function TaskControllerToggle(body: API.ToggleDto, options?: { [key: string]: any }) {
+  return request<any>('/api/task/toggle', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
-    ...(options || {}),
-  });
-}
-
-/** 停止 GET /api/task/stop */
-export async function TaskControllerStop(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskControllerStopParams,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/stop', {
-    method: 'GET',
-    params: {
-      ...params,
-    },
+    data: body,
     ...(options || {}),
   });
 }

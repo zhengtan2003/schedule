@@ -23,23 +23,11 @@ declare namespace API {
 
   type SearchDto = {};
 
-  type TaskControllerDebugParams = {
-    id: string;
-  };
-
   type TaskControllerFromParams = {
     id: string;
   };
 
   type TaskControllerRemoveParams = {
-    id: string;
-  };
-
-  type TaskControllerStartParams = {
-    id: string;
-  };
-
-  type TaskControllerStopParams = {
     id: string;
   };
 
@@ -58,7 +46,17 @@ declare namespace API {
     taskId: string;
   };
 
+  type ToggleDto = {
+    id: number;
+    cronName: string;
+    cronTime: string;
+  };
+
   type UpsertScriptDto = {};
 
-  type UpsertTaskDto = {};
+  type UpsertTaskDto = {
+    id: number;
+    name: string;
+    scriptId: number;
+  };
 }

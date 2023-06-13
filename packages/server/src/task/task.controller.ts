@@ -1,6 +1,6 @@
 import { User } from '@/decorators/user.decorator';
 import { SearchDto } from '@/dto/search.dto';
-import { UpsertTaskDto } from '@/task/dto/task.dto';
+import { ToggleDto, UpsertTaskDto } from '@/task/dto/task.dto';
 import { TaskService } from '@/task/task.service';
 import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -30,23 +30,18 @@ export class TaskController {
     return this.taskService.remove(+id, user);
   }
 
-  @ApiOperation({ summary: '开始' })
-  @Get('start')
-  start(@Query('id') id: string, @User() user) {
-    return this.taskService.start(+id, user);
+  @ApiOperation({ summary: '开始/停止' })
+  @Post('toggle')
+  toggle(@Body() toggleDto: ToggleDto, @User() user) {
+    if (toggleDto.cronName) return this.taskService.stop(toggleDto, user);
+    return this.taskService.start(toggleDto, user);
   }
 
-  @ApiOperation({ summary: '停止' })
-  @Get('stop')
-  stop(@Query('id') id: string, @User() user) {
-    return this.taskService.stop(+id, user);
-  }
-
-  @ApiOperation({ summary: '调试' })
-  @Get('debug')
-  debug(@Query('id') id: string, @User() user) {
-    return this.taskService.debug(+id, user, true);
-  }
+  // @ApiOperation({ summary: '调试' })
+  // @Get('debug')
+  // debug(@Query('id') id: string, @User() user) {
+  //   return this.taskService.debug(+id, user, true);
+  // }
 
   @ApiOperation({ summary: '' })
   @Get()

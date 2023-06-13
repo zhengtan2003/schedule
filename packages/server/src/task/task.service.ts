@@ -1,6 +1,8 @@
 import { HttpResponse } from '@/http-response';
 import { ScriptService } from '@/script/script.service';
+import { TaskEnvService } from '@/task-env/task-env.service';
 import { TaskLogService } from '@/task-log/task-log.service';
+import { startCommandMaps } from '@/task/constants';
 import { Task } from '@/task/entities/task.entity';
 import { searchOptions } from '@/utils';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -8,7 +10,7 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { spawn } from 'child_process';
 import { CronJob } from 'cron';
-import * as dotenv from 'dotenv';
+import * as process from 'process';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { UpsertTaskDto } from './dto/task.dto';
@@ -21,6 +23,7 @@ export class TaskService {
     private scriptService: ScriptService,
     private schedulerRegistry: SchedulerRegistry,
     private taskLogService: TaskLogService,
+    private taskEnvService: TaskEnvService,
   ) {}
 
   async findOne(options, skipException = false) {
@@ -43,16 +46,29 @@ export class TaskService {
   }
 
   async update(upsertTaskDto: UpsertTaskDto, user) {
-    const { id, cronTime = '0 7 * * *' } = upsertTaskDto;
+    const { id, scriptId, ...retDto } = upsertTaskDto;
+    const task = await this.findOne({ where: { id, user } });
+    if (
+      retDto.cronTime !== task.cronTime &&
+      task.cronName &&
+      this.schedulerRegistry.doesExist('cron', task.cronName)
+    ) {
+      this.schedulerRegistry.deleteCronJob(task.cronName);
+      this.cronLaunch(
+        {
+          cronTime: retDto.cronTime,
+          cronName: task.cronName,
+          id,
+        },
+        user,
+      );
+    }
     await this.taskRepository.update(
       {
-        id: +id,
+        id,
         user,
       },
-      {
-        cronTime,
-        name: upsertTaskDto.name,
-      },
+      retDto,
     );
     return new HttpResponse({ showType: 1 });
   }
@@ -69,18 +85,74 @@ export class TaskService {
     return tasks ?? [];
   }
 
-  async start(id: number, user) {
-    const cronName = uuidv4();
+  async execute(id: number, user) {
     const task = await this.findOne({
+      relations: ['taskEnv', 'script'],
       where: { id, user },
     });
-    console.log(`开启任务：${cronName}，当前时间${new Date()}`);
-    const cronJob = new CronJob(task.cronTime, () => {
-      console.log(`执行任务：${cronName}`);
-      this.debug(id, user);
+    console.log(task.cronName);
+    console.log(task.script);
+    let outLog = '';
+    let statusLog: 0 | 1 = 1;
+    const startCommand = startCommandMaps[task.script.language];
+    task.taskEnv.forEach((env) => {
+      const cp = spawn(`${startCommand} ${task.script.filePath}`, {
+        shell: true,
+        env: {
+          ...process.env,
+          ...JSON.parse(env.code),
+        },
+      });
+      cp.stdout.on('data', (bufferData) => {
+        const data = `${bufferData}`.trim();
+        const regex = /@(\w+)=>/;
+        const matchArray = data.match(regex);
+        if (matchArray) {
+          const key = matchArray[1];
+          const codeParsed = JSON.parse(env.code);
+          codeParsed[key] = data.replace(regex, '');
+          this.taskEnvService.update(
+            {
+              taskId: id,
+              id: env.id,
+              code: JSON.stringify(codeParsed, null, 2),
+            },
+            user,
+          );
+        } else {
+          outLog += `${bufferData}`;
+        }
+      });
+      cp.stderr.on('data', (bufferData) => {
+        statusLog = 0;
+        outLog += `${bufferData}`;
+      });
+      cp.on('close', () => {
+        this.taskLogService.create(
+          {
+            log: outLog,
+            taskId: id,
+            status: statusLog,
+          },
+          user,
+        );
+        outLog = '';
+      });
+    });
+  }
+
+  cronLaunch({ cronName, cronTime, id }, user) {
+    const cronJob = new CronJob(cronTime, () => {
+      this.execute(id, user);
     });
     this.schedulerRegistry.addCronJob(cronName, cronJob);
     cronJob.start();
+  }
+
+  async start(toggleDto, user) {
+    const { cronTime, id } = toggleDto;
+    const cronName = uuidv4();
+    this.cronLaunch({ cronName, cronTime, id }, user);
     await this.taskRepository.update(
       {
         id,
@@ -96,72 +168,36 @@ export class TaskService {
     });
   }
 
-  async stop(id: number, user) {
-    const task = await this.findOne({ where: { id, user } });
-    console.log(`停止定时任务：${task.cronName}，${task.cronTime}`);
+  async stop(toggleDto, user) {
+    const { cronName, id } = toggleDto;
     try {
-      await this.schedulerRegistry.deleteCronJob(task.cronName);
+      await this.schedulerRegistry.deleteCronJob(cronName);
     } catch (e) {}
-    task.status = 1;
-    task.cronName = null;
-    await this.taskRepository.save(task);
+    await this.taskRepository.update(
+      {
+        id,
+        user,
+      },
+      {
+        status: 1,
+        cronName: null,
+      },
+    );
     return new HttpResponse({
       showType: 1,
     });
   }
 
-  async debug(id: number, user, needResponse?: boolean) {
-    const task = await this.findOne({
-      relations: ['taskEnv', 'script'],
-      where: { id, user },
-    });
-    let log = '';
-    let statusLog: 0 | 1 = 1;
-    const script = task.script;
-    const envs = task.taskEnv;
-    envs.forEach((env) => {
-      const cp = spawn(`node ${script.filePath}`, {
-        shell: true,
-        env: {
-          ...process.env,
-          ...dotenv.parse(env.code),
-        },
-      });
-      cp.stdout.on('data', (data) => {
-        log += `${data}`;
-      });
-      cp.stderr.on('data', (data) => {
-        log += `${data}`;
-        statusLog = 0;
-      });
-      cp.on('close', () => {
-        console.log('log', log);
-        this.taskLogService.create(
-          {
-            log,
-            taskId: id,
-            status: statusLog,
-          },
-          user,
-        );
-        log = '';
-        console.log(`任务执行结束：${task.cronName}`);
-      });
-    });
-    if (needResponse) {
-      return new HttpResponse({
-        showType: 1,
-        message: '任务执行成功，稍后可在日志中查看结果',
-      });
-    }
-  }
+  // async debug(id: number, user, needResponse?: boolean) {
+  //
+  // }
 
   async remove(id: number, user) {
     const task = await this.findOne({
       where: { id, user },
     });
-    if (task.cronName) {
-      await this.schedulerRegistry.deleteCronJob(task.cronName);
+    if (this.schedulerRegistry.doesExist('cron', task.cronName)) {
+      this.schedulerRegistry.deleteCronJob(task.cronName);
     }
     await this.taskRepository.remove(task);
     return new HttpResponse({ showType: 1 });

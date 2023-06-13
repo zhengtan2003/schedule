@@ -43,12 +43,10 @@ const Upsert = () => {
         >
           <ProFormText hidden name={'id'} />
           <ProFormSelect
-            disabled
             width={'sm'}
             name={'language'}
             label={'language'}
-            tooltip={'暂时只支持javascript，后续开放python、typescript、ruby'}
-            options={['javascript', 'python', 'typescript', 'ruby']}
+            options={['javascript', 'python', 'ruby']}
           />
           <ProFormDependency name={['language']}>
             {({ language }) => {

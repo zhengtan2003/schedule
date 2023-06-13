@@ -1,4 +1,5 @@
 import { ScriptModule } from '@/script/script.module';
+import { TaskEnvModule } from '@/task-env/task-env.module';
 import { TaskLogModule } from '@/task-log/task-log.module';
 import { Task } from '@/task/entities/task.entity';
 import { TaskController } from '@/task/task.controller';
@@ -7,7 +8,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Task]), ScriptModule, TaskLogModule],
+  imports: [
+    TypeOrmModule.forFeature([Task]),
+    ScriptModule,
+    TaskLogModule,
+    TaskEnvModule,
+  ],
   controllers: [TaskController],
   providers: [TaskService],
   exports: [TaskService],
