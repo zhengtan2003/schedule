@@ -1,7 +1,7 @@
+import { EnvService } from '@/env/env.service';
 import { HttpResponse } from '@/http-response';
+import { LogService } from '@/log/log.service';
 import { ScriptService } from '@/script/script.service';
-import { TaskEnvService } from '@/task-env/task-env.service';
-import { TaskLogService } from '@/task-log/task-log.service';
 import { startCommandMaps } from '@/task/constants';
 import { Task } from '@/task/entities/task.entity';
 import { searchOptions } from '@/utils';
@@ -22,8 +22,8 @@ export class TaskService {
     private taskRepository: Repository<Task>,
     private scriptService: ScriptService,
     private schedulerRegistry: SchedulerRegistry,
-    private taskLogService: TaskLogService,
-    private taskEnvService: TaskEnvService,
+    private logService: LogService,
+    private envService: EnvService,
   ) {}
 
   async findOne(options, skipException = false) {
@@ -87,15 +87,14 @@ export class TaskService {
 
   async execute(id: number, user) {
     const task = await this.findOne({
-      relations: ['taskEnv', 'script'],
+      relations: ['env', 'script'],
       where: { id, user },
     });
-    console.log(task.cronName);
-    console.log(task.script);
-    let outLog = '';
-    let statusLog: 0 | 1 = 1;
     const startCommand = startCommandMaps[task.script.language];
-    task.taskEnv.forEach((env) => {
+    task.env.forEach((env) => {
+      let outLog = '';
+      let statusLog: 0 | 1 = 1;
+      const startTime = Date.now();
       const cp = spawn(`${startCommand} ${task.script.filePath}`, {
         shell: true,
         env: {
@@ -111,7 +110,7 @@ export class TaskService {
           const key = matchArray[1];
           const codeParsed = JSON.parse(env.code);
           codeParsed[key] = data.replace(regex, '');
-          this.taskEnvService.update(
+          this.envService.update(
             {
               taskId: id,
               id: env.id,
@@ -128,11 +127,13 @@ export class TaskService {
         outLog += `${bufferData}`;
       });
       cp.on('close', () => {
-        this.taskLogService.create(
+        this.logService.create(
           {
             log: outLog,
             taskId: id,
+            envId: env.id,
             status: statusLog,
+            executionTime: (Date.now() - startTime) / 1000,
           },
           user,
         );
@@ -187,10 +188,6 @@ export class TaskService {
       showType: 1,
     });
   }
-
-  // async debug(id: number, user, needResponse?: boolean) {
-  //
-  // }
 
   async remove(id: number, user) {
     const task = await this.findOne({

@@ -1,6 +1,6 @@
+import { Env } from '@/env/entities/env.entity';
+import { Log } from '@/log/entities/log.entity';
 import { Script } from '@/script/entities/script.entity';
-import { TaskEnv } from '@/task-env/entities/task-env.entity';
-import { TaskLog } from '@/task-log/entities/task-log.entity';
 import { User } from '@/user/entities/user.entity';
 import {
   Column,
@@ -30,10 +30,10 @@ export class Task {
   cronName: string;
   @ManyToOne(() => Script, (script) => script.task)
   script: Script;
-  @OneToMany(() => TaskLog, (taskLog) => taskLog.task)
-  taskLog: TaskLog[];
-  @OneToMany(() => TaskEnv, (taskEnv) => taskEnv.task)
-  taskEnv: TaskEnv[];
+  @OneToMany(() => Log, (Log) => Log.task)
+  log: Log[];
+  @OneToMany(() => Env, (Env) => Env.task)
+  env: Env[];
   @ManyToOne(() => User, (user) => user.task)
   user: User;
   @PrimaryGeneratedColumn()

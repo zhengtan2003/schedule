@@ -1,3 +1,4 @@
+import { Log } from '@/log/entities/log.entity';
 import { Task } from '@/task/entities/task.entity';
 import { User } from '@/user/entities/user.entity';
 import {
@@ -5,19 +6,22 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class TaskLog {
+export class Env {
   @Column('longtext')
-  log: string;
-  @Column()
-  status: number;
-  @ManyToOne(() => Task, (task) => task.taskLog, { onDelete: 'CASCADE' })
+  code: string;
+  @Column({ nullable: true })
+  description: string;
+  @ManyToOne(() => Task, (Task) => Task.env, { onDelete: 'CASCADE' })
   task: Task;
-  @ManyToOne(() => User, (user) => user.taskLog)
+  @OneToMany(() => Log, (Log) => Log.env)
+  log: Log;
+  @ManyToOne(() => User, (User) => User.env)
   user: User;
   @PrimaryGeneratedColumn()
   readonly id: number;

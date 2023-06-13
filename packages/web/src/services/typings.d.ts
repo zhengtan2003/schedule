@@ -6,6 +6,18 @@ declare namespace API {
     password: string;
   };
 
+  type EnvControllerFormParams = {
+    id: string;
+  };
+
+  type EnvControllerRemoveParams = {
+    id: string;
+  };
+
+  type LogControllerRemoveParams = {
+    envId: string;
+  };
+
   type LoginDto = {
     /** 邮箱 */
     username: string;
@@ -31,21 +43,6 @@ declare namespace API {
     id: string;
   };
 
-  type TaskEnvControllerFormParams = {
-    id: string;
-    taskId: string;
-  };
-
-  type TaskEnvControllerRemoveParams = {
-    id: string;
-  };
-
-  type TaskEnvDto = {};
-
-  type TaskLogControllerRemoveParams = {
-    taskId: string;
-  };
-
   type ToggleDto = {
     id: number;
     cronName: string;
@@ -59,4 +56,6 @@ declare namespace API {
     name: string;
     scriptId: number;
   };
+
+  type UpsertTaskEnvDto = {};
 }

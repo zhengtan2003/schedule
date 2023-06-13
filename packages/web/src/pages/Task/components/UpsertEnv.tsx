@@ -1,7 +1,4 @@
-import {
-  TaskEnvControllerForm,
-  TaskEnvControllerUpsertEnv,
-} from '@/services/taskEnv';
+import { EnvControllerForm, EnvControllerUpsert } from '@/services/env';
 import {
   DrawerForm,
   ProFormInstance,
@@ -31,12 +28,12 @@ const UpsertEnv: React.FC<UpsertEnvProps> = (props) => {
       initialValues={{
         id,
         taskId,
-        code:`{\n\n}`
+        code: `{\n\t\n}`,
       }}
       drawerProps={{ destroyOnClose: true }}
-      request={TaskEnvControllerForm as any}
+      request={EnvControllerForm as any}
       onFinish={async (body) => {
-        const { success } = await TaskEnvControllerUpsertEnv(body);
+        const { success } = await EnvControllerUpsert(body);
         if (success) props.onSuccess();
         return success;
       }}

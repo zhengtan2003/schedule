@@ -20,8 +20,7 @@ import {
 import { Button, Tooltip } from 'antd';
 import React, { useRef } from 'react';
 import { UpsertTask } from './components';
-import Env from './components/Env';
-import TaskLog from './components/TaskLog';
+import EnvProTable from './EnvProTable';
 
 export interface DataType {
   key: React.Key;
@@ -104,7 +103,7 @@ const Task: React.FC = () => {
       render: (_: any, record: DataType) => {
         return (
           <>
-            <Env taskId={record.id} taskName={record.name} />
+            {/*<EnvProTable taskId={record.id} taskName={record.name} />*/}
             <ActionButton
               onSuccess={() => actionRef.current?.reload()}
               tooltip={record.status === 2 ? '停止' : '开始'}
@@ -117,11 +116,6 @@ const Task: React.FC = () => {
                 })
               }
             />
-            {/*<ActionButton*/}
-            {/*  request={() => TaskControllerDebug({ id: record.id })}*/}
-            {/*>*/}
-            {/*  <BugOutlined />*/}
-            {/*</ActionButton>*/}
             <UpsertTask
               id={record.id}
               trigger={
@@ -132,11 +126,6 @@ const Task: React.FC = () => {
                 </Tooltip>
               }
               onSuccess={() => actionRef.current?.reload()}
-            />
-            <TaskLog
-              taskId={record.id}
-              taskName={record.name}
-              cronTime={record.cronTime}
             />
             <DeleteButton
               title={`确认删除【${record.name}】吗？`}
@@ -159,6 +148,11 @@ const Task: React.FC = () => {
         columns={columns}
         scroll={{ x: 1300 }}
         actionRef={actionRef}
+        expandable={{
+          expandedRowRender: (record) => (
+            <EnvProTable cronTime={record.cronTime} taskId={record.id} />
+          ),
+        }}
         toolBarRender={() => [
           <UpsertTask
             key={'upsert'}

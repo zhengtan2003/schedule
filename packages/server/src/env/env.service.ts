@@ -3,14 +3,14 @@ import { searchOrder, searchParams } from '@/utils';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TaskEnvDto } from './dto/task-env.dto';
-import { TaskEnv } from './entities/task-env.entity';
+import { UpsertTaskEnvDto } from './dto/env.dto';
+import { Env } from './entities/env.entity';
 
 @Injectable()
-export class TaskEnvService {
+export class EnvService {
   constructor(
-    @InjectRepository(TaskEnv)
-    private readonly taskEnvRepository: Repository<TaskEnv>,
+    @InjectRepository(Env)
+    private readonly taskEnvRepository: Repository<Env>,
   ) {}
 
   async findOne(options, skipException = false) {
@@ -21,7 +21,7 @@ export class TaskEnvService {
     return taskEnv;
   }
 
-  async create(createTaskEnvDto: TaskEnvDto, user) {
+  async create(createTaskEnvDto: UpsertTaskEnvDto, user) {
     const { taskId, ...retDto } = createTaskEnvDto;
     const env = this.taskEnvRepository.create({
       ...retDto,
@@ -32,7 +32,7 @@ export class TaskEnvService {
     return new HttpResponse({ showType: 1 });
   }
 
-  async update(updateTaskEnvDto: TaskEnvDto, user) {
+  async update(updateTaskEnvDto: UpsertTaskEnvDto, user) {
     const { id, taskId, ...retDto } = updateTaskEnvDto;
     await this.taskEnvRepository.update(
       { id, task: { id: taskId }, user },
@@ -64,9 +64,9 @@ export class TaskEnvService {
     return new HttpResponse({ data, total });
   }
 
-  async form(id: number, taskId: number, user) {
-    if (!id || !taskId) return {};
-    const env = await this.findOne({ where: { id, task: taskId, user } }, true);
+  async form(id: number, user) {
+    if (!id) return {};
+    const env = await this.findOne({ where: { id, user } }, true);
     if (!env) return {};
     return {
       code: env.code,

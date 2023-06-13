@@ -2,12 +2,12 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
-/** 创建/更新 POST /api/task/env */
-export async function TaskEnvControllerUpsertEnv(
-  body: API.TaskEnvDto,
+/** 创建/更新 POST /api/env */
+export async function EnvControllerUpsert(
+  body: API.UpsertTaskEnvDto,
   options?: { [key: string]: any },
 ) {
-  return request<any>('/api/task/env', {
+  return request<any>('/api/env', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -17,13 +17,13 @@ export async function TaskEnvControllerUpsertEnv(
   });
 }
 
-/** 删除 DELETE /api/task/env */
-export async function TaskEnvControllerRemove(
+/** 删除 DELETE /api/env */
+export async function EnvControllerRemove(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskEnvControllerRemoveParams,
+  params: API.EnvControllerRemoveParams,
   options?: { [key: string]: any },
 ) {
-  return request<any>('/api/task/env', {
+  return request<any>('/api/env', {
     method: 'DELETE',
     params: {
       ...params,
@@ -32,13 +32,13 @@ export async function TaskEnvControllerRemove(
   });
 }
 
-/** 此处后端没有提供注释 GET /api/task/env/from */
-export async function TaskEnvControllerForm(
+/** 此处后端没有提供注释 GET /api/env/from */
+export async function EnvControllerForm(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.TaskEnvControllerFormParams,
+  params: API.EnvControllerFormParams,
   options?: { [key: string]: any },
 ) {
-  return request<any>('/api/task/env/from', {
+  return request<any>('/api/env/from', {
     method: 'GET',
     params: {
       ...params,
@@ -47,12 +47,9 @@ export async function TaskEnvControllerForm(
   });
 }
 
-/** 🔍列表 POST /api/task/env/search */
-export async function TaskEnvControllerSearch(
-  body: API.SearchDto,
-  options?: { [key: string]: any },
-) {
-  return request<any>('/api/task/env/search', {
+/** 🔍列表 POST /api/env/search */
+export async function EnvControllerSearch(body: API.SearchDto, options?: { [key: string]: any }) {
+  return request<any>('/api/env/search', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

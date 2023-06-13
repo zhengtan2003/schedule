@@ -1,16 +1,16 @@
+import { AppController } from '@/app.controller';
+import { AppService } from '@/app.service';
+import { AuthModule } from '@/auth/auth.module';
+import { EnvModule } from '@/env/env.module';
+import { LogModule } from '@/log/log.module';
+import { ScriptModule } from '@/script/script.module';
+import { TaskModule } from '@/task/task.module';
+import { TerminalModule } from '@/terminal/terminal.module';
+import { UserModule } from '@/user/user.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { ScriptModule } from './script/script.module';
-import { TaskEnvModule } from './task-env/task-env.module';
-import { TaskModule } from './task/task.module';
-import { TerminalModule } from './terminal/terminal.module';
-import { UserModule } from './user/user.module';
-import { TaskLogModule } from './task-log/task-log.module';
 
 @Module({
   imports: [
@@ -33,8 +33,8 @@ import { TaskLogModule } from './task-log/task-log.module';
     ScriptModule,
     TerminalModule,
     ScheduleModule.forRoot(),
-    TaskEnvModule,
-    TaskLogModule,
+    EnvModule,
+    LogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

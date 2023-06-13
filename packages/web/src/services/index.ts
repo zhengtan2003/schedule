@@ -6,13 +6,13 @@ import * as user from './user';
 import * as auth from './auth';
 import * as task from './task';
 import * as script from './script';
-import * as taskLog from './taskLog';
-import * as taskEnv from './taskEnv';
+import * as env from './env';
+import * as log from './log';
 export default {
   user,
   auth,
   task,
   script,
-  taskLog,
-  taskEnv,
+  env,
+  log,
 };
