@@ -7,12 +7,12 @@ import * as auth from './auth';
 import * as task from './task';
 import * as script from './script';
 import * as env from './env';
-import * as log from './log';
+import * as logger from './logger';
 export default {
   user,
   auth,
   task,
   script,
   env,
-  log,
+  logger,
 };

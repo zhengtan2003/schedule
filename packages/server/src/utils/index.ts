@@ -1,3 +1,4 @@
+export * from './getStartCommand';
 export * from './readFileSync';
 export * from './searchOptions';
 export * from './searchOrder';

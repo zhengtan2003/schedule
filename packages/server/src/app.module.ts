@@ -2,10 +2,10 @@ import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 import { AuthModule } from '@/auth/auth.module';
 import { EnvModule } from '@/env/env.module';
-import { LogModule } from '@/log/log.module';
+import { LoggerModule } from '@/logger/logger.module';
 import { ScriptModule } from '@/script/script.module';
+import { SocketModule } from '@/socket/socket.module';
 import { TaskModule } from '@/task/task.module';
-import { TerminalModule } from '@/terminal/terminal.module';
 import { UserModule } from '@/user/user.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -31,10 +31,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     AuthModule,
     TaskModule,
     ScriptModule,
-    TerminalModule,
+    SocketModule,
     ScheduleModule.forRoot(),
     EnvModule,
-    LogModule,
+    LoggerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

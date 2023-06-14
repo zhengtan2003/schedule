@@ -1,10 +1,18 @@
 import { DeleteButton, ProDrawer } from '@/components';
-import { LogControllerLogSearch, LogControllerRemove } from '@/services/log';
-import { FileSyncOutlined } from '@ant-design/icons';
+import {
+  LoggerControllerLogSearch,
+  LoggerControllerRemove,
+} from '@/services/logger';
+import { toDateTimeString } from '@/utils';
+import {
+  CheckCircleFilled,
+  ClockCircleOutlined,
+  CloseCircleFilled,
+  FileSyncOutlined,
+} from '@ant-design/icons';
 import { useRequest } from '@umijs/max';
-import { Button, Timeline, Typography } from 'antd';
+import { Button, Tag, Timeline, Typography } from 'antd';
 import CronParser from 'cron-parser';
-import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 
 interface LogDrawerProps {
@@ -12,15 +20,20 @@ interface LogDrawerProps {
   cronTime: string;
 }
 
-const colorMap: any = {
-  1: '#52c41a',
-  0: '#ff4d4f',
+const statusMaps: any = {
+  1: {
+    color: '#52c41a',
+    dot: <CheckCircleFilled />,
+  },
+  0: {
+    color: '#ff4d4f',
+    dot: <CloseCircleFilled />,
+  },
 };
-
 const { Title } = Typography;
-const Log: React.FC<LogDrawerProps> = (props) => {
+const Logger: React.FC<LogDrawerProps> = (props) => {
   const { envId, cronTime } = props;
-  const { run, data, refresh } = useRequest(LogControllerLogSearch, {
+  const { run, data, refresh } = useRequest(LoggerControllerLogSearch, {
     manual: true,
   });
   const items = useMemo(
@@ -28,12 +41,11 @@ const Log: React.FC<LogDrawerProps> = (props) => {
       data?.reduce(
         (result: any, item: any) => {
           result.push({
-            color: colorMap[item.status],
+            ...statusMaps[item.status],
             children: (
               <Typography>
-                <Title level={5}>
-                  {dayjs(item.createTime).format('YYYY-MM-DD HH:mm:ss')}
-                </Title>
+                <Title level={5}>{toDateTimeString(item.createTime)}</Title>
+                <Tag color="magenta">耗时：{item.executionTime}s</Tag>
                 <pre style={{ background: '#000', color: '#F8F8F8' }}>
                   {item.log}
                 </pre>
@@ -44,13 +56,14 @@ const Log: React.FC<LogDrawerProps> = (props) => {
         },
         [
           {
+            dot: <ClockCircleOutlined />,
             color: 'gray',
             children: (
               <Typography>
                 <Title level={5}>
-                  {dayjs(
+                  {toDateTimeString(
                     CronParser.parseExpression(cronTime).next().toDate(),
-                  ).format('YYYY-MM-DD HH:mm:ss')}
+                  )}
                 </Title>
               </Typography>
             ),
@@ -67,7 +80,7 @@ const Log: React.FC<LogDrawerProps> = (props) => {
           size={'middle'}
           type={'default'}
           onOk={async () => {
-            const { success } = await LogControllerRemove({ envId });
+            const { success } = await LoggerControllerRemove({ envId });
             if (success) refresh();
           }}
         >
@@ -97,4 +110,4 @@ const Log: React.FC<LogDrawerProps> = (props) => {
   );
 };
 
-export default Log;
+export default Logger;

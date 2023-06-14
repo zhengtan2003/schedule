@@ -14,7 +14,7 @@ declare namespace API {
     id: string;
   };
 
-  type LogControllerRemoveParams = {
+  type LoggerControllerRemoveParams = {
     envId: string;
   };
 

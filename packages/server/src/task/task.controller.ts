@@ -37,12 +37,6 @@ export class TaskController {
     return this.taskService.start(toggleDto, user);
   }
 
-  // @ApiOperation({ summary: '调试' })
-  // @Get('debug')
-  // debug(@Query('id') id: string, @User() user) {
-  //   return this.taskService.debug(+id, user, true);
-  // }
-
   @ApiOperation({ summary: '' })
   @Get()
   from(@Query('id') id: string, @User() user) {

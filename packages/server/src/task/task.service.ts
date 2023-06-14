@@ -1,10 +1,9 @@
 import { EnvService } from '@/env/env.service';
 import { HttpResponse } from '@/http-response';
-import { LogService } from '@/log/log.service';
+import { LoggerService } from '@/logger/logger.service';
 import { ScriptService } from '@/script/script.service';
-import { startCommandMaps } from '@/task/constants';
 import { Task } from '@/task/entities/task.entity';
-import { searchOptions } from '@/utils';
+import { getStartCommand, searchOptions } from '@/utils';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,7 +21,7 @@ export class TaskService {
     private taskRepository: Repository<Task>,
     private scriptService: ScriptService,
     private schedulerRegistry: SchedulerRegistry,
-    private logService: LogService,
+    private loggerService: LoggerService,
     private envService: EnvService,
   ) {}
 
@@ -85,66 +84,83 @@ export class TaskService {
     return tasks ?? [];
   }
 
-  async execute(id: number, user) {
-    const task = await this.findOne({
-      relations: ['env', 'script'],
-      where: { id, user },
+  spawn({ task, env }, user) {
+    let outLog = '';
+    let statusLog: 0 | 1 = 1;
+    const startTime = Date.now();
+    const startCommand = getStartCommand(task.script.language);
+    const cp = spawn(`${startCommand} ${task.script.filePath}`, {
+      shell: true,
+      env: {
+        ...process.env,
+        ...JSON.parse(env.code),
+      },
     });
-    const startCommand = startCommandMaps[task.script.language];
-    task.env.forEach((env) => {
-      let outLog = '';
-      let statusLog: 0 | 1 = 1;
-      const startTime = Date.now();
-      const cp = spawn(`${startCommand} ${task.script.filePath}`, {
-        shell: true,
-        env: {
-          ...process.env,
-          ...JSON.parse(env.code),
-        },
-      });
-      cp.stdout.on('data', (bufferData) => {
-        const data = `${bufferData}`.trim();
-        const regex = /@(\w+)=>/;
-        const matchArray = data.match(regex);
-        if (matchArray) {
-          const key = matchArray[1];
-          const codeParsed = JSON.parse(env.code);
-          codeParsed[key] = data.replace(regex, '');
-          this.envService.update(
-            {
-              taskId: id,
-              id: env.id,
-              code: JSON.stringify(codeParsed, null, 2),
-            },
-            user,
-          );
-        } else {
-          outLog += `${bufferData}`;
-        }
-      });
-      cp.stderr.on('data', (bufferData) => {
-        statusLog = 0;
-        outLog += `${bufferData}`;
-      });
-      cp.on('close', () => {
-        this.logService.create(
+    cp.stdout.on('data', (bufferData) => {
+      const data = `${bufferData}`.trim();
+      const regex = /@(\w+)=>/;
+      const matchArray = data.match(regex);
+      if (matchArray) {
+        const key = matchArray[1];
+        const codeParsed = JSON.parse(env.code);
+        codeParsed[key] = data.replace(regex, '');
+        this.envService.update(
           {
-            log: outLog,
-            taskId: id,
-            envId: env.id,
-            status: statusLog,
-            executionTime: (Date.now() - startTime) / 1000,
+            id: env.id,
+            taskId: task.id,
+            code: JSON.stringify(codeParsed, null, 2),
           },
           user,
         );
-        outLog = '';
-      });
+      } else {
+        outLog += `${bufferData}`;
+      }
+    });
+    cp.stderr.on('data', (bufferData) => {
+      statusLog = 0;
+      outLog += `${bufferData}`;
+    });
+    cp.on('close', () => {
+      this.loggerService.create(
+        {
+          log: outLog,
+          envId: env.id,
+          taskId: task.id,
+          status: statusLog,
+          executionTime: (Date.now() - startTime) / 1000,
+        },
+        user,
+      );
+      outLog = '';
     });
   }
 
+  async debug({ taskId, envId, onStdout, onStderr, onClose }: any, user) {
+    const task = await this.findOne({
+      relations: ['script'],
+      where: { id: taskId, user },
+    });
+    const env = await this.envService.findOne({ where: { id: envId } });
+    // this.spawn(
+    //   {
+    //     task,
+    //     env,
+    //     onStdout,
+    //     onStderr,
+    //     onClose,
+    //   },
+    //   user,
+    // );
+    return new HttpResponse();
+  }
+
   cronLaunch({ cronName, cronTime, id }, user) {
-    const cronJob = new CronJob(cronTime, () => {
-      this.execute(id, user);
+    const cronJob = new CronJob(cronTime, async () => {
+      const task = await this.findOne({
+        relations: ['env', 'script'],
+        where: { id, user },
+      });
+      task.env.forEach((env) => this.spawn({ task, env }, user));
     });
     this.schedulerRegistry.addCronJob(cronName, cronJob);
     cronJob.start();

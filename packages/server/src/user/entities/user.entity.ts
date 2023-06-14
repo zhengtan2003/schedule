@@ -1,5 +1,5 @@
 import { Env } from '@/env/entities/env.entity';
-import { Log } from '@/log/entities/log.entity';
+import { Logger } from '@/logger/entities/logger.entity';
 import { Script } from '@/script/entities/script.entity';
 import { Task } from '@/task/entities/task.entity';
 import {
@@ -21,8 +21,8 @@ export class User {
   task: Task[];
   @OneToMany(() => Env, (Env) => Env.user)
   env: Env[];
-  @OneToMany(() => Log, (Log) => Log.user)
-  log: Log[];
+  @OneToMany(() => Logger, (Logger) => Logger.user)
+  logger: Logger[];
   @OneToMany(() => Script, (script) => script.user)
   script: Script[];
   @PrimaryGeneratedColumn()

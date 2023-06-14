@@ -6,16 +6,12 @@ import { history } from '@umijs/max';
 import { defaultSettings } from '../config/defaultSettings';
 import { UserControllerCurrent } from './services/user';
 
-loader.init().then(() => console.log('monaco-editor：初始化加载完成'));
-
 export * from './request';
 
-const isDev = process.env.NODE_ENV === 'development';
+loader.init().then(() => console.log('monaco-editor：初始化加载完成'));
+
 const loginPath = '/login';
 
-/**
- * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
- * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
   currentUser?: any;
@@ -50,10 +46,7 @@ export async function getInitialState(): Promise<{
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout /
-export const layout: RunTimeLayoutConfig = ({
-  initialState,
-  setInitialState,
-}) => {
+export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
     avatarProps: {
       src: '/avatar.jpg',
@@ -61,9 +54,6 @@ export const layout: RunTimeLayoutConfig = ({
       render: (_, avatarChildren) => {
         return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
       },
-    },
-    waterMarkProps: {
-      content: initialState?.currentUser?.email,
     },
     onPageChange: () => {
       const { location } = history;

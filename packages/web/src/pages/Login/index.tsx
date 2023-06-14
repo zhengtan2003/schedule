@@ -9,6 +9,7 @@ import { defaultSettings } from '../../../config/defaultSettings';
 
 const Login: React.FC = () => {
   const { initialState, setInitialState } = useModel('@@initialState');
+  const { connect } = useModel('socket');
   const containerClassName = useEmotionCss(() => {
     return {
       display: 'flex',
@@ -39,6 +40,7 @@ const Login: React.FC = () => {
     });
     localStorage.setItem('authorization', `Bearer ${data.accessToken}`);
     await fetchUserInfo();
+    connect();
     const urlParams = new URL(window.location.href).searchParams;
     history.push(urlParams.get('redirect') || '/');
   };

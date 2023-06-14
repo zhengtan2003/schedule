@@ -1,4 +1,4 @@
-import { Log } from '@/log/entities/log.entity';
+import { Logger } from '@/logger/entities/logger.entity';
 import { Task } from '@/task/entities/task.entity';
 import { User } from '@/user/entities/user.entity';
 import {
@@ -19,8 +19,8 @@ export class Env {
   description: string;
   @ManyToOne(() => Task, (Task) => Task.env, { onDelete: 'CASCADE' })
   task: Task;
-  @OneToMany(() => Log, (Log) => Log.env)
-  log: Log;
+  @OneToMany(() => Logger, (Logger) => Logger.env)
+  logger: Logger;
   @ManyToOne(() => User, (User) => User.env)
   user: User;
   @PrimaryGeneratedColumn()

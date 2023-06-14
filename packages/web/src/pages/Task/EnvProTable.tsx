@@ -1,10 +1,11 @@
 import { DeleteButton } from '@/components';
+import Debug from '@/pages/Task/components/Debug';
 import { EnvControllerRemove, EnvControllerSearch } from '@/services/env';
 import { DeleteOutlined, FormOutlined, PlusOutlined } from '@ant-design/icons';
 import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
 import { Button } from 'antd';
 import React, { useRef } from 'react';
-import Log from './components/Log';
+import Logger from './components/Logger';
 import UpsertEnv from './components/UpsertEnv';
 
 interface DataType {
@@ -60,6 +61,8 @@ const EnvProTable: React.FC<EnvProps> = (props) => {
       render: (_: any, record: DataType) => {
         return (
           <>
+            <Debug envId={record.id} taskId={taskId}/>
+            <Logger envId={record.id} cronTime={cronTime} />
             <UpsertEnv
               taskId={taskId}
               id={record.id}
@@ -71,7 +74,6 @@ const EnvProTable: React.FC<EnvProps> = (props) => {
                 </Button>
               }
             />
-            <Log envId={record.id} cronTime={cronTime} />
             <DeleteButton
               title={`确定删除吗？`}
               onOk={() =>
