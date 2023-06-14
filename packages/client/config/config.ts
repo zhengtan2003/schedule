@@ -1,4 +1,5 @@
 import { defineConfig } from '@umijs/max';
+import { join } from 'path';
 import { defaultSettings } from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
@@ -8,6 +9,7 @@ export default defineConfig({
   layout: {
     ...defaultSettings,
   },
+  outputPath: join(__dirname, '..', '..', 'server', 'src', 'client'),
   model: {},
   hash: true,
   mock: false,

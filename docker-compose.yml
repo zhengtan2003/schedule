@@ -1,16 +1,5 @@
 version: '3.9'
 services:
-  web:
-    image: zhengtan2003/schedule-web
-    container_name: web
-    build:
-      context: ./packages/web
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
-    depends_on:
-      - server
-
   server:
     image: zhengtan2003/schedule-server
     container_name: server
@@ -29,7 +18,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "7002:3000"
-      - "7003:8080"
     depends_on:
       - database
 

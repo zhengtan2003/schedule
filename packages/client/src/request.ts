@@ -30,7 +30,7 @@ const authHeaderInterceptor = (url: string, options: RequestOptions) => {
 };
 export const request: RequestConfig = {
   errorConfig: {
-    errorThrower: (res) => {
+    errorThrower: (res: any) => {
       const {
         success,
         data,
@@ -51,7 +51,7 @@ export const request: RequestConfig = {
       // 我们的 errorThrower 抛出的错误。
       console.log('error', error);
       if (error.name === 'BizError') {
-        const errorInfo: ResponseStructure | undefined = error.info;
+        const errorInfo: any = error.info;
         if (errorInfo) {
           const { errorMessage, code } = errorInfo;
           switch (errorInfo.showType) {

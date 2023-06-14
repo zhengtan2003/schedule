@@ -5,11 +5,11 @@
     "packages/*"
   ],
   "scripts": {
-    "start:web": "pnpm -C ./packages/web start:dev",
+    "start:client": "pnpm -C ./packages/client start:dev",
     "start:server": "pnpm -C ./packages/server start:dev",
-    "build:web": "pnpm -C ./packages/web build",
+    "build:client": "pnpm -C ./packages/client build",
     "build:server": "pnpm -C ./packages/server build",
-    "build": "npm run build:web && npm run build:server",
+    "build": "npm run build:client  && npm run build:server",
     "build:docker": "docker-compose build"
   },
   "packageManager": "pnpm@7.24.3",
