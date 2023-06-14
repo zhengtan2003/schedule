@@ -40,7 +40,6 @@ export class SocketService {
       },
     });
     cp.stdout.on('data', (data) => {
-      console.log(`${data}`);
       socket.emit('debug', `${data}`);
     });
     cp.stderr.on('data', (data) => {

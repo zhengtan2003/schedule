@@ -13,14 +13,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
-
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'client'),
+      rootPath: join(__dirname, process.env.CLIENT_ROOT_PATH),
       exclude: ['/api/(.*)'],
     }),
-    ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DATABASE_HOST,

@@ -10,6 +10,7 @@ services:
       - DATABASE_USERNAME=root
       - DATABASE_PASSWORD=schedule123456
       - DATABASE_DATABASE=schedule
+      - CLIENT_ROOT_PATH=./client
     build:
       context: ./
       dockerfile: Dockerfile
