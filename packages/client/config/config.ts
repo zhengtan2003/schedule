@@ -9,7 +9,6 @@ export default defineConfig({
   layout: {
     ...defaultSettings,
   },
-  outputPath: join(__dirname, '..', '..', 'server', 'src', 'client'),
   model: {},
   hash: true,
   mock: false,
