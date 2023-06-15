@@ -126,17 +126,18 @@ export class ScriptService {
     );
   }
 
-  async retrieve(id, user) {
+  async from(id, user) {
     if (!id) return {};
     const script = await this.findOne({ where: { id, user } });
     const code = readFileSync(script.filePath);
     return {
       code,
+      language: script.language,
       updateURL: script.updateURL,
     };
   }
 
-  async enum(user) {
+  async select(user) {
     const scripts = await this.scriptRepository.find({ where: { user } });
     if (!scripts) return [];
     return scripts.map(({ name, id }) => ({ label: name, value: id }));

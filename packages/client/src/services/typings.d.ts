@@ -25,11 +25,11 @@ declare namespace API {
     password: string;
   };
 
-  type ScriptControllerRemoveParams = {
+  type ScriptControllerFromParams = {
     id: string;
   };
 
-  type ScriptControllerRetrieveParams = {
+  type ScriptControllerRemoveParams = {
     id: string;
   };
 

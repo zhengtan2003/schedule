@@ -14,16 +14,16 @@ import {
 import { history } from '@umijs/max';
 import { Button } from 'antd';
 import { useRef } from 'react';
-import Subscribe from './components/Subscribe';
+// import Subscribe from './components/Subscribe';
 
 const Script = () => {
   const actionRef = useRef<ActionType>();
   const toolBarRender = () => {
     return [
-      <Subscribe
-        key={'subscribe'}
-        onSuccess={() => actionRef.current?.reload()}
-      />,
+      // <Subscribe
+      //   key={'subscribe'}
+      //   onSuccess={() => actionRef.current?.reload()}
+      // />,
       <Button
         key={'create'}
         type={'primary'}

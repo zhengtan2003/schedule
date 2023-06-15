@@ -1,5 +1,5 @@
 import {
-  ScriptControllerRetrieve,
+  ScriptControllerFrom,
   ScriptControllerUpsert,
 } from '@/services/script';
 import {
@@ -31,7 +31,7 @@ const Upsert = () => {
             id: params.id,
             language: 'javascript',
           }}
-          request={ScriptControllerRetrieve as any}
+          request={ScriptControllerFrom as any}
           submitter={{
             resetButtonProps: {
               style: {

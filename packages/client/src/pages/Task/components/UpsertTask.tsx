@@ -1,4 +1,4 @@
-import { ScriptControllerEnum } from '@/services/script';
+import { ScriptControllerSelect } from '@/services/script';
 import { TaskControllerFrom, TaskControllerUpsert } from '@/services/task';
 import type { ProFormInstance } from '@ant-design/pro-components';
 import {
@@ -7,7 +7,6 @@ import {
   ProFormText,
 } from '@ant-design/pro-components';
 import CronParser from 'cron-parser';
-import dayjs from 'dayjs';
 import { useRef } from 'react';
 
 interface UpsertTaskProps {
@@ -48,12 +47,12 @@ const UpsertTask: React.FC<UpsertTaskProps> = (props) => {
       isKeyPressSubmit
       width={'400px'}
       params={{ id }}
-      title={id ? '编辑任务' : '新建任务'}
       trigger={trigger}
       initialValues={{
         id,
         cronTime: '0 7 * * *',
       }}
+      title={id ? '编辑任务' : '新建任务'}
       drawerProps={{ destroyOnClose: true }}
       request={TaskControllerFrom as any}
       onFinish={async (body) => {
@@ -70,9 +69,13 @@ const UpsertTask: React.FC<UpsertTaskProps> = (props) => {
           disabled: !!id,
         }}
         rules={[{ required: true }]}
-        request={ScriptControllerEnum}
+        request={ScriptControllerSelect}
       />
-      <ProFormText name={'name'} label={'任务名称'} />
+      <ProFormText
+        name={'name'}
+        label={'任务名称'}
+        rules={[{ required: true }]}
+      />
       {/*<ProFormDateRangePicker*/}
       {/*  label={'生效时间'}*/}
       {/*  width={'100%' as any}*/}
