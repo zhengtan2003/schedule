@@ -1,7 +1,6 @@
 {
-  "name": "schedule-web",
+  "name": "client",
   "private": true,
-  "author": "liusize <895898088@qq.com>",
   "scripts": {
     "dev": "max dev",
     "build": "max build",
