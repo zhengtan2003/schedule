@@ -1,6 +1,6 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
-import { message, notification } from 'antd';
+import { message } from 'antd';
 
 // 错误处理方案： 错误类型
 enum ErrorShowType {
@@ -31,60 +31,31 @@ const authHeaderInterceptor = (url: string, options: RequestOptions) => {
 export const request: RequestConfig = {
   errorConfig: {
     errorThrower: (res: any) => {
-      const {
-        success,
-        data,
-        code,
-        message: errorMessage,
-        showType,
-      } = res as unknown as ResponseStructure;
+      const { success, data, code, message, showType } =
+        res as unknown as ResponseStructure;
       if (!success) {
-        const error: any = new Error(errorMessage);
+        const error: any = new Error(message);
         error.name = 'BizError';
-        error.info = { code, errorMessage, showType, data };
-        throw error; // 抛出自制的错误
+        error.info = { code, message, showType, data };
+        throw error;
       }
     },
     // 错误接收及处理
     errorHandler: (error: any, opts: any) => {
       if (opts?.skipErrorHandler) throw error;
-      // 我们的 errorThrower 抛出的错误。
-      console.log('error', error);
       if (error.name === 'BizError') {
-        const errorInfo: any = error.info;
-        if (errorInfo) {
-          const { errorMessage, code } = errorInfo;
-          switch (errorInfo.showType) {
-            case ErrorShowType.SILENT:
-              // do nothing
-              break;
-            case 1:
-              message.error(errorMessage);
-              break;
-            case 2:
-              message.warning(errorMessage);
-              break;
-            case ErrorShowType.NOTIFICATION:
-              notification.open({
-                description: errorMessage,
-                message: code,
-              });
-              break;
-            case ErrorShowType.REDIRECT:
-              // TODO: redirect
-              break;
-          }
+        const { showType, message: errorMessage } = error.info;
+        if (showType === 1) {
+          message.error(errorMessage);
+        } else if (showType === 2) {
+          message.warning(errorMessage);
         }
-      } else if (error.response) {
-        message.error(error.response.data.message);
+      } else if (error.name === 'AxiosError') {
+        message.error(error.response.message);
       } else if (error.request) {
-        // 请求已经成功发起，但没有收到响应
-        // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，
-        // 而在node.js中是 http.ClientRequest 的实例
-        message.error('None response! Please retry.');
+        message.error('无响应，请重试。');
       } else {
-        // 发送请求时出了点问题
-        message.error('Request error, please retry.');
+        message.error('请求错误，请重试。');
       }
     },
   },

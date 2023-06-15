@@ -3,6 +3,7 @@ import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { Helmet, history, useModel } from '@umijs/max';
+import { Button, Divider } from 'antd';
 import CryptoJS from 'crypto-js';
 import { flushSync } from 'react-dom';
 import { defaultSettings } from '../../../config/defaultSettings';
@@ -55,9 +56,33 @@ const Login: React.FC = () => {
         <LoginForm
           title="Schedule"
           onFinish={onFinish}
+          subTitle={'🪐 笔落惊风雨，诗成泣鬼神。'}
           logo={<img alt="logo" src="/logo.jpg" />}
           contentStyle={{ minWidth: 280, maxWidth: '75vw' }}
-          subTitle={'🪐 努力打造出最具人性化的的脚本管理工具。'}
+          actions={
+            <div>
+              <Divider plain>
+                <span
+                  style={{ color: '#CCC', fontWeight: 'normal', fontSize: 14 }}
+                >
+                  其他登录方式
+                </span>
+              </Divider>
+              <Button
+                block
+                size={'large'}
+                onClick={() => {
+                  onFinish({
+                    username: 'tourist',
+                    password:
+                      '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
+                  });
+                }}
+              >
+                游客模式登录
+              </Button>
+            </div>
+          }
           submitter={{ searchConfig: { submitText: '登录 / 注册' } }}
         >
           <ProFormText

@@ -15,7 +15,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     ports:
-      - "7002:3000"
+      - "80:3000"
     volumes:
       - data:/app/server/data
     depends_on:
