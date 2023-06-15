@@ -1,4 +1,10 @@
-FROM node:16-alpine
+FROM python:alpine
+
+RUN apk update && apk add ruby && apk add nodejs npm
+
+RUN npm i -g pnpm && npm i -g axios
+
+RUN pip install requests
 
 WORKDIR /app
 
@@ -8,7 +14,7 @@ COPY /packages/server/dist/ ./
 
 COPY /packages/client/dist/ ./client
 
-RUN npm install --production
+RUN pnpm install --production
 
 EXPOSE 3000
 
