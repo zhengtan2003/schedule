@@ -102,7 +102,6 @@ const Task: React.FC = () => {
       render: (_: any, record: DataType) => {
         return (
           <>
-            {/*<EnvProTable taskId={record.id} taskName={record.name} />*/}
             <ActionButton
               onSuccess={() => actionRef.current?.reload()}
               tooltip={record.status === 2 ? '停止' : '开始'}
