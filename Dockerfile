@@ -2,7 +2,7 @@ FROM python:alpine
 
 RUN apk update && apk add ruby && apk add nodejs npm
 
-RUN npm i -g pnpm && npm i -g axios
+RUN npm i -g pnpm axios
 
 RUN pip install requests
 

@@ -59,6 +59,7 @@ export class ScriptService {
     const { id, code, language } = upsertScriptDto;
     const script = await this.findOne({ where: { id, user } });
     const userScrip = analysisComment(code);
+    console.log(userScrip);
     writeFileSync(script.filePath, code);
     await this.scriptRepository.update(
       { id, user },

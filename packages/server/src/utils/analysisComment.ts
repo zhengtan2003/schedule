@@ -1,7 +1,7 @@
 export const analysisComment = (code: string) => {
   const userScript: any = {};
   const userScriptMatchArray = code.match(
-    /#*\s*==UserScript==\s*([\s\S]*?)\n#*\s*==\/UserScript==/i,
+    /.*==UserScript==([\s\S]*)==\/UserScript==/,
   );
   if (userScriptMatchArray) {
     const commentRegex = /#*\s*@(\w+)\s+(.*)/g;
