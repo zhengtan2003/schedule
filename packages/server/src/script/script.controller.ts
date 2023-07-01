@@ -1,6 +1,6 @@
 import { User } from '@/decorators/user.decorator';
 import { SearchDto } from '@/dto/search.dto';
-import { UpsertScriptDto } from '@/script/dto/script.dto';
+import { UpdateScriptDto } from '@/script/dto/update-script.dto';
 import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ScriptService } from './script.service';
@@ -13,8 +13,8 @@ export class ScriptController {
 
   @ApiOperation({ summary: '创建/更新' })
   @Post()
-  upsert(@Body() upsertScriptDto: UpsertScriptDto, @User() user) {
-    if (upsertScriptDto.id)
+  upsert(@Body() upsertScriptDto: UpdateScriptDto, @User() user) {
+    if ('id' in upsertScriptDto)
       return this.scriptService.update(upsertScriptDto, user);
     return this.scriptService.creat(upsertScriptDto, user);
   }
@@ -31,11 +31,11 @@ export class ScriptController {
     return this.scriptService.remove(+id, user);
   }
 
-  @ApiOperation({ summary: '订阅' })
-  @Post('subscribe')
-  subscribe(@Body() subscribeDto, @User() user) {
-    return this.scriptService.subscribe(subscribeDto, user);
-  }
+  // @ApiOperation({ summary: '订阅' })
+  // @Post('subscribe')
+  // subscribe(@Body() subscribeDto, @User() user) {
+  //   return this.scriptService.subscribe(subscribeDto, user);
+  // }
 
   @ApiOperation({ summary: 'from' })
   @Get('from')

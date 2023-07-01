@@ -1,26 +1,24 @@
 import { HttpResponse } from '@/http-response';
+import { CreateScriptDto } from '@/script/dto/creat-script.dto';
 import {
   readFileSync,
   searchOptions,
   unlinkSync,
   writeFileSync,
 } from '@/utils';
-import { analysisComment } from '@/utils/analysisComment';
-import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as path from 'path';
-import { firstValueFrom } from 'rxjs';
+// import { firstValueFrom } from 'rxjs';
+import { UpdateScriptDto } from '@/script/dto/update-script.dto';
+import { Script } from '@/script/entities/script.entity';
+import { getFilePath } from '@/script/utils';
 import { Repository } from 'typeorm';
-import { fileSuffixMap } from './constants';
-import { Script } from './entities/script.entity';
 
 @Injectable()
 export class ScriptService {
   constructor(
     @InjectRepository(Script)
     private scriptRepository: Repository<Script>,
-    private httpService: HttpService,
   ) {}
 
   async findOne(options, skipException = false) {
@@ -31,45 +29,21 @@ export class ScriptService {
     return script;
   }
 
-  async creat(upsertScriptDto, user) {
-    const { language, code } = upsertScriptDto;
-    const filePath = path.join(
-      'data',
-      'files',
-      `${user.id}`,
-      language,
-      `${Date.now()}`,
-      `index.${fileSuffixMap[language]}`,
-    );
-    const script = new Script();
-    const userScrip = analysisComment(code);
-    script.user = user;
+  async creat(createScriptDto: CreateScriptDto, user) {
+    const filePath = getFilePath(createScriptDto.language, user.id);
+    const script = this.scriptRepository.create(createScriptDto);
     script.filePath = filePath;
-    script.name = userScrip.name;
-    script.version = userScrip.version;
-    script.language = language;
-    script.updateURL = userScrip.updateURL;
-    script.description = userScrip.description;
+    script.user = user;
+    writeFileSync(filePath, createScriptDto.code);
     await this.scriptRepository.save(script);
-    writeFileSync(filePath, code);
     return new HttpResponse({ showType: 1 });
   }
 
-  async update(upsertScriptDto, user) {
-    const { id, code, language } = upsertScriptDto;
+  async update(upsertScriptDto: UpdateScriptDto, user) {
+    const { id, code, ...restUpsertScriptDto } = upsertScriptDto;
     const script = await this.findOne({ where: { id, user } });
-    const userScrip = analysisComment(code);
     writeFileSync(script.filePath, code);
-    await this.scriptRepository.update(
-      { id, user },
-      {
-        language,
-        name: userScrip.name,
-        version: userScrip.version,
-        updateURL: userScrip.updateURL,
-        description: userScrip.description,
-      },
-    );
+    await this.scriptRepository.update({ id, user }, restUpsertScriptDto);
     return new HttpResponse({ showType: 1 });
   }
 
@@ -94,37 +68,37 @@ export class ScriptService {
     });
   }
 
-  async subscribe(subscribeDto, user) {
-    const { updateURL } = subscribeDto;
-    let code = '';
-    try {
-      const response = await firstValueFrom(this.httpService.get(updateURL));
-      code = response.data;
-    } catch (e) {
-      return new HttpResponse({
-        success: false,
-        showType: 1,
-        message: `请求失败：${updateURL}`,
-      });
-    }
-    const { userScrip, schemaFormProps } = analysisComment(code);
-    const fileExt = path.extname(updateURL);
-    const fileName = path.basename(updateURL, fileExt);
-    const languageMap = {
-      '.js': 'javascript',
-    };
-    return this.creat(
-      {
-        code,
-        updateURL,
-        schemaFormProps,
-        remark: userScrip.remark,
-        name: userScrip.name ?? fileName,
-        language: languageMap[fileExt] ?? 'javascript',
-      },
-      user,
-    );
-  }
+  // async subscribe(subscribeDto, user) {
+  //   const { updateURL } = subscribeDto;
+  //   let code = '';
+  //   try {
+  //     const response = await firstValueFrom(this.httpService.get(updateURL));
+  //     code = response.data;
+  //   } catch (e) {
+  //     return new HttpResponse({
+  //       success: false,
+  //       showType: 1,
+  //       message: `请求失败：${updateURL}`,
+  //     });
+  //   }
+  //   const { userScrip, schemaFormProps } = analysisComment(code);
+  //   const fileExt = path.extname(updateURL);
+  //   const fileName = path.basename(updateURL, fileExt);
+  //   const languageMap = {
+  //     '.js': 'javascript',
+  //   };
+  //   return this.creat(
+  //     {
+  //       code,
+  //       updateURL,
+  //       schemaFormProps,
+  //       remark: userScrip.remark,
+  //       name: userScrip.name ?? fileName,
+  //       language: languageMap[fileExt] ?? 'javascript',
+  //     },
+  //     user,
+  //   );
+  // }
 
   async from(id, user) {
     if (!id) return {};
