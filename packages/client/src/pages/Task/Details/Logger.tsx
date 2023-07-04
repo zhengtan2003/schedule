@@ -10,7 +10,7 @@ import {
   FileSyncOutlined,
 } from '@ant-design/icons';
 import { useRequest } from '@umijs/max';
-import { Button, Tag, Timeline, Typography } from 'antd';
+import { Button, Tag, Timeline, Tooltip, Typography } from 'antd';
 import React, { useMemo } from 'react';
 
 interface LogDrawerProps {
@@ -75,18 +75,20 @@ const Logger: React.FC<LogDrawerProps> = (props) => {
       destroyOnClose
       title={'日志'}
       trigger={
-        <Button
-          type={'link'}
-          size={'small'}
-          onClick={() =>
-            run({
-              sort: { updateTime: 'descend' },
-              params: { current: 1, pageSize: 100, envId },
-            })
-          }
-        >
-          <FileSyncOutlined />
-        </Button>
+        <Tooltip title={'日志'}>
+          <Button
+            type={'link'}
+            size={'small'}
+            onClick={() =>
+              run({
+                sort: { updateTime: 'descend' },
+                params: { current: 1, pageSize: 100, envId },
+              })
+            }
+          >
+            <FileSyncOutlined />
+          </Button>
+        </Tooltip>
       }
     >
       <Timeline items={items} />

@@ -123,6 +123,7 @@ export class ScriptService {
     const code = readFileSync(script.filePath);
     return {
       code,
+      name: script.name,
       language: script.language,
       updateURL: script.updateURL,
     };

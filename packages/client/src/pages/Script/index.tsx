@@ -120,6 +120,7 @@ const Script = () => {
     <PageContainer>
       <ProTable
         rowKey={'id'}
+        search={false}
         columns={columns}
         scroll={{ x: 1300 }}
         actionRef={actionRef}

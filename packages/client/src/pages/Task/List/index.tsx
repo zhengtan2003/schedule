@@ -102,7 +102,9 @@ const Task: React.FC = () => {
               key="debug"
               taskId={id}
               trigger={
-                <Button type={'link'} size={'small'} icon={<BugOutlined />} />
+                <Tooltip title={'调试'}>
+                  <Button type={'link'} size={'small'} icon={<BugOutlined />} />
+                </Tooltip>
               }
             />
             <Toggle key="toggle" onSuccess={actionRef.current?.reload}>
@@ -137,7 +139,13 @@ const Task: React.FC = () => {
               taskId={id}
               onSuccess={actionRef.current?.reload}
               trigger={
-                <Button size={'small'} type={'link'} icon={<FormOutlined />} />
+                <Tooltip title={'编辑'}>
+                  <Button
+                    size={'small'}
+                    type={'link'}
+                    icon={<FormOutlined />}
+                  />
+                </Tooltip>
               }
             />
             <DeleteButton
@@ -160,6 +168,7 @@ const Task: React.FC = () => {
     <PageContainer>
       <ProTable
         rowKey={'id'}
+        search={false}
         columns={columns}
         scroll={{ x: 1300 }}
         actionRef={actionRef}

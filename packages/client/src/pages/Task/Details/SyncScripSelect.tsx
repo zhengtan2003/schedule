@@ -24,6 +24,7 @@ const SyncScripSelect: React.FC<SyncScripSelectProps> = (props) => {
       mode={'multiple'}
       maxTagCount={'responsive'}
       style={{ minWidth: '200px' }}
+      placeholder={'请选择需要运行的脚本'}
       onChange={async (value: number[]) => {
         const { success } = await TaskControllerSyncScrip({
           id: taskId,

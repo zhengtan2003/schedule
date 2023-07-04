@@ -41,17 +41,17 @@
       }
     ],
   },
-  {
-    name: '终端',
-    icon: 'CodeOutlined',
-    path: '/terminal',
-    routes: [
-      {
-        path: '/terminal',
-        component: './Terminal',
-      },
-    ],
-  },
+  // {
+  //   name: '终端',
+  //   icon: 'CodeOutlined',
+  //   path: '/terminal',
+  //   routes: [
+  //     {
+  //       path: '/terminal',
+  //       component: './Terminal',
+  //     },
+  //   ],
+  // },
   { path: '/welcome', icon: 'smile', component: './Welcome' },
   { path: '/', redirect: '/welcome' },
   // { path: '*', layout: false, component: './404' },

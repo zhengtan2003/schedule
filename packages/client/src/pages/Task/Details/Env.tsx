@@ -3,7 +3,7 @@ import Logger from '@/pages/Task/Details/Logger';
 import { EnvControllerRemove, EnvControllerSearch } from '@/services/env';
 import { DeleteOutlined, FormOutlined, PlusOutlined } from '@ant-design/icons';
 import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
-import { Button, Typography } from 'antd';
+import { Button, Tooltip, Typography } from 'antd';
 import React, { useRef } from 'react';
 import UpsertEnv from './UpsertEnv';
 
@@ -74,9 +74,11 @@ const Env: React.FC<EnvProps> = (props) => {
               title={'编辑'}
               onSuccess={() => actionRef.current?.reload()}
               trigger={
-                <Button type={'link'} size={'small'}>
-                  <FormOutlined />
-                </Button>
+                <Tooltip title={'编辑'}>
+                  <Button type={'link'} size={'small'}>
+                    <FormOutlined />
+                  </Button>
+                </Tooltip>
               }
             />
             <DeleteButton
