@@ -6,6 +6,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -16,24 +18,20 @@ import {
 export class Task {
   @Column({ nullable: true })
   name: string;
-  @Column({ nullable: true })
-  startTime: string;
-  @Column({ nullable: true })
-  endTime: string;
-  @Column('datetime', { nullable: true })
-  nextExecutionTime: Date;
-  @Column({ nullable: true, default: 1 })
-  status: 0 | 1 | 2;
-  @Column({ nullable: true, default: '0 7 * * *' })
-  cronTime: string;
-  @Column({ nullable: true })
-  cronName: string;
-  @ManyToOne(() => Script, (script) => script.task)
-  script: Script;
+  @Column({ nullable: true, default: 0 })
+  status: 0 | 1;
+  @Column('json', { nullable: true })
+  scriptsExt: Record<
+    string,
+    { id: number; cronTime: string; cronName: string }
+  >;
+  @ManyToMany(() => Script, (script) => script.tasks)
+  @JoinTable()
+  scripts: Script[];
   @OneToMany(() => Logger, (Logger) => Logger.task)
-  logger: Logger[];
+  loggers: Logger[];
   @OneToMany(() => Env, (Env) => Env.task)
-  env: Env[];
+  envs: Env[];
   @ManyToOne(() => User, (user) => user.task)
   user: User;
   @PrimaryGeneratedColumn()

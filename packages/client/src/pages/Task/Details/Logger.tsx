@@ -6,18 +6,15 @@ import {
 import { toDateTimeString } from '@/utils';
 import {
   CheckCircleFilled,
-  ClockCircleOutlined,
   CloseCircleFilled,
   FileSyncOutlined,
 } from '@ant-design/icons';
 import { useRequest } from '@umijs/max';
 import { Button, Tag, Timeline, Typography } from 'antd';
-import CronParser from 'cron-parser';
 import React, { useMemo } from 'react';
 
 interface LogDrawerProps {
   envId: string;
-  cronTime: string;
 }
 
 const statusMaps: any = {
@@ -32,44 +29,27 @@ const statusMaps: any = {
 };
 const { Title } = Typography;
 const Logger: React.FC<LogDrawerProps> = (props) => {
-  const { envId, cronTime } = props;
+  const { envId } = props;
   const { run, data, refresh } = useRequest(LoggerControllerLogSearch, {
     manual: true,
   });
   const items = useMemo(
     () =>
-      data?.reduce(
-        (result: any, item: any) => {
-          result.push({
-            ...statusMaps[item.status],
-            children: (
-              <Typography>
-                <Title level={5}>{toDateTimeString(item.createTime)}</Title>
-                <Tag color="magenta">耗时：{item.executionTime}s</Tag>
-                <pre style={{ background: '#000', color: '#F8F8F8' }}>
-                  {item.log}
-                </pre>
-              </Typography>
-            ),
-          });
-          return result;
-        },
-        [
-          {
-            dot: <ClockCircleOutlined />,
-            color: 'gray',
-            children: (
-              <Typography>
-                <Title level={5}>
-                  {toDateTimeString(
-                    CronParser.parseExpression(cronTime).next().toDate(),
-                  )}
-                </Title>
-              </Typography>
-            ),
-          },
-        ],
-      ),
+      data?.reduce((result: any, item: any) => {
+        result.push({
+          ...statusMaps[item.status],
+          children: (
+            <Typography>
+              <Title level={5}>{toDateTimeString(item.createTime)}</Title>
+              <Tag color="magenta">耗时：{item.executionTime}s</Tag>
+              <pre style={{ background: '#000', color: '#F8F8F8' }}>
+                {item.log}
+              </pre>
+            </Typography>
+          ),
+        });
+        return result;
+      }, []),
     [data],
   );
 
@@ -79,9 +59,13 @@ const Logger: React.FC<LogDrawerProps> = (props) => {
         <DeleteButton
           size={'middle'}
           type={'default'}
-          onOk={async () => {
-            const { success } = await LoggerControllerRemove({ envId });
-            if (success) refresh();
+          confirmProps={{
+            title: '确定清空日志吗？',
+            content: '',
+            onOk: async () => {
+              const { success } = await LoggerControllerRemove({ envId });
+              if (success) refresh();
+            },
           }}
         >
           清空日志

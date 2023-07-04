@@ -1,12 +1,13 @@
 import { DeleteButton } from '@/components';
-import Debug from '@/pages/Task/components/Debug';
+import Logger from '@/pages/Task/Details/Logger';
 import { EnvControllerRemove, EnvControllerSearch } from '@/services/env';
 import { DeleteOutlined, FormOutlined, PlusOutlined } from '@ant-design/icons';
 import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
-import { Button } from 'antd';
+import { Button, Typography } from 'antd';
 import React, { useRef } from 'react';
-import Logger from './components/Logger';
-import UpsertEnv from './components/UpsertEnv';
+import UpsertEnv from './UpsertEnv';
+
+const { Text } = Typography;
 
 interface DataType {
   key: React.Key;
@@ -19,11 +20,10 @@ interface DataType {
 
 interface EnvProps {
   taskId: string;
-  cronTime: string;
 }
 
-const EnvProTable: React.FC<EnvProps> = (props) => {
-  const { taskId, cronTime } = props;
+const Env: React.FC<EnvProps> = (props) => {
+  const { taskId } = props;
   const actionRef = useRef<ActionType>();
   const columns: ProColumns<DataType>[] = [
     {
@@ -31,12 +31,17 @@ const EnvProTable: React.FC<EnvProps> = (props) => {
       dataIndex: 'code',
       width: '300px',
       ellipsis: true,
-      // render: (_, record) => {
-      //   return <pre className="whitespace-pre-wrap">{record.code}</pre>;
-      // },
+      render: (text) => {
+        return (
+          <Text ellipsis={{ tooltip: text }}>
+            <pre style={{ margin: 0, padding: 0 }}>{text}</pre>
+          </Text>
+        );
+      },
     },
     {
       title: '描述',
+      ellipsis: true,
       dataIndex: 'description',
     },
     {
@@ -58,11 +63,11 @@ const EnvProTable: React.FC<EnvProps> = (props) => {
       title: '操作',
       key: 'action',
       fixed: 'right',
+      width: '110px',
       render: (_: any, record: DataType) => {
         return (
           <>
-            <Debug envId={record.id} taskId={taskId}/>
-            <Logger envId={record.id} cronTime={cronTime} />
+            <Logger envId={record.id} />
             <UpsertEnv
               taskId={taskId}
               id={record.id}
@@ -75,12 +80,13 @@ const EnvProTable: React.FC<EnvProps> = (props) => {
               }
             />
             <DeleteButton
-              title={`确定删除吗？`}
-              onOk={() =>
-                EnvControllerRemove({ id: record.id }).then(() =>
-                  actionRef.current?.reload(),
-                )
-              }
+              confirmProps={{
+                title: `确定删除吗？`,
+                onOk: () =>
+                  EnvControllerRemove({ id: record.id }).then(() =>
+                    actionRef.current?.reload(),
+                  ),
+              }}
             >
               <DeleteOutlined />
             </DeleteButton>
@@ -93,9 +99,7 @@ const EnvProTable: React.FC<EnvProps> = (props) => {
     <ProTable
       headerTitle={'ENV'}
       rowKey={'id'}
-      cardBordered
       search={false}
-      params={{ taskId }}
       columns={columns}
       scroll={{ x: 1300 }}
       actionRef={actionRef}
@@ -115,10 +119,10 @@ const EnvProTable: React.FC<EnvProps> = (props) => {
         />,
       ]}
       request={(params, sort, filter) =>
-        EnvControllerSearch({ params, filter, sort })
+        EnvControllerSearch({ taskId }, { params, filter, sort })
       }
     />
   );
 };
 
-export default EnvProTable;
+export default Env;

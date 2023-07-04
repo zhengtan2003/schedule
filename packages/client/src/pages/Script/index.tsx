@@ -1,5 +1,5 @@
 import { DeleteButton } from '@/components';
-import { DataType } from '@/pages/Task';
+import { DataType } from '@/pages/Task/List';
 import {
   ScriptControllerRemove,
   ScriptControllerSearch,
@@ -49,6 +49,7 @@ const Script = () => {
     {
       title: '描述',
       width: '160px',
+      ellipsis: true,
       dataIndex: 'description',
       hideInSearch: true,
     },
@@ -88,6 +89,7 @@ const Script = () => {
       dataIndex: 'action',
       fixed: 'right',
       hideInSearch: true,
+      width: '80px',
       render: (text, record) => [
         <Button
           key={'edit'}
@@ -99,10 +101,14 @@ const Script = () => {
         </Button>,
         <DeleteButton
           key={'delete'}
-          title={`确认删除【${record.name}】吗？`}
-          onOk={async () => {
-            const { success } = await ScriptControllerRemove({ id: record.id });
-            if (success) actionRef.current?.reload();
+          confirmProps={{
+            title: `确认删除【${record.name}】吗？`,
+            onOk: async () => {
+              const { success } = await ScriptControllerRemove({
+                id: record.id,
+              });
+              if (success) actionRef.current?.reload();
+            },
           }}
         >
           <DeleteOutlined />

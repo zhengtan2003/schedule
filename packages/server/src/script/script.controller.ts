@@ -1,5 +1,6 @@
 import { User } from '@/decorators/user.decorator';
 import { SearchDto } from '@/dto/search.dto';
+import { OptionsDto } from '@/script/dto/options.dto';
 import { UpdateScriptDto } from '@/script/dto/update-script.dto';
 import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -43,9 +44,9 @@ export class ScriptController {
     return this.scriptService.from(id, user);
   }
 
-  @ApiOperation({ summary: 'select' })
-  @Get('select')
-  select(@User() user) {
-    return this.scriptService.select(user);
+  @ApiOperation({ summary: 'options' })
+  @Get('options')
+  options(@Query() optionsDto: OptionsDto, @User() user) {
+    return this.scriptService.options(optionsDto, user);
   }
 }

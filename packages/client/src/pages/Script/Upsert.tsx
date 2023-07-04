@@ -42,6 +42,12 @@ const Upsert = () => {
           }}
         >
           <ProFormText hidden name={'id'} />
+          <ProFormText
+            width={'sm'}
+            label={'名称'}
+            name={'name'}
+            rules={[{ required: true }]}
+          />
           <ProFormSelect
             width={'sm'}
             name={'language'}

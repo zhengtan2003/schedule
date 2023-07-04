@@ -17,7 +17,7 @@ export class Env {
   code: string;
   @Column({ nullable: true })
   description: string;
-  @ManyToOne(() => Task, (Task) => Task.env, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Task, (Task) => Task.envs, { onDelete: 'CASCADE' })
   task: Task;
   @OneToMany(() => Logger, (Logger) => Logger.env)
   logger: Logger;

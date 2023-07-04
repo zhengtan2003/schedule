@@ -4,8 +4,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -18,14 +18,16 @@ export class Script {
   language: string;
   @Column()
   filePath: string;
+  @Column({ default: 'node' })
+  startCommand: string;
   @Column({ nullable: true })
   description: string;
   @Column({ nullable: true })
   updateURL: string;
   @Column({ nullable: true })
   version: string;
-  @OneToMany(() => Task, (task) => task.script)
-  task: any;
+  @ManyToMany(() => Task, (task) => task.scripts)
+  tasks: Task[];
   @ManyToOne(() => User, (user) => user.script)
   user: User;
   @PrimaryGeneratedColumn()

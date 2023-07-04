@@ -4,7 +4,7 @@ import { request } from '@umijs/max';
 
 /** 创建/更新 POST /api/script */
 export async function ScriptControllerUpsert(
-  body: API.UpsertScriptDto,
+  body: API.UpdateScriptDto,
   options?: { [key: string]: any },
 ) {
   return request<any>('/api/script', {
@@ -47,6 +47,14 @@ export async function ScriptControllerFrom(
   });
 }
 
+/** options GET /api/script/options */
+export async function ScriptControllerOptions(options?: { [key: string]: any }) {
+  return request<any>('/api/script/options', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** 列表 POST /api/script/search */
 export async function ScriptControllerSearch(
   body: API.SearchDto,
@@ -58,22 +66,6 @@ export async function ScriptControllerSearch(
       'Content-Type': 'application/json',
     },
     data: body,
-    ...(options || {}),
-  });
-}
-
-/** select GET /api/script/select */
-export async function ScriptControllerSelect(options?: { [key: string]: any }) {
-  return request<any>('/api/script/select', {
-    method: 'GET',
-    ...(options || {}),
-  });
-}
-
-/** 订阅 POST /api/script/subscribe */
-export async function ScriptControllerSubscribe(options?: { [key: string]: any }) {
-  return request<any>('/api/script/subscribe', {
-    method: 'POST',
     ...(options || {}),
   });
 }

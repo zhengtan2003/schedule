@@ -11,3 +11,9 @@ export const getFilePath = (language = 'javascript', userId) => {
     `index.${fileSuffixMap[language]}`,
   );
 };
+export const getStartCommand = (language: string) => {
+  if (language === 'javascript') return 'node';
+  if (language === 'python3') return 'python3';
+  if (language === 'ruby') return 'ruby';
+  return 'node';
+};

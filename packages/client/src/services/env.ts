@@ -47,12 +47,28 @@ export async function EnvControllerForm(
   });
 }
 
+/** options GET /api/env/options */
+export async function EnvControllerOptions(options?: { [key: string]: any }) {
+  return request<any>('/api/env/options', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** 🔍列表 POST /api/env/search */
-export async function EnvControllerSearch(body: API.SearchDto, options?: { [key: string]: any }) {
+export async function EnvControllerSearch(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.EnvControllerSearchParams,
+  body: API.SearchDto,
+  options?: { [key: string]: any },
+) {
   return request<any>('/api/env/search', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+    },
+    params: {
+      ...params,
     },
     data: body,
     ...(options || {}),

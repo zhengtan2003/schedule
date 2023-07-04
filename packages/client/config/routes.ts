@@ -29,9 +29,16 @@
     path: '/task',
     routes: [
       {
-        path: '/task',
-        component: './Task',
+        path: '/task', redirect: '/task/list'
       },
+      {
+        path: '/task/list',
+        component: './Task/List',
+      },
+      {
+        path: '/task/details',
+        component: './Task/Details',
+      }
     ],
   },
   {
