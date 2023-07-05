@@ -10,11 +10,11 @@ export class AppService {
   ) {}
 
   async restartTask() {
-    // const users = await this.userService.find({ relations: ['task'] });
-    // users.forEach((user) => {
-    //   user.task.forEach((task) => {
-    //     if (task.cronName) this.taskService.cronLaunch(task, { id: user.id });
-    //   });
-    // });
+    const users = await this.userService.find({ relations: ['tasks'] });
+    users.forEach((user) => {
+      user.tasks.forEach((task) => {
+        if (task.status === 1) this.taskService.firing(task, user);
+      });
+    });
   }
 }

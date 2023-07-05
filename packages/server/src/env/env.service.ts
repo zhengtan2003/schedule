@@ -48,7 +48,6 @@ export class EnvService {
     const { current = 1, pageSize = 10, ...retParams } = searchDto.params;
     const where = searchParams(retParams);
     const order = searchOrder(searchDto.sort);
-    console.log(order);
     const [data, total] = await this.envRepository.findAndCount({
       order,
       take: pageSize,

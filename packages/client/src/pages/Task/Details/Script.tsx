@@ -25,7 +25,7 @@ const Script: React.FC<ScriptProps> = () => {
     },
     {
       title: 'cronTime',
-      width: '160px',
+      width: '100px',
       dataIndex: 'cronTime',
     },
     {
@@ -50,6 +50,7 @@ const Script: React.FC<ScriptProps> = () => {
     {
       title: '描述',
       width: '160px',
+      ellipsis: true,
       dataIndex: 'description',
     },
     {

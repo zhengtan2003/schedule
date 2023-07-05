@@ -28,7 +28,7 @@ export class Script {
   version: string;
   @ManyToMany(() => Task, (task) => task.scripts)
   tasks: Task[];
-  @ManyToOne(() => User, (user) => user.script)
+  @ManyToOne(() => User, (user) => user.scripts)
   user: User;
   @PrimaryGeneratedColumn()
   readonly id: number;

@@ -32,7 +32,7 @@ export class Task {
   loggers: Logger[];
   @OneToMany(() => Env, (Env) => Env.task)
   envs: Env[];
-  @ManyToOne(() => User, (user) => user.task)
+  @ManyToOne(() => User, (user) => user.tasks)
   user: User;
   @PrimaryGeneratedColumn()
   id: number;

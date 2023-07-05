@@ -6,7 +6,7 @@ import {
   ProFormDependency,
   ProFormText,
 } from '@ant-design/pro-components';
-import { Button, message, Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd';
 import CronParser from 'cron-parser';
 
 type UpsertCronTimeProps = {
@@ -22,10 +22,7 @@ const UpsertCronTime: React.FC<UpsertCronTimeProps> = (props) => {
         initialValues={props.initialValues}
         onFinish={async (values) => {
           const { success } = await TaskControllerUpdateScripExt(values);
-          if (success) {
-            message.success('操作成功');
-            props.onSuccess?.();
-          }
+          if (success) props.onSuccess?.();
           return success;
         }}
         autoFocusFirstInput

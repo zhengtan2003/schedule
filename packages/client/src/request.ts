@@ -1,6 +1,6 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
-import { message } from 'antd';
+import { message, notification } from 'antd';
 
 // 错误处理方案： 错误类型
 enum ErrorShowType {
@@ -51,7 +51,11 @@ export const request: RequestConfig = {
           message.warning(errorMessage);
         }
       } else if (error.name === 'AxiosError') {
-        message.error(error.response.message);
+        const { statusText, data } = error.response;
+        notification.error({
+          message: statusText,
+          description: data,
+        });
       } else if (error.request) {
         message.error('无响应，请重试。');
       } else {
@@ -61,7 +65,7 @@ export const request: RequestConfig = {
   },
   responseInterceptors: [
     (response: any) => {
-      if (response.data.success && response.data.showType) {
+      if (response.data.success && response.data.showType === 1) {
         message.success(response.data.message);
       }
       return response;

@@ -18,13 +18,13 @@ export class User {
   @Column()
   password: string;
   @OneToMany(() => Task, (task) => task.user)
-  task: Task[];
-  @OneToMany(() => Env, (Env) => Env.user)
-  env: Env[];
-  @OneToMany(() => Logger, (Logger) => Logger.user)
-  logger: Logger[];
+  tasks: Task[];
+  @OneToMany(() => Env, (env) => env.user)
+  envs: Env[];
+  @OneToMany(() => Logger, (logger) => logger.user)
+  loggers: Logger[];
   @OneToMany(() => Script, (script) => script.user)
-  script: Script[];
+  scripts: Script[];
   @PrimaryGeneratedColumn()
   readonly id: number;
   @CreateDateColumn()

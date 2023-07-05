@@ -17,11 +17,11 @@ export class Env {
   code: string;
   @Column({ nullable: true })
   description: string;
-  @ManyToOne(() => Task, (Task) => Task.envs, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Task, (task) => task.envs, { onDelete: 'CASCADE' })
   task: Task;
-  @OneToMany(() => Logger, (Logger) => Logger.env)
+  @OneToMany(() => Logger, (logger) => logger.env)
   logger: Logger;
-  @ManyToOne(() => User, (User) => User.env)
+  @ManyToOne(() => User, (user) => user.envs)
   user: User;
   @PrimaryGeneratedColumn()
   readonly id: number;

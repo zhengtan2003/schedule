@@ -18,11 +18,11 @@ export class Logger {
   log: string;
   @Column('float')
   executionTime: number;
-  @ManyToOne(() => Env, (Env) => Env.logger, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Env, (env) => env.logger, { onDelete: 'CASCADE' })
   env: Env;
   @ManyToOne(() => Task, (task) => task.loggers, { onDelete: 'CASCADE' })
   task: Task;
-  @ManyToOne(() => User, (User) => User.logger, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.loggers, { onDelete: 'CASCADE' })
   user: User;
   @CreateDateColumn()
   readonly createTime: Date;

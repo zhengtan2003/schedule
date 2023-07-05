@@ -25,7 +25,6 @@ export class SocketService {
     return new Promise((resolve) => {
       const cp = spawn(command, options);
       cp.stdout.on('data', (data) => {
-        console.log(`cp.stdout:${data}`);
         socket.emit('debug', `${data}`);
       });
       cp.stderr.on('data', (data) => {
