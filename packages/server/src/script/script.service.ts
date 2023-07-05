@@ -1,27 +1,31 @@
 import { HttpResponse } from '@/http-response';
+import { CreateScriptDto } from '@/script/dto/creat-script.dto';
 import {
   readFileSync,
-  searchOptions,
+  searchOrder,
+  searchParams,
   unlinkSync,
   writeFileSync,
 } from '@/utils';
-import { analysisComment } from '@/utils/analysisComment';
-import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as path from 'path';
-import { firstValueFrom } from 'rxjs';
+// import { firstValueFrom } from 'rxjs';
+import { OptionsDto } from '@/script/dto/options.dto';
+import { UpdateScriptDto } from '@/script/dto/update-script.dto';
+import { Script } from '@/script/entities/script.entity';
+import { getFilePath, getStartCommand } from '@/script/utils';
 import { Repository } from 'typeorm';
-import { fileSuffixMap } from './constants';
-import { Script } from './entities/script.entity';
 
 @Injectable()
 export class ScriptService {
+  public repository: Repository<Script>;
+
   constructor(
     @InjectRepository(Script)
     private scriptRepository: Repository<Script>,
-    private httpService: HttpService,
-  ) {}
+  ) {
+    this.repository = this.scriptRepository;
+  }
 
   async findOne(options, skipException = false) {
     const script = await this.scriptRepository.findOne(options);
@@ -31,57 +35,43 @@ export class ScriptService {
     return script;
   }
 
-  async creat(upsertScriptDto, user) {
-    const { language, code } = upsertScriptDto;
-    const filePath = path.join(
-      'data',
-      'files',
-      `${user.id}`,
-      language,
-      `${Date.now()}`,
-      `index.${fileSuffixMap[language]}`,
-    );
-    const script = new Script();
-    const userScrip = analysisComment(code);
-    script.user = user;
+  async creat(createScriptDto: CreateScriptDto, user) {
+    const filePath = getFilePath(createScriptDto.language, user.id);
+    const startCommand = getStartCommand(createScriptDto.language);
+    const script = this.scriptRepository.create(createScriptDto);
     script.filePath = filePath;
-    script.name = userScrip.name;
-    script.version = userScrip.version;
-    script.language = language;
-    script.updateURL = userScrip.updateURL;
-    script.description = userScrip.description;
+    script.startCommand = startCommand;
+    script.user = user;
+    writeFileSync(filePath, createScriptDto.code);
     await this.scriptRepository.save(script);
-    writeFileSync(filePath, code);
     return new HttpResponse({ showType: 1 });
   }
 
-  async update(upsertScriptDto, user) {
-    const { id, code, language } = upsertScriptDto;
+  async update(upsertScriptDto: UpdateScriptDto, user) {
+    const { id, code, ...restUpsertScriptDto } = upsertScriptDto;
     const script = await this.findOne({ where: { id, user } });
-    const userScrip = analysisComment(code);
-    console.log(userScrip);
     writeFileSync(script.filePath, code);
-    await this.scriptRepository.update(
-      { id, user },
-      {
-        language,
-        name: userScrip.name,
-        version: userScrip.version,
-        updateURL: userScrip.updateURL,
-        description: userScrip.description,
-      },
-    );
+    await this.scriptRepository.update({ id, user }, restUpsertScriptDto);
     return new HttpResponse({ showType: 1 });
   }
 
   async search(searchDto, user) {
-    const [data, total] = await this.scriptRepository.findAndCount(
-      searchOptions(searchDto, { where: { user } }),
-    );
-    return new HttpResponse({
-      data,
-      total,
+    const {
+      current = 1,
+      pageSize = 10,
+      taskId,
+      ...retParams
+    } = searchDto.params;
+    const where = searchParams(retParams);
+    const order = searchOrder(searchDto.order);
+    const tasks = taskId ? [{ id: taskId }] : undefined;
+    const [data, total] = await this.scriptRepository.findAndCount({
+      order,
+      take: pageSize,
+      skip: (current - 1) * pageSize,
+      where: { ...where, tasks, user },
     });
+    return new HttpResponse({ data, total });
   }
 
   async remove(id: number, user) {
@@ -95,37 +85,37 @@ export class ScriptService {
     });
   }
 
-  async subscribe(subscribeDto, user) {
-    const { updateURL } = subscribeDto;
-    let code = '';
-    try {
-      const response = await firstValueFrom(this.httpService.get(updateURL));
-      code = response.data;
-    } catch (e) {
-      return new HttpResponse({
-        success: false,
-        showType: 1,
-        message: `请求失败：${updateURL}`,
-      });
-    }
-    const { userScrip, schemaFormProps } = analysisComment(code);
-    const fileExt = path.extname(updateURL);
-    const fileName = path.basename(updateURL, fileExt);
-    const languageMap = {
-      '.js': 'javascript',
-    };
-    return this.creat(
-      {
-        code,
-        updateURL,
-        schemaFormProps,
-        remark: userScrip.remark,
-        name: userScrip.name ?? fileName,
-        language: languageMap[fileExt] ?? 'javascript',
-      },
-      user,
-    );
-  }
+  // async subscribe(subscribeDto, user) {
+  //   const { updateURL } = subscribeDto;
+  //   let code = '';
+  //   try {
+  //     const response = await firstValueFrom(this.httpService.get(updateURL));
+  //     code = response.data;
+  //   } catch (e) {
+  //     return new HttpResponse({
+  //       success: false,
+  //       showType: 1,
+  //       message: `请求失败：${updateURL}`,
+  //     });
+  //   }
+  //   const { userScrip, schemaFormProps } = analysisComment(code);
+  //   const fileExt = path.extname(updateURL);
+  //   const fileName = path.basename(updateURL, fileExt);
+  //   const languageMap = {
+  //     '.js': 'javascript',
+  //   };
+  //   return this.creat(
+  //     {
+  //       code,
+  //       updateURL,
+  //       schemaFormProps,
+  //       remark: userScrip.remark,
+  //       name: userScrip.name ?? fileName,
+  //       language: languageMap[fileExt] ?? 'javascript',
+  //     },
+  //     user,
+  //   );
+  // }
 
   async from(id, user) {
     if (!id) return {};
@@ -133,13 +123,18 @@ export class ScriptService {
     const code = readFileSync(script.filePath);
     return {
       code,
+      name: script.name,
       language: script.language,
       updateURL: script.updateURL,
     };
   }
 
-  async select(user) {
-    const scripts = await this.scriptRepository.find({ where: { user } });
+  async options(optionsDto: OptionsDto, user) {
+    const where = { user };
+    if (!isNaN(optionsDto.taskId)) {
+      where['tasks'] = [{ id: optionsDto.taskId }];
+    }
+    const scripts = await this.scriptRepository.findBy(where);
     if (!scripts) return [];
     return scripts.map(({ name, id }) => ({ label: name, value: id }));
   }

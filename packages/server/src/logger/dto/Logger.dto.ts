@@ -8,9 +8,6 @@ import {
 } from 'class-validator';
 
 export class LoggerDto {
-  @IsNotEmpty()
-  @IsInt()
-  status: 0 | 1;
   @IsOptional()
   @IsString()
   log?: string;

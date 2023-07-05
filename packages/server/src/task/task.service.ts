@@ -2,17 +2,19 @@ import { EnvService } from '@/env/env.service';
 import { HttpResponse } from '@/http-response';
 import { LoggerService } from '@/logger/logger.service';
 import { ScriptService } from '@/script/script.service';
+import { CreateTaskDto } from '@/task/dto/creat-task.dto';
+import { SyncScripDto } from '@/task/dto/sync-scrip.dto';
+import { UpdateScripExtDto } from '@/task/dto/update-scrip-ext.dto';
+import { UpdateTaskDto } from '@/task/dto/update-task.dto';
 import { Task } from '@/task/entities/task.entity';
-import { getStartCommand, searchOptions } from '@/utils';
+import { searchOptions } from '@/utils';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { spawn } from 'child_process';
 import { CronJob } from 'cron';
-import * as process from 'process';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { UpsertTaskDto } from './dto/task.dto';
 
 @Injectable()
 export class TaskService {
@@ -33,35 +35,31 @@ export class TaskService {
     return task;
   }
 
-  async creat(upsertTaskDto: UpsertTaskDto, user) {
-    const { scriptId, ...retDto } = upsertTaskDto;
+  async creat(upsertTaskDto: CreateTaskDto, user) {
+    // const { scriptIds, scriptsExt } = upsertTaskDto.scripts.reduce(
+    //   (result, { id, cronTime }) => {
+    //     result.scriptsExt[id] = { id, cronTime };
+    //     result.scriptIds.push(id);
+    //     return result;
+    //   },
+    //   { scriptIds: [], scriptsExt: {} },
+    // );
+    // const scripts = await this.scriptService.repository.findBy({
+    //   id: In(scriptIds),
+    //   user,
+    // });
     const task = await this.taskRepository.create({
-      ...retDto,
+      ...upsertTaskDto,
       user,
-      script: { id: scriptId },
+      // scriptsExt,
+      // scripts,
     });
     await this.taskRepository.save(task);
-    return new HttpResponse({ showType: 1 });
+    return new HttpResponse({ data: task });
   }
 
-  async update(upsertTaskDto: UpsertTaskDto, user) {
-    const { id, scriptId, ...retDto } = upsertTaskDto;
-    const task = await this.findOne({ where: { id, user } });
-    if (
-      retDto.cronTime !== task.cronTime &&
-      task.cronName &&
-      this.schedulerRegistry.doesExist('cron', task.cronName)
-    ) {
-      this.schedulerRegistry.deleteCronJob(task.cronName);
-      this.cronLaunch(
-        {
-          cronTime: retDto.cronTime,
-          cronName: task.cronName,
-          id,
-        },
-        user,
-      );
-    }
+  async update(updateTaskDto: UpdateTaskDto, user) {
+    const { id, ...retDto } = updateTaskDto;
     await this.taskRepository.update(
       {
         id,
@@ -84,122 +82,91 @@ export class TaskService {
     return tasks ?? [];
   }
 
-  spawn({ task, env }, user) {
-    let outLog = '';
-    let statusLog: 0 | 1 = 1;
-    const startTime = Date.now();
-    const startCommand = getStartCommand(task.script.language);
-    const cp = spawn(`${startCommand} ${task.script.filePath}`, {
-      shell: true,
-      env: {
-        ...process.env,
-        ...JSON.parse(env.code),
-      },
-    });
-    cp.stdout.on('data', (bufferData) => {
-      const data = `${bufferData}`.trim();
-      const regex = /@(\w+)=>/;
-      const matchArray = data.match(regex);
-      if (matchArray) {
-        const key = matchArray[1];
-        const codeParsed = JSON.parse(env.code);
-        codeParsed[key] = data.replace(regex, '');
-        this.envService.update(
-          {
-            id: env.id,
-            taskId: task.id,
-            code: JSON.stringify(codeParsed, null, 2),
-          },
-          user,
-        );
-      } else {
-        outLog += `${bufferData}`;
-      }
-    });
-    cp.stderr.on('data', (bufferData) => {
-      statusLog = 0;
-      outLog += `${bufferData}`;
-    });
-    cp.on('close', () => {
-      this.loggerService.create(
-        {
-          log: outLog,
-          envId: env.id,
-          taskId: task.id,
-          status: statusLog,
-          executionTime: (Date.now() - startTime) / 1000,
-        },
-        user,
-      );
-      outLog = '';
-    });
-  }
-
-  async debug({ taskId, envId, onStdout, onStderr, onClose }: any, user) {
+  async toggle(id, user) {
     const task = await this.findOne({
-      relations: ['script'],
-      where: { id: taskId, user },
+      where: { id, user },
     });
-    const env = await this.envService.findOne({ where: { id: envId } });
-    // this.spawn(
-    //   {
-    //     task,
-    //     env,
-    //     onStdout,
-    //     onStderr,
-    //     onClose,
-    //   },
-    //   user,
-    // );
-    return new HttpResponse();
+    if (task.status === 0) return this.start(task, user);
+    if (task.status === 1) return this.stop(task);
   }
 
-  cronLaunch({ cronName, cronTime, id }, user) {
-    const cronJob = new CronJob(cronTime, async () => {
-      const task = await this.findOne({
-        relations: ['env', 'script'],
-        where: { id, user },
+  async start(task: Task, user) {
+    const id = task.id;
+    task.status = 1;
+    Object.values(task.scriptsExt).forEach((ext) => {
+      ext.cronName = uuidv4();
+      const cronJob = new CronJob(ext.cronTime, async () => {
+        const task = await this.findOne({
+          where: { id },
+          relations: ['scripts', 'envs'],
+        });
+        const script = task.scripts.find(({ id }) => id == ext.id);
+        task.envs.forEach((env) => {
+          let outLog = '';
+          const startTime = Date.now();
+          const cp = spawn(`${script.startCommand} ${script.filePath}`, {
+            shell: true,
+            env: {
+              ...process.env,
+              ...JSON.parse(env.code),
+            },
+          });
+          cp.stdout.on('data', (bufferData) => {
+            const data = `${bufferData}`.trim();
+            const regex = /@(\w+)=>/;
+            const matchArray = data.match(regex);
+            if (matchArray) {
+              const key = matchArray[1];
+              const codeParsed = JSON.parse(env.code);
+              codeParsed[key] = data.replace(regex, '');
+              this.envService.update(
+                {
+                  id: env.id,
+                  taskId: task.id,
+                  code: JSON.stringify(codeParsed, null, 2),
+                },
+                user,
+              );
+            } else {
+              outLog += `${bufferData}`;
+            }
+          });
+          cp.stderr.on('data', (bufferData) => {
+            outLog += `${bufferData}`;
+          });
+          cp.on('close', () => {
+            this.loggerService.create(
+              {
+                log: outLog,
+                envId: env.id,
+                taskId: task.id,
+                executionTime: (Date.now() - startTime) / 1000,
+              },
+              user,
+            );
+            outLog = '';
+          });
+        });
       });
-      task.env.forEach((env) => this.spawn({ task, env }, user));
+      this.schedulerRegistry.addCronJob(ext.cronName, cronJob);
+      cronJob.start();
     });
-    this.schedulerRegistry.addCronJob(cronName, cronJob);
-    cronJob.start();
-  }
-
-  async start(toggleDto, user) {
-    const { cronTime, id } = toggleDto;
-    const cronName = uuidv4();
-    this.cronLaunch({ cronName, cronTime, id }, user);
-    await this.taskRepository.update(
-      {
-        id,
-        user,
-      },
-      {
-        status: 2,
-        cronName,
-      },
-    );
+    await this.taskRepository.save(task);
     return new HttpResponse({
       showType: 1,
     });
   }
 
-  async stop(toggleDto, user) {
-    const { cronName, id } = toggleDto;
-    try {
-      await this.schedulerRegistry.deleteCronJob(cronName);
-    } catch (e) {}
-    await this.taskRepository.update(
-      {
-        id,
-        user,
-      },
-      {
-        status: 1,
-        cronName: null,
-      },
-    );
+  async stop(task: Task) {
+    task.status = 0;
+    const exts = Object.values(task.scriptsExt);
+    for (let i = 0; i < exts.length; i++) {
+      try {
+        await this.schedulerRegistry.deleteCronJob(exts[i].cronName);
+      } catch (e) {}
+      delete exts[i].cronName;
+    }
+    await this.taskRepository.save(task);
     return new HttpResponse({
       showType: 1,
     });
@@ -209,9 +176,9 @@ export class TaskService {
     const task = await this.findOne({
       where: { id, user },
     });
-    if (this.schedulerRegistry.doesExist('cron', task.cronName)) {
-      this.schedulerRegistry.deleteCronJob(task.cronName);
-    }
+    // if (this.schedulerRegistry.doesExist('cron', task.cronName)) {
+    //   this.schedulerRegistry.deleteCronJob(task.cronName);
+    // }
     await this.taskRepository.remove(task);
     return new HttpResponse({ showType: 1 });
   }
@@ -220,13 +187,60 @@ export class TaskService {
     if (!id) return {};
     const task = await this.findOne({
       where: { id, user },
-      relations: ['script'],
     });
     if (!task) return {};
     return {
       name: task.name,
-      cronTime: task.cronTime,
-      scriptId: task.script.id,
     };
+  }
+
+  async script(id: number, user) {
+    if (!id) return new HttpResponse({ success: false, data: [] });
+    const task = await this.findOne({
+      where: { id, user },
+      relations: ['scripts'],
+    });
+    if (!task) return new HttpResponse({ success: false, data: [] });
+    const data = task.scripts.map((script) => {
+      const { cronTime = '0 7 * * *' } = task.scriptsExt[script.id];
+      return {
+        ...script,
+        cronTime,
+      };
+    });
+    return new HttpResponse({ data, total: data.length });
+  }
+
+  async details(id: number, user) {
+    if (!id) return new HttpResponse({ success: false });
+    const task = await this.findOne({
+      where: { id, user },
+    });
+    return new HttpResponse({ data: task });
+  }
+
+  async syncScrip(syncScripDto: SyncScripDto, user) {
+    const { id, scriptIds } = syncScripDto;
+    const scripts = await this.scriptService.repository.findBy({
+      id: In(scriptIds),
+      user,
+    });
+    const task = await this.findOne({ where: { id, user } });
+    task.scriptsExt = scriptIds.reduce((scriptsExt, id) => {
+      scriptsExt[id] = { id, cronTime: '0 7 * * *' };
+      return scriptsExt;
+    }, {});
+    task.scripts = scripts;
+    await this.taskRepository.save(task);
+    return new HttpResponse();
+  }
+
+  async updateScripExt(updateScripExtDto: UpdateScripExtDto, user) {
+    const { id, scriptId, cronTime } = updateScripExtDto;
+    const task = await this.findOne({ where: { id, user } });
+    task.scriptsExt[scriptId].id = scriptId;
+    task.scriptsExt[scriptId].cronTime = cronTime;
+    await this.taskRepository.save(task);
+    return new HttpResponse();
   }
 }

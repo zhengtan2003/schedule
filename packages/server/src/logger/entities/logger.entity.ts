@@ -16,13 +16,11 @@ export class Logger {
   readonly id: number;
   @Column('longtext')
   log: string;
-  @Column('int')
-  status: 0 | 1;
   @Column('float')
   executionTime: number;
   @ManyToOne(() => Env, (Env) => Env.logger, { onDelete: 'CASCADE' })
   env: Env;
-  @ManyToOne(() => Task, (task) => task.logger, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Task, (task) => task.loggers, { onDelete: 'CASCADE' })
   task: Task;
   @ManyToOne(() => User, (User) => User.logger, { onDelete: 'CASCADE' })
   user: User;

@@ -29,22 +29,29 @@
     path: '/task',
     routes: [
       {
-        path: '/task',
-        component: './Task',
+        path: '/task', redirect: '/task/list'
       },
-    ],
-  },
-  {
-    name: '终端',
-    icon: 'CodeOutlined',
-    path: '/terminal',
-    routes: [
       {
-        path: '/terminal',
-        component: './Terminal',
+        path: '/task/list',
+        component: './Task/List',
       },
+      {
+        path: '/task/details',
+        component: './Task/Details',
+      }
     ],
   },
+  // {
+  //   name: '终端',
+  //   icon: 'CodeOutlined',
+  //   path: '/terminal',
+  //   routes: [
+  //     {
+  //       path: '/terminal',
+  //       component: './Terminal',
+  //     },
+  //   ],
+  // },
   { path: '/welcome', icon: 'smile', component: './Welcome' },
   { path: '/', redirect: '/welcome' },
   // { path: '*', layout: false, component: './404' },

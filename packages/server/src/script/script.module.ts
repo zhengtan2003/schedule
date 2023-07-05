@@ -1,14 +1,14 @@
-import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { ScriptService } from './script.service';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Script } from './entities/script.entity';
 import { ScriptController } from './script.controller';
+import { ScriptService } from './script.service';
 
 @Module({
-    imports: [HttpModule, TypeOrmModule.forFeature([Script])],
-    controllers: [ScriptController],
-    providers: [ScriptService],
-    exports: [ScriptService],
+  imports: [HttpModule, TypeOrmModule.forFeature([Script])],
+  controllers: [ScriptController],
+  providers: [ScriptService],
+  exports: [ScriptService],
 })
 export class ScriptModule {}

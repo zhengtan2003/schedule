@@ -1,4 +1,6 @@
 declare namespace API {
+  type CreateTaskDto = {};
+
   type CreateUserDto = {
     /** 用户名 */
     username: string;
@@ -12,6 +14,10 @@ declare namespace API {
 
   type EnvControllerRemoveParams = {
     id: string;
+  };
+
+  type EnvControllerSearchParams = {
+    taskId: string;
   };
 
   type LoggerControllerRemoveParams = {
@@ -35,6 +41,12 @@ declare namespace API {
 
   type SearchDto = {};
 
+  type SyncScripDto = {};
+
+  type TaskControllerDetailsParams = {
+    id: string;
+  };
+
   type TaskControllerFromParams = {
     id: string;
   };
@@ -43,18 +55,16 @@ declare namespace API {
     id: string;
   };
 
-  type ToggleDto = {
-    id: number;
-    cronName: string;
-    cronTime: string;
+  type TaskControllerScriptParams = {
+    id: string;
   };
 
-  type UpsertScriptDto = {};
+  type UpdateScripExtDto = {};
 
-  type UpsertTaskDto = {
+  type UpdateScriptDto = {};
+
+  type UpdateTaskDto = {
     id: number;
-    name: string;
-    scriptId: number;
   };
 
   type UpsertTaskEnvDto = {};
