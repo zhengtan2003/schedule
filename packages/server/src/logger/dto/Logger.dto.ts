@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
+  IsEmpty,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -8,6 +9,9 @@ import {
 } from 'class-validator';
 
 export class LoggerDto {
+  @IsEmpty()
+  @IsString()
+  scriptName: string;
   @IsOptional()
   @IsString()
   log?: string;

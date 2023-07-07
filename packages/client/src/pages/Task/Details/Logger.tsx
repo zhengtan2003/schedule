@@ -7,11 +7,11 @@ import { toDateTimeString } from '@/utils';
 import {
   CheckCircleFilled,
   CloseCircleFilled,
-  FileSyncOutlined,
+  MessageOutlined,
+  ClearOutlined
 } from '@ant-design/icons';
 import { useRequest } from '@umijs/max';
-import { Button, Tag, Timeline, Tooltip, Typography } from 'antd';
-import React, { useMemo } from 'react';
+import { Button, Empty, Tag, Timeline, Tooltip, Typography } from 'antd';
 
 interface LogDrawerProps {
   envId: string;
@@ -33,26 +33,6 @@ const Logger: React.FC<LogDrawerProps> = (props) => {
   const { run, data, refresh } = useRequest(LoggerControllerLogSearch, {
     manual: true,
   });
-  const items = useMemo(
-    () =>
-      data?.reduce((result: any, item: any) => {
-        result.push({
-          ...statusMaps[item.status],
-          children: (
-            <Typography>
-              <Title level={5}>{toDateTimeString(item.createTime)}</Title>
-              <Tag color="magenta">耗时：{item.executionTime}s</Tag>
-              <pre style={{ background: '#000', color: '#F8F8F8' }}>
-                {item.log}
-              </pre>
-            </Typography>
-          ),
-        });
-        return result;
-      }, []),
-    [data],
-  );
-
   return (
     <ProDrawer
       extra={
@@ -68,6 +48,7 @@ const Logger: React.FC<LogDrawerProps> = (props) => {
             },
           }}
         >
+          <ClearOutlined />
           清空日志
         </DeleteButton>
       }
@@ -86,12 +67,32 @@ const Logger: React.FC<LogDrawerProps> = (props) => {
               })
             }
           >
-            <FileSyncOutlined />
+            <MessageOutlined />
           </Button>
         </Tooltip>
       }
     >
-      <Timeline items={items} />
+      {!data?.length ? (
+        <Empty description={false} />
+      ) : (
+        <Timeline
+          items={data?.map((item: any) => {
+            return {
+              ...statusMaps[item.status],
+              children: (
+                <Typography>
+                  <Title level={5}>{toDateTimeString(item.createTime)}</Title>
+                  <Tag color="magenta">耗时：{item.executionTime}s</Tag>
+                  <Tag color="geekblue">{item.scriptName}</Tag>
+                  <pre style={{ background: '#000', color: '#F8F8F8' }}>
+                    {item.log}
+                  </pre>
+                </Typography>
+              ),
+            };
+          })}
+        />
+      )}
     </ProDrawer>
   );
 };

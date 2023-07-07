@@ -80,16 +80,19 @@ export class TaskService {
     Object.values(scriptsExt).forEach(
       (ext: { id: number; cronName?: string; cronTime: string }) => {
         if (!ext.cronName) ext.cronName = uuidv4();
+        if (this.schedulerRegistry.doesExist('cron', ext.cronName)) return;
         const cronJob = new CronJob(ext.cronTime, async () => {
           const task = await this.findOne({
             where: { id },
             relations: ['scripts', 'envs'],
           });
-          const script = task.scripts.find(({ id }) => id == ext.id);
+          const { startCommand, filePath, name } = task.scripts.find(
+            ({ id }) => id == ext.id,
+          );
           task.envs.forEach((env) => {
             let outLog = '';
             const startTime = Date.now();
-            const cp = spawn(`${script.startCommand} ${script.filePath}`, {
+            const cp = spawn(`${startCommand} ${filePath}`, {
               shell: true,
               env: {
                 ...process.env,
@@ -122,6 +125,7 @@ export class TaskService {
             cp.on('close', () => {
               this.loggerService.create(
                 {
+                  scriptName: name,
                   log: outLog,
                   envId: env.id,
                   taskId: task.id,
@@ -141,8 +145,7 @@ export class TaskService {
 
   async start(task: Task, user) {
     task.status = 1;
-    this.firing(task, user);
-    const exts = Object.values(task.scriptsExt);
+    const exts = Object.values(task.scriptsExt || {});
     if (!exts.length) {
       return new HttpResponse({
         showType: 1,
@@ -150,6 +153,7 @@ export class TaskService {
         message: '请先关联脚本，再开始任务',
       });
     }
+    this.firing(task, user);
     await this.taskRepository.save(task);
     return new HttpResponse({
       showType: 1,
@@ -230,11 +234,17 @@ export class TaskService {
       user,
     });
     const task = await this.findOne({ where: { id, user } });
+    console.log(task.scriptsExt);
     task.scriptsExt = scriptIds.reduce((scriptsExt, id) => {
-      scriptsExt[id] = { id, cronTime: '0 7 * * *' };
+      scriptsExt[id] = {
+        id,
+        cronTime: '0 7 * * *',
+        ...scriptsExt[id],
+      };
       return scriptsExt;
-    }, {});
+    }, task.scriptsExt || {});
     task.scripts = scripts;
+    if (task.status === 1) this.firing(task, user);
     await this.taskRepository.save(task);
     return new HttpResponse();
   }

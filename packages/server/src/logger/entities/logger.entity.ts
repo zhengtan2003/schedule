@@ -14,6 +14,8 @@ import {
 export class Logger {
   @PrimaryGeneratedColumn()
   readonly id: number;
+  @Column()
+  scriptName: string;
   @Column('longtext')
   log: string;
   @Column('float')

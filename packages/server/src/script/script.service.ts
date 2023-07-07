@@ -124,8 +124,10 @@ export class ScriptService {
     return {
       code,
       name: script.name,
+      version: script.version,
       language: script.language,
       updateURL: script.updateURL,
+      description: script.description,
     };
   }
 
