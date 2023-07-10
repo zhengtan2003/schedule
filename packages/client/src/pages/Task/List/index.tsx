@@ -165,7 +165,7 @@ const Task: React.FC = () => {
     },
   ];
   return (
-    <PageContainer>
+    <PageContainer title={'任务管理'}>
       <ProTable
         rowKey={'id'}
         search={false}
