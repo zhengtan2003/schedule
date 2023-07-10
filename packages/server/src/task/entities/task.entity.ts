@@ -23,7 +23,7 @@ export class Task {
   @Column('json', { nullable: true })
   scriptsExt: Record<
     string,
-    { id: number; cronTime: string; cronName: string }
+    { id: number; cronTime: string; cronName: string; executeType: number }
   >;
   @ManyToMany(() => Script, (script) => script.tasks)
   @JoinTable()

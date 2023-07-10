@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^8.0.1",
+    "@hudiemon/utils": "^0.1.9",
     "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.2",

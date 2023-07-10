@@ -1,16 +1,22 @@
 import Context from '@/pages/Task/Details/Context';
 import SyncScripSelect from '@/pages/Task/Details/SyncScripSelect';
 import UpsertCronTime from '@/pages/Task/Details/UpsertCronTime';
-import { DataType } from '@/pages/Task/List';
 import { TaskControllerScript } from '@/services/task';
 import { toMomentFormat } from '@/utils';
 import { ActionType, ProColumns, ProTable } from '@ant-design/pro-components';
+import { Tag } from 'antd';
 import CronParser from 'cron-parser';
 import React, { useContext, useRef, useState } from 'react';
 
 type ScriptProps = {
   id: string;
   taskName: string;
+};
+
+type DataType = {
+  id: number;
+  cronTime: string;
+  executeType: number;
 };
 const Script: React.FC<ScriptProps> = () => {
   const { taskId } = useContext(Context);
@@ -27,6 +33,15 @@ const Script: React.FC<ScriptProps> = () => {
       title: 'cronTime',
       width: '100px',
       dataIndex: 'cronTime',
+    },
+    {
+      title: '执行方式',
+      width: '100px',
+      dataIndex: 'executeType',
+      render: (text) => {
+        if (text === 2) return <Tag color={'volcano'}>随机</Tag>;
+        return <Tag color={'green'}>固定</Tag>;
+      },
     },
     {
       title: '下次执行时间',
@@ -74,9 +89,10 @@ const Script: React.FC<ScriptProps> = () => {
         return (
           <UpsertCronTime
             initialValues={{
-              id: taskId,
+              taskId,
               scriptId: record.id,
               cronTime: record.cronTime,
+              executeType: record.executeType ?? 1,
             }}
             onSuccess={() => tableReload()}
           />

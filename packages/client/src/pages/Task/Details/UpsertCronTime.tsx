@@ -4,6 +4,7 @@ import { FieldTimeOutlined } from '@ant-design/icons';
 import {
   ModalForm,
   ProFormDependency,
+  ProFormSelect,
   ProFormText,
 } from '@ant-design/pro-components';
 import { Button, Tooltip } from 'antd';
@@ -37,7 +38,7 @@ const UpsertCronTime: React.FC<UpsertCronTimeProps> = (props) => {
           </Tooltip>
         }
       >
-        <ProFormText hidden name={'id'} />
+        <ProFormText hidden name={'taskId'} />
         <ProFormText hidden name={'scriptId'} />
         <ProFormText
           width="md"
@@ -69,6 +70,15 @@ const UpsertCronTime: React.FC<UpsertCronTimeProps> = (props) => {
                 }
               },
             },
+          ]}
+        />
+        <ProFormSelect
+          label={'执行方式'}
+          name={'executeType'}
+          rules={[{ required: true }]}
+          options={[
+            { label: '固定', value: 1 },
+            { label: '随机', value: 2 },
           ]}
         />
       </ModalForm>

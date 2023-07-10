@@ -8,6 +8,7 @@ import { UpdateScripExtDto } from '@/task/dto/update-scrip-ext.dto';
 import { UpdateTaskDto } from '@/task/dto/update-task.dto';
 import { Task } from '@/task/entities/task.entity';
 import { searchOptions } from '@/utils';
+import { randomCronExpr } from '@hudiemon/utils';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -78,7 +79,12 @@ export class TaskService {
 
   firing({ id, scriptsExt }, user) {
     Object.values(scriptsExt).forEach(
-      (ext: { id: number; cronName?: string; cronTime: string }) => {
+      (ext: {
+        id: number;
+        cronName?: string;
+        cronTime: string;
+        isRandom: boolean;
+      }) => {
         if (!ext.cronName) ext.cronName = uuidv4();
         if (this.schedulerRegistry.doesExist('cron', ext.cronName)) return;
         const cronJob = new CronJob(ext.cronTime, async () => {
@@ -136,6 +142,12 @@ export class TaskService {
               outLog = '';
             });
           });
+          if (task.scriptsExt[ext.id].executeType === 2) {
+            const newCronTime = randomCronExpr(ext.cronTime);
+            cronJob.setTime(new CronTime(newCronTime));
+            task.scriptsExt[ext.id].cronTime = newCronTime;
+            await this.taskRepository.save(task);
+          }
         });
         this.schedulerRegistry.addCronJob(ext.cronName, cronJob);
         cronJob.start();
@@ -210,10 +222,12 @@ export class TaskService {
     });
     if (!task) return new HttpResponse({ success: false, data: [] });
     const data = task.scripts.map((script) => {
-      const { cronTime = '0 7 * * *' } = task.scriptsExt[script.id];
+      const { cronTime = '0 7 * * *', executeType } =
+        task.scriptsExt[script.id];
       return {
         ...script,
         cronTime,
+        executeType,
       };
     });
     return new HttpResponse({ data, total: data.length });
@@ -234,7 +248,6 @@ export class TaskService {
       user,
     });
     const task = await this.findOne({ where: { id, user } });
-    console.log(task.scriptsExt);
     task.scriptsExt = scriptIds.reduce((scriptsExt, id) => {
       scriptsExt[id] = {
         id,
@@ -250,21 +263,21 @@ export class TaskService {
   }
 
   async updateScripExt(updateScripExtDto: UpdateScripExtDto, user) {
-    const { id, scriptId, cronTime } = updateScripExtDto;
-    const task = await this.findOne({ where: { id, user } });
-    const { cronTime: extCronTime, cronName: extCronName } =
-      task.scriptsExt[scriptId];
-    if (extCronTime !== cronTime) {
-      task.scriptsExt[scriptId].cronTime = cronTime;
-      if (
-        extCronName &&
-        this.schedulerRegistry.doesExist('cron', extCronName)
-      ) {
-        const cronJob = this.schedulerRegistry.getCronJob(extCronName);
-        cronJob.setTime(new CronTime(cronTime));
-      }
-      await this.taskRepository.save(task);
+    const { scriptId, taskId } = updateScripExtDto;
+    const task = await this.findOne({
+      where: { id: taskId, user },
+    });
+    const { cronName, cronTime } = task.scriptsExt[scriptId];
+    task.scriptsExt[scriptId].cronTime = updateScripExtDto.cronTime;
+    task.scriptsExt[scriptId].executeType = updateScripExtDto.executeType;
+    if (
+      cronTime !== updateScripExtDto.cronTime &&
+      this.schedulerRegistry.doesExist('cron', cronName)
+    ) {
+      const cronJob = this.schedulerRegistry.getCronJob(cronName);
+      cronJob.setTime(new CronTime(cronTime));
     }
+    await this.taskRepository.save(task);
     return new HttpResponse({ showType: 1 });
   }
 }
