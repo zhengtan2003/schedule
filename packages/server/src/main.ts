@@ -1,13 +1,13 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-// import { WsAdapter } from '@nestjs/platform-ws';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import * as compression from 'compression';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // app.useWebSocketAdapter(new WsAdapter(app));
+  app.use(compression());
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
   app.use(bodyParser.json({ limit: '10mb' }));
