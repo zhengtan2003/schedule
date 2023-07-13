@@ -1,21 +1,15 @@
-FROM python:alpine
+FROM node:18-alpine
+RUN npm i -g pnpm pm2
+WORKDIR /usr/src/app
 
-RUN apk update && apk add ruby && apk add nodejs npm
-
-RUN npm i -g pnpm
-
-WORKDIR /app
-
-COPY /packages/server/package*.json ./
-
-COPY /packages/server/dist/ ./
-
+COPY /packages/server/ .
 COPY /packages/client/dist/ ./client
 
-RUN pnpm install --production
+RUN pnpm install
+RUN npm run build
+
+ENV NODE_ENV production
 
 EXPOSE 3000
-
-RUN npm install pm2 -g
 
 CMD ["pm2-runtime", "npm", "--", "start"]

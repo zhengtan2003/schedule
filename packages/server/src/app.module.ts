@@ -17,7 +17,7 @@ import { join } from 'path';
   imports: [
     ConfigModule.forRoot(),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, process.env.CLIENT_ROOT_PATH),
+      rootPath: join(__dirname, '..', 'client'),
       exclude: ['/api/(.*)'],
     }),
     TypeOrmModule.forRoot({
